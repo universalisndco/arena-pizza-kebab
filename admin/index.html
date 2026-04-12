@@ -116,6 +116,25 @@
 <script>
 checkAuth();
 initDemoData();
+  // Écoute les commandes Firebase en temps réel
+if (typeof db !== 'undefined') {
+  db.collection('orders')
+    .orderBy('timestamp', 'desc')
+    .onSnapshot(function(snapshot) {
+      var orders = [];
+      snapshot.forEach(function(doc) {
+        orders.push(Object.assign({ firestoreId: doc.id }, doc.data()));
+      });
+      // Fusionner avec les commandes localStorage
+      var localOrders = JSON.parse(localStorage.getItem('apk_orders') || '[]');
+      var allIds = orders.map(function(o) { return o.orderNumber; });
+      var onlyLocal = localOrders.filter(function(o) { return !allIds.includes(o.orderNumber); });
+      var merged = orders.concat(onlyLocal);
+      saveOrders(merged);
+      buildStats();
+      buildOrdersTable();
+    });
+}
 
 let currentFilter = 'all';
 let selectedOrderNum = null;
