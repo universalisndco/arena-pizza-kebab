@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — Connexion | Arena Pizza Kebab</title>
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+<div class="login-page">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="login-logo-name">ARENA <span>PIZZA</span> KEBAB</div>
+      <div class="login-logo-sub">Dashboard Administration</div>
+    </div>
+    <div id="loginError" class="login-error">Email ou mot de passe incorrect.</div>
+    <div class="form-group">
+      <label class="form-label">Email</label>
+      <input type="text" class="form-control" id="loginEmail" placeholder="admin@apk.fr">
+    </div>
+    <div class="form-group" style="margin-bottom:24px">
+      <label class="form-label">Mot de passe</label>
+      <input type="password" class="form-control" id="loginPassword" placeholder="••••••••">
+    </div>
+    <button type="button" class="btn-save" id="btnLogin">Se connecter</button>
+    <div style="margin-top:20px;text-align:center;font-size:.75rem;color:var(--gray)">
+      Accès réservé au personnel<br>
+      <span style="color:var(--gray2)">admin@apk.fr &nbsp;/&nbsp; apk2024</span>
+    </div>
+    <div style="margin-top:20px;text-align:center">
+      <a href="../index.html" style="color:var(--gray);font-size:.82rem;font-weight:700">← Retour au site</a>
+    </div>
+  </div>
+</div>
+<script>
+// Rediriger si déjà connecté
+if (localStorage.getItem('apk_admin_auth') === '1') {
+  window.location.replace('index.html');
+}
+
+var ADMIN_EMAIL    = 'admin@apk.fr';
+var ADMIN_PASSWORD = 'apk2024';
+
+function doLogin() {
+  var email = document.getElementById('loginEmail').value.trim().toLowerCase();
+  var pass  = document.getElementById('loginPassword').value;
+  if (email === ADMIN_EMAIL && pass === ADMIN_PASSWORD) {
+    localStorage.setItem('apk_admin_auth', '1');
+    window.location.replace('index.html');
+  } else {
+    document.getElementById('loginError').style.display = 'block';
+    setTimeout(function() {
+      document.getElementById('loginError').style.display = 'none';
+    }, 3000);
+  }
+}
+
+document.getElementById('btnLogin').addEventListener('click', doLogin);
+document.getElementById('loginPassword').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') doLogin();
+});
+document.getElementById('loginEmail').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') document.getElementById('loginPassword').focus();
+});
+</script>
+</body>
+</html>

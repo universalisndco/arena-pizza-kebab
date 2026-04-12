@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Commandes — Admin APK</title>
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+<div class="admin-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-name">ARENA <span>PIZZA</span> KEBAB</div>
+      <div class="sidebar-logo-sub">Administration</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">Principal</div>
+      <a href="index.html" class="nav-item active">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Tableau de bord
+        <span class="nav-badge" id="sidebarPendingCount" style="display:none">0</span>
+      </a>
+      <a href="orders.html" class="nav-item">
+        <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+        Toutes les commandes
+      </a>
+      <a href="reservations.html" class="nav-item">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Réservations
+        <span class="nav-badge" id="sidebarResCount" style="display:none">0</span>
+      </a>
+      <div class="nav-section-title">Gestion</div>
+      <a href="menu-manager.html" class="nav-item">
+        <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20A10 10 0 0012 2z"/><path d="M12 8v4l3 3"/></svg>
+        Gestion du Menu
+      </a>
+      <div class="nav-section-title">Paramètres</div>
+      <a href="../index.html" class="nav-item">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Voir le site
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user-avatar">A</div>
+      <div>
+        <div class="sidebar-user-name">Admin APK</div>
+        <div class="sidebar-user-role">Administrateur</div>
+      </div>
+      <button class="btn-logout" onclick="logout()" title="Déconnexion">
+        <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="admin-main">
+    <!-- Top Bar -->
+    <div class="topbar">
+      <div class="topbar-title">TABLEAU DE BORD</div>
+      <div class="topbar-actions">
+        <div class="live-dot" title="Temps réel actif"></div>
+        <button class="sound-btn active" id="soundBtn" onclick="toggleSound()">
+          <svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 010 7.07"/></svg>
+          Son
+        </button>
+        <button class="topbar-btn" onclick="location.reload()">
+          <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+          Actualiser
+        </button>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="page-content">
+      <!-- Stats -->
+      <div class="stats-row" id="statsRow"></div>
+
+      <!-- Orders + Detail -->
+      <div class="two-col">
+        <!-- Orders Today -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Commandes du jour</div>
+            <div style="display:flex;gap:8px">
+              <button class="filter-btn active" data-filter="all">Toutes</button>
+              <button class="filter-btn" data-filter="pending">En attente</button>
+              <button class="filter-btn" data-filter="active">En cours</button>
+              <button class="filter-btn" data-filter="done">Terminées</button>
+            </div>
+          </div>
+          <div class="card-body">
+            <div id="ordersTable"></div>
+          </div>
+        </div>
+
+        <!-- Detail -->
+        <div class="detail-panel" id="detailPanel">
+          <div class="detail-placeholder">
+            <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+            <p>Cliquez sur une commande<br>pour voir les détails</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="../js/data.js"></script>
+<script src="js/admin.js"></script>
+<script>
+checkAuth();
+initDemoData();
+
+let currentFilter = 'all';
+let selectedOrderNum = null;
+
+// ─── Stats ────────────────────────────────────────────────────
+function buildStats() {
+  const orders = getOrders();
+  const today = new Date().toDateString();
+  const todayOrders = orders.filter(o => new Date(o.timestamp).toDateString() === today);
+  const pending = orders.filter(o => o.status === 'pending').length;
+  const todayRevenue = todayOrders.filter(o => o.status !== 'cancelled').reduce((s, o) => s + (o.total || 0), 0);
+  const res = getReservations().filter(r => r.status === 'pending').length;
+
+  document.getElementById('statsRow').innerHTML = `
+    <div class="stat-card red">
+      <div class="stat-label">En attente</div>
+      <div class="stat-value" style="color:var(--red)">${pending}</div>
+      <div class="stat-sub">Commandes à traiter</div>
+    </div>
+    <div class="stat-card gold">
+      <div class="stat-label">Aujourd'hui</div>
+      <div class="stat-value" style="color:var(--gold)">${todayOrders.length}</div>
+      <div class="stat-sub">Commandes reçues</div>
+    </div>
+    <div class="stat-card green">
+      <div class="stat-label">CA du jour</div>
+      <div class="stat-value" style="color:var(--green)">${formatPrice(todayRevenue)}</div>
+      <div class="stat-sub">Chiffre d'affaires</div>
+    </div>
+    <div class="stat-card blue">
+      <div class="stat-label">Réservations</div>
+      <div class="stat-value" style="color:var(--blue)">${res}</div>
+      <div class="stat-sub">En attente de confirmation</div>
+    </div>
+  `;
+
+  // Sidebar badges
+  const pendingBadge = document.getElementById('sidebarPendingCount');
+  if (pending > 0) { pendingBadge.style.display = 'flex'; pendingBadge.textContent = pending; }
+  else pendingBadge.style.display = 'none';
+  const resBadge = document.getElementById('sidebarResCount');
+  if (res > 0) { resBadge.style.display = 'flex'; resBadge.textContent = res; }
+  else resBadge.style.display = 'none';
+}
+
+// ─── Orders Table ─────────────────────────────────────────────
+function buildOrdersTable() {
+  const orders = getOrders();
+  const today = new Date().toDateString();
+  let filtered = orders.filter(o => new Date(o.timestamp).toDateString() === today);
+
+  if (currentFilter === 'pending')    filtered = filtered.filter(o => o.status === 'pending');
+  else if (currentFilter === 'active') filtered = filtered.filter(o => ['accepted','preparing','ready','delivering'].includes(o.status));
+  else if (currentFilter === 'done')   filtered = filtered.filter(o => o.status === 'done');
+
+  const el = document.getElementById('ordersTable');
+  if (!el) return;
+
+  if (filtered.length === 0) {
+    el.innerHTML = '<div style="padding:40px;text-align:center;color:var(--gray);font-size:.88rem">Aucune commande pour ce filtre.</div>';
+    return;
+  }
+
+  el.innerHTML = `
+    <div style="display:grid;grid-template-columns:80px 1fr 110px 120px 110px 100px;gap:12px;padding:10px 20px;font-size:.72rem;font-weight:900;letter-spacing:1px;text-transform:uppercase;color:var(--gray2);border-bottom:1px solid rgba(255,255,255,.05)">
+      <div>N°</div><div>Client</div><div>Total</div><div>Mode</div><div>Statut</div><div>Heure</div>
+    </div>
+    ${filtered.map(o => `
+      <div class="order-row${o.status === 'pending' ? ' new' : ''}${o.orderNumber === selectedOrderNum ? '' : ''}" onclick="showDetail('${o.orderNumber}')">
+        <div class="order-id">${o.orderNumber}</div>
+        <div>
+          <div class="order-client">${o.firstName} ${o.lastName}</div>
+          <div class="order-client-phone">${o.phone}</div>
+        </div>
+        <div class="order-total">${formatPrice(o.total)}</div>
+        <div><span class="order-mode mode-${o.mode === 'delivery' ? 'delivery' : 'pickup'}">${o.mode === 'delivery' ? 'Livraison' : 'À emporter'}</span></div>
+        <div>${statusBadge(o.status)}</div>
+        <div class="order-time">${timeAgo(o.timestamp)}</div>
+      </div>
+    `).join('')}
+  `;
+}
+
+// ─── Detail Panel ─────────────────────────────────────────────
+function showDetail(orderNum) {
+  selectedOrderNum = orderNum;
+  const order = getOrders().find(o => o.orderNumber === orderNum);
+  if (!order) return;
+
+  const panel = document.getElementById('detailPanel');
+  const addrHtml = order.mode === 'delivery' && order.address
+    ? `<div class="detail-row"><label>Adresse</label><span>${order.address.street}, ${order.address.city} ${order.address.zip}</span></div>
+       ${order.address.notes ? `<div class="detail-row"><label>Instructions</label><span>${order.address.notes}</span></div>` : ''}`
+    : '';
+
+  const itemsHtml = (order.items || []).map(i => `
+    <div class="detail-item">
+      <span class="detail-item-price">${formatPrice(i.totalPrice * i.qty)}</span>
+      <div class="detail-item-name">${i.qty}× ${i.name}</div>
+      ${i.selectedOptions && Object.keys(i.selectedOptions).length
+        ? `<div class="detail-item-opts">${Object.entries(i.selectedOptions).map(([k,v])=>`${k}: ${v}`).join(' · ')}</div>`
+        : ''}
+    </div>
+  `).join('');
+
+  panel.innerHTML = `
+    <div class="detail-header">
+      <div>
+        <div class="detail-order-id">${order.orderNumber}</div>
+        <div style="font-size:.75rem;color:var(--gray)">${formatDate(order.timestamp)}</div>
+      </div>
+      ${statusBadge(order.status)}
+    </div>
+    <div class="detail-body">
+      <div class="detail-section">
+        <div class="detail-section-title">Client</div>
+        <div class="detail-row"><label>Nom</label><span>${order.firstName} ${order.lastName}</span></div>
+        <div class="detail-row"><label>Téléphone</label><span><a href="tel:${order.phone}" style="color:var(--gold)">${order.phone}</a></span></div>
+        ${order.email ? `<div class="detail-row"><label>Email</label><span style="font-size:.8rem">${order.email}</span></div>` : ''}
+        <div class="detail-row"><label>Mode</label><span>${order.mode === 'delivery' ? 'Livraison' : 'À emporter'}</span></div>
+        <div class="detail-row"><label>Horaire</label><span>${order.time === 'ASAP' ? 'Dès que possible' : order.time}</span></div>
+        <div class="detail-row"><label>Paiement</label><span>${{card:'Carte',paypal:'PayPal',cash:'Livraison'}[order.payment]||''}</span></div>
+        ${addrHtml}
+      </div>
+      ${order.notes ? `<div class="detail-section"><div class="detail-section-title">Notes</div><div style="font-size:.85rem;color:var(--gray);line-height:1.5;padding:8px;background:var(--dark3);border-radius:8px">${order.notes}</div></div>` : ''}
+      <div class="detail-section">
+        <div class="detail-section-title">Articles</div>
+        ${itemsHtml}
+        <div style="display:flex;justify-content:space-between;padding:10px 0;margin-top:4px;border-top:1px solid rgba(255,255,255,.08);font-weight:900">
+          <span>Total</span>
+          <span style="color:var(--gold);font-size:1.1rem">${formatPrice(order.total)}</span>
+        </div>
+      </div>
+      <div class="detail-section">
+        <div class="detail-section-title">Changer le statut</div>
+        <select class="status-select" id="statusSelect">
+          <option value="pending"    ${order.status==='pending'    ?'selected':''}>En attente</option>
+          <option value="accepted"   ${order.status==='accepted'   ?'selected':''}>Acceptée</option>
+          <option value="preparing"  ${order.status==='preparing'  ?'selected':''}>En préparation</option>
+          <option value="ready"      ${order.status==='ready'      ?'selected':''}>Prête</option>
+          <option value="delivering" ${order.status==='delivering' ?'selected':''}>En livraison</option>
+          <option value="done"       ${order.status==='done'       ?'selected':''}>Terminée</option>
+          <option value="cancelled"  ${order.status==='cancelled'  ?'selected':''}>Annulée</option>
+        </select>
+        <button class="btn-update-status" onclick="updateStatus('${order.orderNumber}')">Mettre à jour</button>
+      </div>
+    </div>
+  `;
+}
+
+function updateStatus(orderNum) {
+  const newStatus = document.getElementById('statusSelect').value;
+  let orders = getOrders();
+  const idx = orders.findIndex(o => o.orderNumber === orderNum);
+  if (idx >= 0) {
+    orders[idx].status = newStatus;
+    saveOrders(orders);
+    showToast('Statut mis à jour : ' + STATUS_LABELS[newStatus]);
+    buildStats();
+    buildOrdersTable();
+    showDetail(orderNum);
+  }
+}
+
+// ─── Filters ──────────────────────────────────────────────────
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentFilter = btn.dataset.filter;
+    buildOrdersTable();
+  });
+});
+
+// ─── Sound Toggle ─────────────────────────────────────────────
+function toggleSound() {
+  soundEnabled = !soundEnabled;
+  const btn = document.getElementById('soundBtn');
+  btn.classList.toggle('active', soundEnabled);
+  btn.innerHTML = soundEnabled
+    ? `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 010 7.07"/></svg>Son`
+    : `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>Son off`;
+}
+
+// ─── Init ─────────────────────────────────────────────────────
+buildStats();
+buildOrdersTable();
+startOrderPolling(() => { buildStats(); buildOrdersTable(); });
+
+// Auto-refresh every 30s
+setInterval(() => { buildStats(); buildOrdersTable(); }, 30000);
+</script>
+</body>
+</html>
