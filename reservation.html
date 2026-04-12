@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Réservation — Arena Pizza Kebab Reims</title>
   <meta name="description" content="Réservez votre table chez Arena Pizza Kebab à Reims. 88 Rue Lesage. Ouvert 7J/7.">
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -217,6 +221,9 @@ function submitReservation() {
   let reservations = JSON.parse(localStorage.getItem('apk_reservations') || '[]');
   reservations.unshift(reservation);
   localStorage.setItem('apk_reservations', JSON.stringify(reservations));
+  if (typeof db !== 'undefined') {
+  db.collection('reservations').add(reservation).catch(function(e){ console.log(e); });
+}
 
   // Show success
   document.getElementById('reservationForm').style.display = 'none';
