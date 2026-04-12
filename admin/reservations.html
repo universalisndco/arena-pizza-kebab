@@ -164,6 +164,19 @@ function updateRes(id, status) {
     showToast(status === 'accepted' ? 'Réservation acceptée' : 'Réservation refusée', status === 'accepted' ? 'success' : 'error');
     buildStats();
     buildTable();
+    if (typeof db !== 'undefined') {
+  db.collection('reservations')
+    .orderBy('timestamp', 'desc')
+    .onSnapshot(function(snapshot) {
+      var res = [];
+      snapshot.forEach(function(doc) {
+        res.push(Object.assign({ firestoreId: doc.id }, doc.data()));
+      });
+      saveReservations(res);
+      buildStats();
+      buildTable();
+    });
+}
   }
 }
 
