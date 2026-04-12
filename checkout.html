@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Commande — Arena Pizza Kebab</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .pay-methods-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
+    .pay-btn {
+      padding: 14px 10px; border-radius: 10px; background: var(--dark4);
+      border: 2px solid rgba(255,255,255,.08); color: var(--gray);
+      font-size: .8rem; font-weight: 800; text-align: center;
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+      transition: all .2s; font-family: var(--font-b); cursor: pointer; width: 100%;
+    }
+    .pay-btn.active { border-color: var(--gold); color: #fff; background: rgba(245,166,35,.1); }
+    .pay-btn:hover:not(.active) { border-color: rgba(255,255,255,.2); color: #fff; }
+    .pay-btn img { height: 18px; object-fit: contain; opacity: .6; }
+    .pay-btn.active img { opacity: 1; }
+  </style>
+</head>
+<body>
+<nav class="navbar" id="navbar">
+  <div class="container">
+    <a href="index.html" class="nav-logo">
+      <img src="https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=100&q=80" alt="APK" class="nav-logo-img">
+      <span>ARENA <span class="text-red">PIZZA</span> KEBAB</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html">Accueil</a></li>
+      <li><a href="menu.html">Menu</a></li>
+      <li><a href="cart.html">Panier</a></li>
+    </ul>
+    <div class="nav-actions">
+      <a href="cart.html" class="nav-cart-btn">
+        <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+        <span class="cart-count" style="display:none">0</span>
+      </a>
+      <button type="button" class="nav-burger" id="navBurger"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</nav>
+<div class="nav-mobile" id="navMobile">
+  <a href="index.html">Accueil</a>
+  <a href="menu.html">Menu</a>
+  <a href="cart.html">Panier</a>
+</div>
+
+<main class="checkout-page">
+  <div class="container">
+    <h1 class="section-title" style="margin-bottom:32px">VOTRE <span class="text-red">COMMANDE</span></h1>
+
+    <div id="emptyCartMsg" style="display:none;text-align:center;padding:80px 20px">
+      <h2 style="font-family:var(--font-h);font-size:2rem;margin-bottom:12px">Panier vide</h2>
+      <p style="color:var(--gray);margin-bottom:28px">Ajoutez des articles avant de commander</p>
+      <a href="menu.html" class="btn btn-primary">Voir le menu</a>
+    </div>
+
+    <div class="checkout-grid" id="checkoutGrid">
+      <!-- GAUCHE -->
+      <div>
+        <!-- 1. Coordonnées -->
+        <div class="checkout-section">
+          <div class="checkout-section-title"><span>1</span>Vos coordonnées</div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Prénom *</label>
+              <input type="text" class="form-input" id="firstName" placeholder="Jean">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Nom *</label>
+              <input type="text" class="form-input" id="lastName" placeholder="Dupont">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Téléphone *</label>
+              <input type="tel" class="form-input" id="phone" placeholder="06 12 34 56 78">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email</label>
+              <input type="email" class="form-input" id="email" placeholder="jean@email.com">
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Mode -->
+        <div class="checkout-section">
+          <div class="checkout-section-title"><span>2</span>Mode de commande</div>
+          <div class="mode-btns">
+            <button type="button" class="mode-btn active" id="btnDelivery">
+              <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+              Livraison
+            </button>
+            <button type="button" class="mode-btn" id="btnTakeaway">
+              <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg>
+              À emporter
+            </button>
+          </div>
+          <div style="margin-top:10px;font-size:.82rem;color:var(--gray);padding:10px;background:var(--dark4);border-radius:8px">
+            Livraison gratuite zone 1 (min. 15€) · Zone 2 min. 20€ · Zone 3 min. 25€
+          </div>
+        </div>
+
+        <!-- 3. Adresse -->
+        <div class="checkout-section" id="addressSection">
+          <div class="checkout-section-title"><span>3</span>Adresse de livraison</div>
+          <div class="form-grid">
+            <div class="form-group full">
+              <label class="form-label">Adresse *</label>
+              <input type="text" class="form-input" id="address" placeholder="12 Rue de la Paix">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Ville *</label>
+              <input type="text" class="form-input" id="city" placeholder="Reims">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Code postal *</label>
+              <input type="text" class="form-input" id="zip" placeholder="51100">
+            </div>
+            <div class="form-group full">
+              <label class="form-label">Instructions (digicode, étage…)</label>
+              <textarea class="form-textarea" id="deliveryNotes" placeholder="Digicode : 1234 — 3ème étage gauche"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. Heure -->
+        <div class="checkout-section">
+          <div class="checkout-section-title"><span id="stepTime">4</span>Heure souhaitée</div>
+          <div class="mode-btns" style="margin-bottom:16px">
+            <button type="button" class="mode-btn active" id="btnASAP">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              Dès que possible
+            </button>
+            <button type="button" class="mode-btn" id="btnLater">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              Heure programmée
+            </button>
+          </div>
+          <div id="timePickerWrap" style="display:none">
+            <input type="time" class="form-input" id="scheduledTime" min="11:00" max="23:00">
+          </div>
+        </div>
+
+        <!-- 5. Notes -->
+        <div class="checkout-section">
+          <div class="checkout-section-title"><span id="stepNotes">5</span>Instructions spéciales</div>
+          <textarea class="form-textarea" id="orderNotes" placeholder="Allergies, préférences…" style="min-height:90px"></textarea>
+        </div>
+
+        <!-- 6. Paiement -->
+        <div class="checkout-section">
+          <div class="checkout-section-title"><span id="stepPay">6</span>Mode de paiement</div>
+          <div class="pay-methods-row">
+            <button type="button" class="pay-btn active" data-pay="card">
+              <svg width="26" height="18" viewBox="0 0 24 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="22" height="14" rx="2"/><line x1="1" y1="6" x2="23" y2="6"/><line x1="5" y1="11" x2="9" y2="11"/></svg>
+              Carte bancaire
+            </button>
+            <button type="button" class="pay-btn" data-pay="paypal">
+              <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/39/PayPal_logo.svg/200px-PayPal_logo.svg.png" alt="PayPal">
+              PayPal
+            </button>
+            <button type="button" class="pay-btn" data-pay="cash">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="4" width="22" height="16" rx="2"/><circle cx="12" cy="12" r="3"/></svg>
+              À la livraison
+            </button>
+          </div>
+          <div id="cardFields" style="margin-top:18px">
+            <div style="background:var(--dark4);border-radius:10px;padding:20px;border:1px solid rgba(255,255,255,.08)">
+              <div style="font-size:.8rem;color:var(--gray);margin-bottom:14px;font-weight:700">Paiement sécurisé via Stripe</div>
+              <div class="form-group" style="margin-bottom:12px">
+                <label class="form-label">Numéro de carte</label>
+                <input type="text" class="form-input" id="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19" inputmode="numeric">
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                <div class="form-group">
+                  <label class="form-label">Expiration</label>
+                  <input type="text" class="form-input" id="cardExpiry" placeholder="MM/AA" maxlength="5" inputmode="numeric">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">CVV</label>
+                  <input type="text" class="form-input" id="cardCVV" placeholder="123" maxlength="4" inputmode="numeric">
+                </div>
+              </div>
+            </div>
+          </div>
+          <div id="paypalInfo" style="display:none;margin-top:12px;padding:12px;background:var(--dark4);border-radius:10px;font-size:.85rem;color:var(--gray)">
+            Vous serez redirigé vers PayPal pour finaliser le paiement.
+          </div>
+          <div id="cashInfo" style="display:none;margin-top:12px;padding:12px;background:var(--dark4);border-radius:10px;font-size:.85rem;color:var(--gray)">
+            Paiement en espèces ou par carte à la réception / livraison.
+          </div>
+        </div>
+      </div>
+
+      <!-- DROITE : Récapitulatif -->
+      <div>
+        <div class="cart-summary">
+          <div class="summary-title">RÉCAPITULATIF</div>
+          <div id="orderItemsList"></div>
+          <div class="summary-row" style="margin-top:12px;border-top:1px solid rgba(255,255,255,.08);padding-top:12px">
+            <span>Sous-total</span>
+            <span id="oSubtotal" style="font-weight:800">0,00€</span>
+          </div>
+          <div class="summary-row" id="deliveryRow" style="display:none">
+            <span>Livraison</span>
+            <span id="deliveryCost" style="color:var(--green);font-weight:800">Gratuite</span>
+          </div>
+          <div class="summary-row total">
+            <span>Total</span>
+            <span id="oTotal" style="color:var(--gold);font-family:var(--font-h);font-size:1.4rem">0,00€</span>
+          </div>
+          <button type="button" class="btn btn-primary" id="btnConfirm"
+            style="width:100%;justify-content:center;margin-top:18px;font-size:1rem">
+            Confirmer la commande
+          </button>
+          <div style="margin-top:10px;font-size:.74rem;color:var(--gray);text-align:center;line-height:1.5">
+            Données protégées et chiffrées
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="js/data.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/main.js"></script>
+<script>
+/* ── STATE ─────────────────────────────── */
+var orderMode     = 'delivery';
+var timeMode      = 'asap';
+var paymentMethod = 'card';
+
+/* ── MODE LIVRAISON / EMPORTER ──────────── */
+document.getElementById('btnDelivery').addEventListener('click', function() { setMode('delivery'); });
+document.getElementById('btnTakeaway').addEventListener('click', function() { setMode('takeaway'); });
+
+function setMode(m) {
+  orderMode = m;
+  document.getElementById('btnDelivery').classList.toggle('active', m === 'delivery');
+  document.getElementById('btnTakeaway').classList.toggle('active', m === 'takeaway');
+  document.getElementById('addressSection').style.display = (m === 'delivery') ? 'block' : 'none';
+  document.getElementById('deliveryRow').style.display    = (m === 'delivery') ? 'flex'  : 'none';
+  var base = (m === 'delivery') ? 4 : 3;
+  document.getElementById('stepTime').textContent  = base;
+  document.getElementById('stepNotes').textContent = base + 1;
+  document.getElementById('stepPay').textContent   = base + 2;
+}
+
+/* ── HEURE ──────────────────────────────── */
+document.getElementById('btnASAP').addEventListener('click', function() { setTime('asap'); });
+document.getElementById('btnLater').addEventListener('click', function() { setTime('later'); });
+
+function setTime(t) {
+  timeMode = t;
+  document.getElementById('btnASAP').classList.toggle('active', t === 'asap');
+  document.getElementById('btnLater').classList.toggle('active', t === 'later');
+  document.getElementById('timePickerWrap').style.display = (t === 'later') ? 'block' : 'none';
+}
+
+/* ── PAIEMENT ───────────────────────────── */
+document.querySelectorAll('.pay-btn').forEach(function(btn) {
+  btn.addEventListener('click', function() { setPayment(this.dataset.pay); });
+});
+
+function setPayment(method) {
+  paymentMethod = method;
+  document.querySelectorAll('.pay-btn').forEach(function(b) { b.classList.remove('active'); });
+  document.querySelector('[data-pay="' + method + '"]').classList.add('active');
+  document.getElementById('cardFields').style.display  = (method === 'card')   ? 'block' : 'none';
+  document.getElementById('paypalInfo').style.display  = (method === 'paypal') ? 'block' : 'none';
+  document.getElementById('cashInfo').style.display    = (method === 'cash')   ? 'block' : 'none';
+}
+
+/* ── FORMAT CARTE ───────────────────────── */
+document.getElementById('cardNumber').addEventListener('input', function() {
+  var v = this.value.replace(/\D/g, '').substring(0, 16);
+  this.value = v.replace(/(.{4})/g, '$1 ').trim();
+});
+document.getElementById('cardExpiry').addEventListener('input', function() {
+  var v = this.value.replace(/\D/g, '');
+  if (v.length >= 2) v = v.substring(0,2) + '/' + v.substring(2,4);
+  this.value = v;
+});
+
+/* ── RÉCAPITULATIF ──────────────────────── */
+function renderSummary() {
+  var listEl = document.getElementById('orderItemsList');
+  if (!Cart.items || Cart.items.length === 0) {
+    document.getElementById('emptyCartMsg').style.display  = 'block';
+    document.getElementById('checkoutGrid').style.display  = 'none';
+    return;
+  }
+  var html = '';
+  for (var i = 0; i < Cart.items.length; i++) {
+    var item  = Cart.items[i];
+    var price = (parseFloat(item.totalPrice) || 0) * (parseInt(item.qty) || 1);
+    var opts  = '';
+    if (item.selectedOptions) {
+      var vals = [];
+      for (var k in item.selectedOptions) {
+        if (item.selectedOptions[k]) vals.push(item.selectedOptions[k]);
+      }
+      if (vals.length) opts = '<div style="color:var(--gray);font-size:.75rem;margin-top:2px">' + vals.join(' · ') + '</div>';
+    }
+    html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:.85rem;gap:8px">'
+          + '<div><span style="font-weight:800">' + (parseInt(item.qty)||1) + '×</span> ' + item.name + opts + '</div>'
+          + '<span style="font-weight:700;color:var(--gold);white-space:nowrap;margin-left:8px">' + formatPrice(price) + '</span>'
+          + '</div>';
+  }
+  listEl.innerHTML = html;
+  var total = Cart.getTotal();
+  document.getElementById('oSubtotal').textContent = formatPrice(total);
+  document.getElementById('oTotal').textContent    = formatPrice(total);
+}
+
+/* ── SOUMETTRE LA COMMANDE ──────────────── */
+document.getElementById('btnConfirm').addEventListener('click', submitOrder);
+
+function submitOrder() {
+  var firstName = document.getElementById('firstName').value.trim();
+  var lastName  = document.getElementById('lastName').value.trim();
+  var phone     = document.getElementById('phone').value.trim();
+  if (!firstName || !lastName) { alert('Veuillez renseigner votre prénom et nom.'); return; }
+  if (!phone)                  { alert('Le numéro de téléphone est obligatoire.'); return; }
+  if (!Cart.items || Cart.items.length === 0) { alert('Votre panier est vide.'); return; }
+  if (orderMode === 'delivery') {
+    if (!document.getElementById('address').value.trim()) { alert('Veuillez renseigner votre adresse.'); return; }
+    if (!document.getElementById('city').value.trim())    { alert('Veuillez renseigner votre ville.'); return; }
+  }
+  if (paymentMethod === 'card') {
+    var cn = document.getElementById('cardNumber').value.replace(/\s/g, '');
+    if (cn.length < 16) { alert('Veuillez entrer un numéro de carte valide (16 chiffres).'); return; }
+  }
+
+  var orderNum = 'APK-' + Date.now().toString().slice(-6);
+  var orderData = {
+    orderNumber: orderNum,
+    firstName: firstName, lastName: lastName, phone: phone,
+    email:   document.getElementById('email').value,
+    mode:    orderMode,
+    address: (orderMode === 'delivery') ? {
+      street: document.getElementById('address').value,
+      city:   document.getElementById('city').value,
+      zip:    document.getElementById('zip').value,
+      notes:  document.getElementById('deliveryNotes').value
+    } : null,
+    time:    (timeMode === 'later') ? document.getElementById('scheduledTime').value : 'ASAP',
+    payment: paymentMethod,
+    items:   Cart.items,
+    total:   Cart.getTotal(),
+    notes:   document.getElementById('orderNotes').value,
+    status:  'pending',
+    timestamp: new Date().toISOString()
+  };
+
+  localStorage.setItem('apk_last_order', JSON.stringify(orderData));
+  var orders = JSON.parse(localStorage.getItem('apk_orders') || '[]');
+  orders.unshift(orderData);
+  localStorage.setItem('apk_orders', JSON.stringify(orders));
+  Cart.clear();
+  window.location.href = 'confirmation.html';
+}
+
+/* ── INIT ───────────────────────────────── */
+Cart.load();
+renderSummary();
+setMode('delivery');
+</script>
+</body>
+</html>

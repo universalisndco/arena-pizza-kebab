@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Arena Pizza Kebab — Pizzas & Kebabs à Reims | 88 Rue Lesage</title>
+  <meta name="description" content="Arena Pizza Kebab à Reims — Pizzas artisanales, kebabs, tacos. Livraison et à emporter. Ouvert 7j/7 11h-14h et 18h-23h. Commander en ligne.">
+  <meta property="og:title" content="Arena Pizza Kebab — Reims">
+  <meta property="og:description" content="Les meilleures pizzas de Reims. Commandez en ligne !">
+  <meta property="og:image" content="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=800">
+  <link rel="canonical" href="https://arenapizzakebab.fr/">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍕</text></svg>">
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════ NAVBAR -->
+<nav class="navbar" id="navbar">
+  <div class="container">
+    <a href="index.html" class="nav-logo">
+      <img src="https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=100&q=80" alt="APK Logo" class="nav-logo-img">
+      <span>ARENA <span class="text-red">PIZZA</span> KEBAB</span>
+      <span class="nav-logo-badge">APK</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html" class="active">Accueil</a></li>
+      <li><a href="menu.html">Menu</a></li>
+      <li><a href="reservation.html">Réservation</a></li>
+      <li><a href="index.html#contact">Contact</a></li>
+    </ul>
+    <div class="nav-actions">
+      <a href="cart.html" class="nav-cart-btn" aria-label="Panier">
+        <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+        <span class="cart-count" id="cartCount" style="display:none">0</span>
+      </a>
+      <button class="nav-burger" id="navBurger" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile nav -->
+<div class="nav-mobile" id="navMobile">
+  <a href="index.html">Accueil</a>
+  <a href="menu.html">Menu</a>
+  <a href="reservation.html">Réservation</a>
+  <a href="index.html#contact">Contact</a>
+  <a href="cart.html" style="color:var(--gold)">Mon Panier</a>
+</div>
+
+<!-- ═══════════════════════════════════════════ HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-overlay"></div>
+  <div class="container">
+    <div class="hero-content">
+      <div class="hero-eyebrow">
+        <div class="hero-eyebrow-line"></div>
+        <span class="hero-eyebrow-text">Reims · 88 Rue Lesage · Ouvert 7J/7</span>
+      </div>
+      <h1 class="hero-title">
+        ARENA<br>
+        <span class="line-red">PIZZA</span>
+        KEBAB
+      </h1>
+      <p class="hero-subtitle">
+        Pizzas artisanales, kebabs savoureux et bien plus encore.
+        Livraison rapide ou à emporter — la vraie gourmandise vous attend.
+      </p>
+      <div class="hero-actions">
+        <a href="menu.html" class="btn btn-primary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+          Commander maintenant
+        </a>
+        <a href="reservation.html" class="btn btn-secondary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          Réserver une table
+        </a>
+      </div>
+    </div>
+  </div>
+  <div class="hero-stats">
+    <div class="container">
+      <div class="hero-stat">
+        <div class="hero-stat-num">7J/7</div>
+        <div class="hero-stat-label">Ouvert tous les jours</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num">15€</div>
+        <div class="hero-stat-label">Min. livraison</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num">30min</div>
+        <div class="hero-stat-label">Livraison estimée</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num">4.8</div>
+        <div class="hero-stat-label">Note Google</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════ PROMO BANNER -->
+<div class="promos-section">
+  <div class="promos-track" id="promosTrack"></div>
+</div>
+
+<!-- ═══════════════════════════════════════════ FEATURED PIZZAS -->
+<section class="featured-section">
+  <div class="container">
+    <div class="featured-inner">
+      <div class="featured-image-wrap">
+        <img
+          src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=900&q=90"
+          alt="Pizza Arena Pizza Kebab"
+          loading="lazy"
+        >
+        <div class="featured-badge-float">Notre Spécialité</div>
+      </div>
+      <div>
+        <div class="hero-eyebrow" style="margin-bottom:14px">
+          <div class="hero-eyebrow-line"></div>
+          <span class="hero-eyebrow-text">La Maison</span>
+        </div>
+        <h2 class="section-title">PIZZAS<br><span class="text-red">ARTISANALES</span></h2>
+        <p class="section-sub" style="margin-bottom:28px">
+          Notre pâte est préparée chaque jour, garnie généreusement et cuite au four à la perfection. 
+          Disponibles en 3 tailles : Junior, Senior et Mega.
+        </p>
+        <a href="menu.html#pizzas" class="btn btn-primary" style="margin-bottom:32px">
+          Voir toutes nos pizzas
+        </a>
+        <div class="featured-promo-cards" id="promoCards"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════ CATEGORIES -->
+<section class="categories-section section">
+  <div class="container">
+    <h2 class="section-title">NOTRE <span class="text-red">MENU</span></h2>
+    <p class="section-sub">Choisissez votre catégorie et commandez en quelques clics</p>
+    <div class="categories-grid" id="categoriesGrid"></div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════ PIZZA DEALS -->
+<section class="section" style="background:var(--dark2)">
+  <div class="container">
+    <h2 class="section-title">OFFRES <span class="text-gold">SPÉCIALES</span></h2>
+    <p class="section-sub">Des boissons offertes avec vos pizzas préférées</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px" id="pizzaDealsGrid"></div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════ GALLERY -->
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">EN <span class="text-red">IMAGES</span></h2>
+    <p class="section-sub">Un avant-goût de nos créations</p>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:240px 240px;gap:12px;border-radius:16px;overflow:hidden" id="galleryGrid"></div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════ REVIEWS -->
+<section class="reviews-section">
+  <div class="container">
+    <h2 class="section-title">AVIS <span class="text-gold">CLIENTS</span></h2>
+    <p class="section-sub">Ce que nos clients pensent de nous</p>
+    <div class="reviews-grid" id="reviewsGrid"></div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════ INFO -->
+<section class="info-section" id="contact">
+  <div class="container">
+    <h2 class="section-title">NOUS <span class="text-red">TROUVER</span></h2>
+    <p class="section-sub">Venez nous rendre visite ou passez commande</p>
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="info-card-title">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          Horaires d'ouverture
+        </div>
+        <div class="hours-row"><span class="day">Lundi — Dimanche</span><span class="time" style="color:var(--gold)">11h00 — 14h00</span></div>
+        <div class="hours-row"><span class="day">Lundi — Dimanche</span><span class="time" style="color:var(--gold)">18h00 — 23h00</span></div>
+        <div style="margin-top:20px;padding:14px;background:rgba(212,43,43,.1);border-radius:10px;border:1px solid rgba(212,43,43,.3)">
+          <div style="font-weight:800;font-size:.9rem;color:var(--red);margin-bottom:4px">Livraison</div>
+          <div style="font-size:.85rem;color:var(--gray)">Minimum de commande 15€ — Livraison gratuite Zone 1</div>
+          <div class="zone-badges">
+            <div class="zone-badge">Zone 1 <span>min. 15€</span></div>
+            <div class="zone-badge">Zone 2 <span>min. 20€</span></div>
+            <div class="zone-badge">Zone 3 <span>min. 25€</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="info-card">
+        <div class="info-card-title">
+          <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          Adresse & Contact
+        </div>
+        <div class="contact-row">
+          <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <span>88 Rue Lesage, 51100 Reims</span>
+        </div>
+        <div class="contact-row">
+          <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 8.63 19.79 19.79 0 01.12 2.18 2 2 0 012.11 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.13 6.13l1.27-.71a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+          <a href="tel:0983398220">09 83 39 82 20</a>
+        </div>
+        <div class="contact-row">
+          <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 8.63 19.79 19.79 0 01.12 2.18 2 2 0 012.11 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.13 6.13l1.27-.71a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+          <a href="tel:0784652358">07 84 65 23 58</a>
+        </div>
+        <iframe
+          class="map-embed"
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2621.5!2d4.0316!3d49.2576!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47e97d2a8c0e0001%3A0x0!2s88+Rue+Lesage%2C+51100+Reims!5e0!3m2!1sfr!2sfr!4v1"
+          allowfullscreen
+          loading="lazy"
+          title="Arena Pizza Kebab - 88 Rue Lesage Reims"
+        ></iframe>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════ FOOTER -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand-name">ARENA <span class="text-red">PIZZA</span> KEBAB</div>
+        <div class="footer-brand-sub">88 Rue Lesage · 51100 Reims<br>Ouvert 7J/7 · 11h-14h et 18h-23h</div>
+        <div class="footer-socials">
+          <a href="#" class="social-btn" aria-label="Facebook">
+            <svg viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg>
+          </a>
+          <a href="#" class="social-btn" aria-label="Instagram">
+            <svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+          </a>
+          <a href="#" class="social-btn" aria-label="Snapchat">
+            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
+          </a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">Navigation</div>
+        <a href="index.html">Accueil</a>
+        <a href="menu.html">Menu</a>
+        <a href="menu.html#pizzas">Nos Pizzas</a>
+        <a href="reservation.html">Réservation</a>
+        <a href="cart.html">Panier</a>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">Infos</div>
+        <a href="#contact">Horaires</a>
+        <a href="#contact">Livraison</a>
+        <a href="#contact">Zones</a>
+        <a href="admin/index.html">Admin</a>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">Contact</div>
+        <a href="tel:0983398220">09 83 39 82 20</a>
+        <a href="tel:0784652358">07 84 65 23 58</a>
+        <a href="mailto:contact@arenapizzakebab.fr">Email</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2024 Arena Pizza Kebab — Tous droits réservés</span>
+      <div>
+        <a href="#">Mentions légales</a>
+        <span style="margin:0 8px;opacity:.3">|</span>
+        <a href="#">RGPD</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- Sticky Cart -->
+<a href="cart.html" id="sticky-cart">
+  <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+  <span class="cart-count">0</span>
+  <span class="cart-total-display">0,00€</span>
+  Voir le panier
+</a>
+
+<script src="js/data.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/main.js"></script>
+<script>
+// ─── Promos Banner
+function buildPromos() {
+  const track = document.getElementById('promosTrack');
+  if (!track) return;
+  const items = [...APK_MENU.promos, ...APK_MENU.promos]; // duplicate for loop
+  track.innerHTML = items.map(p =>
+    `<div class="promo-item"><div class="dot"></div>${p.title} — ${p.description} · ${p.note}</div>`
+  ).join('');
+}
+
+// ─── Promo Cards
+function buildPromoCards() {
+  const el = document.getElementById('promoCards');
+  if (!el) return;
+  el.innerHTML = APK_MENU.promos.map(p => `
+    <div class="promo-card">
+      <div class="promo-card-title">${p.title}</div>
+      <div class="promo-card-desc">${p.description}</div>
+      <div class="promo-card-note">${p.note}</div>
+    </div>
+  `).join('');
+}
+
+// ─── Categories Grid
+const CAT_IMAGES = {
+  pizzas:   'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=200&q=80',
+  tacos:    'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=200&q=80',
+  rolls:    'https://images.unsplash.com/photo-1551782450-a2132b4ba21d?w=200&q=80',
+  krousty:  'https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=200&q=80',
+  panini:   'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=200&q=80',
+  salade:   'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=200&q=80',
+  kids:     'https://images.unsplash.com/photo-1562802378-063ec186a863?w=200&q=80',
+  desserts: 'https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=200&q=80',
+  boissons: 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=200&q=80'
+};
+
+function buildCategories() {
+  const el = document.getElementById('categoriesGrid');
+  if (!el) return;
+  el.innerHTML = APK_MENU.categories.map(c => `
+    <a href="menu.html#${c.id}" class="cat-card">
+      <img src="${CAT_IMAGES[c.id] || ''}" alt="${c.label}" class="cat-card-img" loading="lazy">
+      <div class="cat-card-label">${c.label}</div>
+    </a>
+  `).join('');
+}
+
+// ─── Pizza Deals
+function buildPizzaDeals() {
+  const el = document.getElementById('pizzaDealsGrid');
+  if (!el) return;
+  const imgs = [
+    'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&q=80',
+    'https://images.unsplash.com/photo-1571407970349-bc81e7e96d47?w=400&q=80',
+    'https://images.unsplash.com/photo-1604068549290-dea0e4a305ca?w=400&q=80'
+  ];
+  el.innerHTML = APK_MENU.pizzaDeals.map((deal, i) => `
+    <div style="background:var(--dark3);border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,.06);display:flex;gap:0;align-items:center">
+      <img src="${imgs[i]}" alt="${deal}" style="width:120px;height:100px;object-fit:cover;flex-shrink:0" loading="lazy">
+      <div style="padding:16px 20px">
+        <div style="font-weight:900;font-size:.95rem;margin-bottom:4px">${deal}</div>
+        <div style="font-size:.8rem;color:var(--gray)">Offre valable sur sélection</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ─── Gallery
+function buildGallery() {
+  const el = document.getElementById('galleryGrid');
+  if (!el) return;
+  const imgs = [
+    { src: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=800&q=85', style: 'grid-column:1/3;grid-row:1/2', alt:'Pizza' },
+    { src: 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=600&q=85', style: 'grid-column:3/4;grid-row:1/2', alt:'Tacos' },
+    { src: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=600&q=85', style: 'grid-column:4/5;grid-row:1/2', alt:'Pizza' },
+    { src: 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=600&q=85', style: 'grid-column:1/2;grid-row:2/3', alt:'Pizza' },
+    { src: 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=600&q=85', style: 'grid-column:2/3;grid-row:2/3', alt:'Riz' },
+    { src: 'https://images.unsplash.com/photo-1551782450-a2132b4ba21d?w=800&q=85', style: 'grid-column:3/5;grid-row:2/3', alt:'Roll' },
+  ];
+  el.innerHTML = imgs.map(img => `
+    <img src="${img.src}" alt="${img.alt}" style="${img.style};width:100%;height:100%;object-fit:cover" loading="lazy">
+  `).join('');
+}
+
+// ─── Reviews
+const REVIEWS = [
+  { name:'Thomas M.', date:'Mars 2024', rating:5, text:'La meilleure pizza de Reims, sans hésitation ! La pâte est parfaite, bien croustillante. Je commande au moins 2 fois par semaine.' },
+  { name:'Amira B.', date:'Février 2024', rating:5, text:'Livraison super rapide et les tacos sont énormes. Généreux, frais et délicieux. L\'accueil est aussi très sympa en boutique.' },
+  { name:'Julien P.', date:'Avril 2024', rating:5, text:'Les promos pizzas sont imbattables ! 3 achetées = 4ème offerte, c\'est parfait pour les soirées en famille. Qualité top.' },
+  { name:'Safia K.', date:'Janvier 2024', rating:5, text:'Le Krousty APK, une vraie découverte ! Original, savoureux, et ça cale bien. Je recommande à 100%.' },
+  { name:'Romain D.', date:'Mars 2024', rating:5, text:'Commande en ligne très facile. La livraison est ponctuelle et tout est bien emballé. Pizzas au top, on reviendra !' },
+  { name:'Nadia L.', date:'Avril 2024', rating:5, text:'Le Queen Arena Roll est tout simplement fantastique. Mes enfants adorent le Kids Menu. Restaurant de qualité, prix raisonnables.' }
+];
+function buildReviews() {
+  const el = document.getElementById('reviewsGrid');
+  if (!el) return;
+  el.innerHTML = REVIEWS.map(r => `
+    <div class="review-card">
+      <div class="review-stars">${'★'.repeat(r.rating)}</div>
+      <div class="review-text">"${r.text}"</div>
+      <div class="review-author">
+        <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(r.name)}&background=E8272A&color=fff&size=80" alt="${r.name}" class="review-avatar">
+        <div>
+          <div class="review-name">${r.name}</div>
+          <div class="review-date">${r.date}</div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// Init
+buildPromos();
+buildPromoCards();
+buildCategories();
+buildPizzaDeals();
+buildGallery();
+buildReviews();
+Cart.load();
+</script>
+</body>
+</html>

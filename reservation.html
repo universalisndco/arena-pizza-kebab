@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Réservation — Arena Pizza Kebab Reims</title>
+  <meta name="description" content="Réservez votre table chez Arena Pizza Kebab à Reims. 88 Rue Lesage. Ouvert 7J/7.">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<nav class="navbar" id="navbar">
+  <div class="container">
+    <a href="index.html" class="nav-logo">
+      <img src="https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=100&q=80" alt="APK" class="nav-logo-img">
+      <span>ARENA <span class="text-red">PIZZA</span> KEBAB</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html">Accueil</a></li>
+      <li><a href="menu.html">Menu</a></li>
+      <li><a href="reservation.html" class="active">Réservation</a></li>
+    </ul>
+    <div class="nav-actions">
+      <a href="cart.html" class="nav-cart-btn">
+        <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+        <span class="cart-count" style="display:none">0</span>
+      </a>
+      <button class="nav-burger" id="navBurger"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</nav>
+<div class="nav-mobile" id="navMobile">
+  <a href="index.html">Accueil</a>
+  <a href="menu.html">Menu</a>
+  <a href="reservation.html">Réservation</a>
+  <a href="cart.html" style="color:var(--gold)">Mon Panier</a>
+</div>
+
+<div class="page-header">
+  <div class="container">
+    <div class="page-header-eyebrow">Votre Table</div>
+    <h1>RÉSERVATION</h1>
+    <p>Réservez votre table en ligne — confirmation rapide</p>
+  </div>
+</div>
+
+<main class="reservation-page">
+  <div class="container">
+    <div class="reservation-grid">
+      <!-- Info -->
+      <div class="reservation-info">
+        <img
+          src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=900&q=85"
+          alt="Intérieur Arena Pizza Kebab"
+          class="reservation-info-img"
+          loading="lazy"
+        >
+        <div class="info-block">
+          <div class="info-block-title">Horaires</div>
+          <p>Lundi au Dimanche<br><strong>11h00 – 14h00</strong> et <strong>18h00 – 23h00</strong></p>
+        </div>
+        <div class="info-block">
+          <div class="info-block-title">Adresse</div>
+          <p>88 Rue Lesage<br>51100 Reims</p>
+        </div>
+        <div class="info-block">
+          <div class="info-block-title">Contact direct</div>
+          <p>
+            <a href="tel:0983398220">09 83 39 82 20</a><br>
+            <a href="tel:0784652358">07 84 65 23 58</a>
+          </p>
+        </div>
+        <div style="background:rgba(212,43,43,.1);border-radius:12px;padding:16px;border:1px solid rgba(212,43,43,.3)">
+          <div style="font-weight:900;font-size:.9rem;color:var(--red);margin-bottom:6px">Événements &amp; Fêtes</div>
+          <div style="font-size:.85rem;color:var(--gray);line-height:1.5">
+            Envie de célébrer un anniversaire ou une petite fête ? Réservez votre événement chez nous !
+          </div>
+        </div>
+      </div>
+
+      <!-- Form -->
+      <div class="reservation-form-wrap" id="reservationForm">
+        <h2 style="font-family:var(--font-h);font-size:1.6rem;letter-spacing:1px;margin-bottom:24px">RÉSERVER UNE TABLE</h2>
+
+        <div class="form-grid" style="gap:16px">
+          <div class="form-group">
+            <label class="form-label">Prénom *</label>
+            <input type="text" class="form-input" id="rFirstName" placeholder="Jean" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Nom *</label>
+            <input type="text" class="form-input" id="rLastName" placeholder="Dupont" required>
+          </div>
+          <div class="form-group full">
+            <label class="form-label">Téléphone *</label>
+            <input type="tel" class="form-input" id="rPhone" placeholder="06 12 34 56 78" required>
+          </div>
+          <div class="form-group full">
+            <label class="form-label">Email</label>
+            <input type="email" class="form-input" id="rEmail" placeholder="jean@email.com">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Nombre de personnes *</label>
+            <select class="form-select" id="rGuests" required>
+              <option value="">Choisir</option>
+              <option value="1">1 personne</option>
+              <option value="2">2 personnes</option>
+              <option value="3">3 personnes</option>
+              <option value="4">4 personnes</option>
+              <option value="5">5 personnes</option>
+              <option value="6">6 personnes</option>
+              <option value="7">7 personnes</option>
+              <option value="8">8 personnes</option>
+              <option value="9+">9+ personnes</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Date *</label>
+            <input type="date" class="form-input" id="rDate" required>
+          </div>
+          <div class="form-group full">
+            <label class="form-label">Heure *</label>
+            <select class="form-select" id="rTime" required>
+              <option value="">Choisir un créneau</option>
+              <optgroup label="Déjeuner">
+                <option value="11:00">11h00</option>
+                <option value="11:30">11h30</option>
+                <option value="12:00">12h00</option>
+                <option value="12:30">12h30</option>
+                <option value="13:00">13h00</option>
+                <option value="13:30">13h30</option>
+              </optgroup>
+              <optgroup label="Dîner">
+                <option value="18:00">18h00</option>
+                <option value="18:30">18h30</option>
+                <option value="19:00">19h00</option>
+                <option value="19:30">19h30</option>
+                <option value="20:00">20h00</option>
+                <option value="20:30">20h30</option>
+                <option value="21:00">21h00</option>
+                <option value="21:30">21h30</option>
+                <option value="22:00">22h00</option>
+              </optgroup>
+            </select>
+          </div>
+          <div class="form-group full">
+            <label class="form-label">Message (optionnel)</label>
+            <textarea class="form-textarea" id="rMessage" placeholder="Allergies, occasion spéciale, demandes particulières…"></textarea>
+          </div>
+        </div>
+
+        <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:24px;font-size:1rem" onclick="submitReservation()">
+          Envoyer ma réservation
+        </button>
+        <p style="font-size:.8rem;color:var(--gray);text-align:center;margin-top:12px">
+          Confirmation par téléphone dans les 24h · 
+          <a href="tel:0983398220" style="color:var(--gold)">09 83 39 82 20</a>
+        </p>
+      </div>
+
+      <!-- Success message (hidden) -->
+      <div id="reservationSuccess" style="display:none" class="reservation-form-wrap">
+        <div style="text-align:center;padding:40px 0">
+          <div style="width:80px;height:80px;border-radius:50%;background:rgba(80,200,80,.1);border:3px solid #50c850;display:flex;align-items:center;justify-content:center;margin:0 auto 24px">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#50c850" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <h3 style="font-family:var(--font-h);font-size:1.8rem;letter-spacing:1px;margin-bottom:12px">RÉSERVATION ENVOYÉE</h3>
+          <p style="color:var(--gray);font-size:.95rem;line-height:1.6;margin-bottom:28px" id="successMsg"></p>
+          <a href="index.html" class="btn btn-primary">Retour à l'accueil</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- FOOTER -->
+<footer class="footer" style="padding:32px 0">
+  <div class="container">
+    <div class="footer-bottom" style="border-top:none;padding-top:0">
+      <span>© 2024 Arena Pizza Kebab · 88 Rue Lesage · 51100 Reims</span>
+      <a href="index.html">Retour Accueil</a>
+    </div>
+  </div>
+</footer>
+
+<script src="js/data.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/main.js"></script>
+<script>
+// Set min date to today
+document.getElementById('rDate').min = new Date().toISOString().split('T')[0];
+
+function submitReservation() {
+  const firstName = document.getElementById('rFirstName').value.trim();
+  const lastName = document.getElementById('rLastName').value.trim();
+  const phone = document.getElementById('rPhone').value.trim();
+  const guests = document.getElementById('rGuests').value;
+  const date = document.getElementById('rDate').value;
+  const time = document.getElementById('rTime').value;
+
+  if (!firstName || !lastName) { alert('Veuillez renseigner votre nom et prénom.'); return; }
+  if (!phone) { alert('Le numéro de téléphone est obligatoire.'); return; }
+  if (!guests) { alert('Veuillez indiquer le nombre de personnes.'); return; }
+  if (!date) { alert('Veuillez choisir une date.'); return; }
+  if (!time) { alert('Veuillez choisir un horaire.'); return; }
+
+  const reservation = {
+    id: 'RES-' + Date.now().toString().slice(-6),
+    firstName, lastName, phone,
+    email: document.getElementById('rEmail').value,
+    guests, date, time,
+    message: document.getElementById('rMessage').value,
+    status: 'pending',
+    timestamp: new Date().toISOString()
+  };
+
+  // Save to localStorage (for admin)
+  let reservations = JSON.parse(localStorage.getItem('apk_reservations') || '[]');
+  reservations.unshift(reservation);
+  localStorage.setItem('apk_reservations', JSON.stringify(reservations));
+
+  // Show success
+  document.getElementById('reservationForm').style.display = 'none';
+  document.getElementById('reservationSuccess').style.display = 'block';
+  document.getElementById('successMsg').textContent =
+    `Votre réservation pour ${guests} personne(s) le ${new Date(date).toLocaleDateString('fr-FR', {weekday:'long',day:'numeric',month:'long'})} à ${time} a bien été transmise. Nous vous confirmerons par téléphone au ${phone}.`;
+
+  Cart.load();
+}
+
+Cart.load();
+</script>
+</body>
+</html>

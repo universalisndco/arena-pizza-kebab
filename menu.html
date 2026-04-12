@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Menu — Arena Pizza Kebab Reims</title>
+  <meta name="description" content="Découvrez le menu complet d'Arena Pizza Kebab : pizzas, tacos, kebabs, rolls, krousty, desserts. Commandez en ligne.">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍕</text></svg>">
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar">
+  <div class="container">
+    <a href="index.html" class="nav-logo">
+      <img src="https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=100&q=80" alt="APK" class="nav-logo-img">
+      <span>ARENA <span class="text-red">PIZZA</span> KEBAB</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html">Accueil</a></li>
+      <li><a href="menu.html" class="active">Menu</a></li>
+      <li><a href="reservation.html">Réservation</a></li>
+      <li><a href="index.html#contact">Contact</a></li>
+    </ul>
+    <div class="nav-actions">
+      <a href="cart.html" class="nav-cart-btn">
+        <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+        <span class="cart-count" style="display:none">0</span>
+      </a>
+      <button class="nav-burger" id="navBurger"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</nav>
+<div class="nav-mobile" id="navMobile">
+  <a href="index.html">Accueil</a>
+  <a href="menu.html">Menu</a>
+  <a href="reservation.html">Réservation</a>
+  <a href="index.html#contact">Contact</a>
+  <a href="cart.html" style="color:var(--gold)">Mon Panier</a>
+</div>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="container">
+    <div class="page-header-eyebrow">Notre Carte</div>
+    <h1>LE <span class="text-red">MENU</span></h1>
+    <p>Tous nos plats préparés avec soin — ajoutez au panier et commandez en quelques clics</p>
+  </div>
+</div>
+
+<!-- PROMOS STRIP -->
+<div class="promos-section">
+  <div class="promos-track" id="promosTrack"></div>
+</div>
+
+<!-- MENU -->
+<section class="menu-section">
+  <div class="container">
+    <!-- Category Tabs -->
+    <div class="menu-tabs" id="menuTabs"></div>
+
+    <!-- Pizza size filter (only shown for pizzas) -->
+    <div class="pizza-size-filter" id="pizzaSizeFilter" style="display:none">
+      <button class="size-btn active" data-size="all">Toutes les tailles</button>
+      <button class="size-btn" data-size="Junior">Junior</button>
+      <button class="size-btn" data-size="Senior">Senior</button>
+      <button class="size-btn" data-size="Mega">Mega</button>
+    </div>
+
+    <!-- Items Grid -->
+    <div class="menu-grid" id="menuGrid"></div>
+  </div>
+</section>
+
+<!-- ITEM MODAL -->
+<div class="item-modal" id="item-modal">
+  <div class="modal-inner">
+    <button class="modal-close" onclick="closeItemModal()">&#x2715;</button>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<!-- Sticky Cart -->
+<a href="cart.html" id="sticky-cart">
+  <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+  <span class="cart-count">0</span>
+  <span class="cart-total-display">0,00€</span>
+  Voir le panier
+</a>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-bottom" style="border-top:none;padding-top:0">
+      <span>© 2024 Arena Pizza Kebab · 88 Rue Lesage · 51100 Reims</span>
+      <a href="index.html" class="btn btn-secondary" style="padding:8px 20px;font-size:.85rem">Retour Accueil</a>
+    </div>
+  </div>
+</footer>
+
+<script src="js/data.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/main.js"></script>
+<script>
+let currentCategory = 'pizzas';
+let currentSize = 'all';
+
+function getBadgeClass(badge) {
+  if (!badge) return '';
+  if (badge === 'Best-seller' || badge === 'Populaire') return 'badge-red';
+  if (badge === 'Nouveau') return 'badge-gold';
+  return 'badge-dark';
+}
+
+function renderMenuCard(item) {
+  return `
+    <div class="menu-card" onclick="openItemModal('${item.id}')">
+      <div class="menu-card-img-wrap">
+        <img src="${item.image}" alt="${item.name}" class="menu-card-img" loading="lazy"
+          onerror="this.src='https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400'">
+        ${item.badge ? `<div class="menu-card-badge"><span class="badge ${getBadgeClass(item.badge)}">${item.badge}</span></div>` : ''}
+        ${item.size ? `<div class="menu-card-size">${item.size}</div>` : ''}
+      </div>
+      <div class="menu-card-body">
+        <div class="menu-card-name">${item.name}</div>
+        <div class="menu-card-desc">${item.description}</div>
+        <div class="menu-card-footer">
+          <div class="menu-card-price">${formatPrice(item.price)}</div>
+          <button class="btn-add" onclick="event.stopPropagation();openItemModal('${item.id}')" aria-label="Ajouter ${item.name}">+</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderMenu() {
+  const grid = document.getElementById('menuGrid');
+  if (!grid) return;
+  let items = getItemsByCategory(currentCategory);
+  if (currentCategory === 'pizzas' && currentSize !== 'all') {
+    items = items.filter(i => i.size === currentSize);
+  }
+  if (items.length === 0) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--gray)">Aucun article dans cette catégorie.</div>';
+    return;
+  }
+  grid.innerHTML = items.map(renderMenuCard).join('');
+}
+
+function buildTabs() {
+  const el = document.getElementById('menuTabs');
+  if (!el) return;
+  el.innerHTML = APK_MENU.categories.map(c => `
+    <button class="menu-tab${c.id === currentCategory ? ' active' : ''}" data-cat="${c.id}">
+      ${c.label}
+    </button>
+  `).join('');
+  el.querySelectorAll('.menu-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      currentCategory = btn.dataset.cat;
+      currentSize = 'all';
+      el.querySelectorAll('.menu-tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const sizeFilter = document.getElementById('pizzaSizeFilter');
+      if (sizeFilter) sizeFilter.style.display = currentCategory === 'pizzas' ? 'flex' : 'none';
+      if (sizeFilter) sizeFilter.querySelectorAll('.size-btn').forEach(b => { b.classList.toggle('active', b.dataset.size === 'all'); });
+      renderMenu();
+    });
+  });
+}
+
+function buildSizeFilter() {
+  const el = document.getElementById('pizzaSizeFilter');
+  if (!el) return;
+  el.style.display = currentCategory === 'pizzas' ? 'flex' : 'none';
+  el.querySelectorAll('.size-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      currentSize = btn.dataset.size;
+      el.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderMenu();
+    });
+  });
+}
+
+// Build promos banner
+function buildPromos() {
+  const track = document.getElementById('promosTrack');
+  if (!track) return;
+  const items = [...APK_MENU.promos, ...APK_MENU.promos];
+  track.innerHTML = items.map(p =>
+    `<div class="promo-item"><div class="dot"></div>${p.title} — ${p.description} · ${p.note}</div>`
+  ).join('');
+}
+
+// Check URL hash for category
+function initFromHash() {
+  const hash = window.location.hash.replace('#', '');
+  if (hash && APK_MENU.categories.find(c => c.id === hash)) {
+    currentCategory = hash;
+  }
+}
+
+initFromHash();
+buildPromos();
+buildTabs();
+buildSizeFilter();
+renderMenu();
+Cart.load();
+</script>
+</body>
+</html>

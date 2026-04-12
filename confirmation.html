@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Commande Confirmée — Arena Pizza Kebab</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<nav class="navbar" id="navbar">
+  <div class="container">
+    <a href="index.html" class="nav-logo">
+      <img src="https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=100&q=80" alt="APK" class="nav-logo-img">
+      <span>ARENA <span class="text-red">PIZZA</span> KEBAB</span>
+    </a>
+  </div>
+</nav>
+
+<main class="confirm-page">
+  <div class="container">
+    <div class="confirm-icon">
+      <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <h1 class="section-title">COMMANDE <span class="text-red">CONFIRMÉE</span></h1>
+    <div class="confirm-order-num" id="confirmOrderNum">APK-000000</div>
+    <p class="confirm-message">
+      Merci pour votre commande ! Nous l'avons bien reçue et nous la préparons avec soin. 
+      Un email de confirmation vous sera envoyé.
+    </p>
+
+    <div class="time-badge" id="timeBadge">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      Temps estimé : 25-35 minutes
+    </div>
+
+    <div class="confirm-details" id="confirmDetails"></div>
+
+    <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap">
+      <a href="index.html" class="btn btn-primary">Retour à l'accueil</a>
+      <a href="menu.html" class="btn btn-secondary">Commander à nouveau</a>
+    </div>
+  </div>
+</main>
+
+<script src="js/data.js"></script>
+<script src="js/cart.js"></script>
+<script>
+const order = JSON.parse(localStorage.getItem('apk_last_order') || '{}');
+
+if (order.orderNumber) {
+  document.getElementById('confirmOrderNum').textContent = order.orderNumber;
+
+  const modeLabel = order.mode === 'delivery' ? 'Livraison' : 'À emporter';
+  const timeLabel = order.time === 'ASAP' ? 'Dès que possible' : order.time;
+  const payLabel = { card: 'Carte bancaire', paypal: 'PayPal', cash: 'À la livraison' }[order.payment] || '';
+
+  let addrLine = '';
+  if (order.mode === 'delivery' && order.address) {
+    addrLine = `<div class="confirm-detail-row"><label>Adresse</label><span>${order.address.street}, ${order.address.city}</span></div>`;
+  }
+
+  let itemsHtml = (order.items || []).map(i =>
+    `<div class="confirm-detail-row"><label>${i.qty}x ${i.name}</label><span>${formatPrice(i.totalPrice * i.qty)}</span></div>`
+  ).join('');
+
+  document.getElementById('confirmDetails').innerHTML = `
+    <div class="confirm-detail-row"><label>Nom</label><span>${order.firstName} ${order.lastName}</span></div>
+    <div class="confirm-detail-row"><label>Téléphone</label><span>${order.phone}</span></div>
+    <div class="confirm-detail-row"><label>Mode</label><span>${modeLabel}</span></div>
+    ${addrLine}
+    <div class="confirm-detail-row"><label>Heure</label><span>${timeLabel}</span></div>
+    <div class="confirm-detail-row"><label>Paiement</label><span>${payLabel}</span></div>
+    <div style="margin:12px 0;border-top:1px solid rgba(255,255,255,.1)"></div>
+    ${itemsHtml}
+    <div class="confirm-detail-row" style="font-weight:900"><label>Total</label><span style="color:var(--gold);font-family:var(--font-h);font-size:1.3rem">${formatPrice(order.total || 0)}</span></div>
+  `;
+
+  if (order.mode === 'takeaway') {
+    document.getElementById('timeBadge').innerHTML = `
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      Prêt dans : 15-20 minutes
+    `;
+  }
+}
+
+Cart.load();
+</script>
+</body>
+</html>
