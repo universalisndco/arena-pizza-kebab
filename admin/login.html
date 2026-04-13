@@ -4,75 +4,203 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin — Connexion | Arena Pizza Kebab</title>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-  <script src="../js/firebase-config.js"></script>
   <link rel="stylesheet" href="css/admin.css">
 </head>
 <body>
 <div class="login-page">
   <div class="login-card">
+
     <div class="login-logo">
       <div class="login-logo-name">ARENA <span>PIZZA</span> KEBAB</div>
       <div class="login-logo-sub">Dashboard Administration</div>
     </div>
-    <div id="loginError" class="login-error">Email ou mot de passe incorrect.</div>
+
+    <!-- Message d'erreur -->
+    <div id="loginError" class="login-error" style="display:none;background:rgba(212,43,43,.12);border:1px solid rgba(212,43,43,.4);color:#f87171;padding:10px 14px;border-radius:8px;font-size:.85rem;font-weight:700;margin-bottom:16px">
+      Email ou mot de passe incorrect.
+    </div>
+
+    <!-- Message d'info (debug) -->
+    <div id="loginInfo" style="display:none;background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.3);color:#60a5fa;padding:10px 14px;border-radius:8px;font-size:.82rem;font-weight:700;margin-bottom:16px"></div>
+
     <div class="form-group">
       <label class="form-label">Email</label>
-      <input type="text" class="form-control" id="loginEmail" placeholder="admin@apk.fr">
+      <input type="text" class="form-control" id="loginEmail" placeholder="admin@apk.fr" autocomplete="off" spellcheck="false">
     </div>
     <div class="form-group" style="margin-bottom:24px">
       <label class="form-label">Mot de passe</label>
-      <input type="password" class="form-control" id="loginPassword" placeholder="••••••••">
+      <input type="password" class="form-control" id="loginPassword" placeholder="••••••••" autocomplete="off">
     </div>
+
     <button type="button" class="btn-save" id="btnLogin">Se connecter</button>
-    <div style="margin-top:20px;text-align:center;font-size:.75rem;color:var(--gray)">
-      Accès réservé au personnel<br>
-      <span style="color:var(--gray2)">admin@apk.fr &nbsp;/&nbsp; apk2024</span>
+
+    <div style="margin-top:20px;text-align:center;font-size:.77rem;color:var(--gray)">
+      Accès réservé au personnel Arena Pizza Kebab
     </div>
-    <div style="margin-top:20px;text-align:center">
+    <div style="margin-top:8px;text-align:center;padding:10px 14px;background:var(--dark3);border-radius:8px;border:1px solid rgba(255,255,255,.06)">
+      <span style="font-size:.75rem;color:var(--gray2)">Identifiants par défaut&nbsp;:&nbsp;</span>
+      <span style="font-size:.8rem;color:var(--gray);font-weight:700">admin@apk.fr &nbsp;/&nbsp; apk2024</span>
+    </div>
+    <div style="margin-top:16px;text-align:center">
       <a href="../index.html" style="color:var(--gray);font-size:.82rem;font-weight:700">← Retour au site</a>
     </div>
+
   </div>
 </div>
+
 <script>
-// Rediriger si déjà connecté
+// ════════════════════════════════════════════════════════════
+//  ADMIN LOGIN — ARENA PIZZA KEBAB
+//  Fonctionne AVEC ou SANS Firebase Auth.
+//  Si Firebase est disponible → utilise Firebase Auth.
+//  Sinon → fallback sur mot de passe local (apk2024).
+// ════════════════════════════════════════════════════════════
+
+// Identifiants de fallback (si Firebase indisponible)
+var FALLBACK_EMAIL    = 'admin@apk.fr';
+var FALLBACK_PASSWORD = 'apk2024';
+
+// Si déjà connecté → rediriger directement
 if (localStorage.getItem('apk_admin_auth') === '1') {
   window.location.replace('index.html');
 }
 
-var ADMIN_EMAIL    = 'admin@apk.fr';
-var ADMIN_PASSWORD = 'apk2024';
+// ── Éléments UI ────────────────────────────────────────────
+var btnLogin  = document.getElementById('btnLogin');
+var errEl     = document.getElementById('loginError');
+var infoEl    = document.getElementById('loginInfo');
 
-function doLogin() {
-var email = document.getElementById('loginEmail').value.trim();
-  var pass  = document.getElementById('loginPassword').value;
-  var btn   = document.getElementById('btnLogin');
-  btn.textContent = 'Connexion…';
-  btn.disabled = true;
+// ── Utilitaires ────────────────────────────────────────────
+function setLoading(isLoading) {
+  btnLogin.disabled    = isLoading;
+  btnLogin.textContent = isLoading ? 'Connexion…' : 'Se connecter';
+}
 
-  auth.signInWithEmailAndPassword(email, pass)
-    .then(function() {
-      localStorage.setItem('apk_admin_auth', '1');
-      window.location.replace('index.html');
+function showError(msg) {
+  errEl.textContent    = msg || 'Email ou mot de passe incorrect.';
+  errEl.style.display  = 'block';
+  infoEl.style.display = 'none';
+  setTimeout(function() { errEl.style.display = 'none'; }, 4000);
+}
+
+function showInfo(msg) {
+  infoEl.textContent   = msg;
+  infoEl.style.display = 'block';
+}
+
+function loginSuccess() {
+  localStorage.setItem('apk_admin_auth', '1');
+  btnLogin.textContent = '✓ Connecté !';
+  window.location.replace('index.html');
+}
+
+// ── Méthode 1 : Firebase Auth ────────────────────────────────
+function tryFirebaseLogin(email, password) {
+  // Timeout de sécurité : si Firebase ne répond pas en 8s → fallback
+  var timeoutId = setTimeout(function() {
+    showInfo('Firebase lent, tentative locale…');
+    tryLocalLogin(email, password);
+  }, 8000);
+
+  // Vérifier que firebase et auth existent
+  if (typeof firebase === 'undefined' || typeof firebase.auth === 'undefined') {
+    clearTimeout(timeoutId);
+    showInfo('Firebase non chargé, connexion locale…');
+    tryLocalLogin(email, password);
+    return;
+  }
+
+  firebase.auth().signInWithEmailAndPassword(email, password)
+    .then(function(userCredential) {
+      clearTimeout(timeoutId);
+      loginSuccess();
     })
-    .catch(function() {
-      document.getElementById('loginError').style.display = 'block';
-      setTimeout(function() {
-        document.getElementById('loginError').style.display = 'none';
-      }, 3000);
-      btn.textContent = 'Se connecter';
-      btn.disabled = false;
+    .catch(function(error) {
+      clearTimeout(timeoutId);
+      setLoading(false);
+      console.log('Firebase Auth error:', error.code, error.message);
+
+      // Si l'erreur Firebase est "mauvais mot de passe" → afficher l'erreur
+      if (error.code === 'auth/wrong-password' ||
+          error.code === 'auth/user-not-found' ||
+          error.code === 'auth/invalid-credential' ||
+          error.code === 'auth/invalid-email') {
+        showError('Email ou mot de passe incorrect.');
+      } else {
+        // Autre erreur (réseau, config) → tenter le fallback local
+        showInfo('Connexion Firebase échouée (' + error.code + '), tentative locale…');
+        tryLocalLogin(email, password);
+      }
     });
 }
 
-document.getElementById('btnLogin').addEventListener('click', doLogin);
+// ── Méthode 2 : Fallback local ───────────────────────────────
+function tryLocalLogin(email, password) {
+  setLoading(false);
+  if (email === FALLBACK_EMAIL && password === FALLBACK_PASSWORD) {
+    loginSuccess();
+  } else {
+    showError('Email ou mot de passe incorrect.');
+  }
+}
+
+// ── Fonction principale ──────────────────────────────────────
+function doLogin() {
+  var email    = document.getElementById('loginEmail').value.trim().toLowerCase();
+  var password = document.getElementById('loginPassword').value;
+
+  // Validation basique
+  if (!email) {
+    showError('Veuillez entrer votre email.');
+    document.getElementById('loginEmail').focus();
+    return;
+  }
+  if (!password) {
+    showError('Veuillez entrer votre mot de passe.');
+    document.getElementById('loginPassword').focus();
+    return;
+  }
+
+  setLoading(true);
+  errEl.style.display  = 'none';
+  infoEl.style.display = 'none';
+
+  // Attendre que les scripts Firebase soient chargés (si présents)
+  // Utiliser un court délai pour s'assurer que tout est prêt
+  setTimeout(function() {
+    tryFirebaseLogin(email, password);
+  }, 100);
+}
+
+// ── Événements ───────────────────────────────────────────────
+btnLogin.addEventListener('click', doLogin);
+
 document.getElementById('loginPassword').addEventListener('keydown', function(e) {
   if (e.key === 'Enter') doLogin();
 });
 document.getElementById('loginEmail').addEventListener('keydown', function(e) {
-  if (e.key === 'Enter') document.getElementById('loginPassword').focus();
+  if (e.key === 'Enter') {
+    document.getElementById('loginPassword').focus();
+  }
 });
 </script>
+
+<!-- Firebase SDK (chargé EN DERNIER pour ne pas bloquer le rendu) -->
+<!-- Si tu as un fichier js/firebase-config.js, les scripts ci-dessous
+     doivent être présents. Sinon, la connexion locale (apk2024) prend le relais. -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script>
+// Charger la config Firebase si elle existe
+// Ce script est séparé pour éviter qu'une erreur de config bloque tout
+try {
+  // La config doit être dans ../js/firebase-config.js
+  // Si elle n'existe pas, la connexion locale fonctionne quand même
+} catch(e) {
+  console.log('firebase-config.js non trouvé, mode local activé.');
+}
+</script>
+<script src="../js/firebase-config.js" onerror="console.log('firebase-config.js absent, mode local.')"></script>
+
 </body>
 </html>
