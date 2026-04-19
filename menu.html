@@ -4,23 +4,54 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Menu — Arena Pizza Kebab Reims</title>
-  <meta name="description" content="Découvrez le menu complet d'Arena Pizza Kebab : pizzas, tacos, kebabs, rolls, krousty, desserts. Commandez en ligne.">
+  <meta name="description" content="Menu complet Arena Pizza Kebab : pizzas, tacos, fried chicken, sandwichs, burgers, rolls et plus. Commandez en ligne.">
   <link rel="stylesheet" href="css/style.css">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍕</text></svg>">
   <style>
-    .pizza-filters-wrap { display:none; flex-direction:column; gap:10px; margin-bottom:28px; }
+    /* ── Filtres pizza ───────────────────────────────────── */
+    .pizza-filters-wrap { display:none; flex-direction:column; gap:8px; margin-bottom:28px; }
     .pizza-filters-wrap.visible { display:flex; }
-    .filter-row { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
-    .filter-row-label { font-size:.72rem; font-weight:900; letter-spacing:1.5px; text-transform:uppercase; color:var(--gray); min-width:46px; }
-    .filter-divider { width:1px; height:22px; background:rgba(255,255,255,.1); margin:0 4px; }
-    .size-btn { padding:7px 18px; border-radius:50px; font-size:.82rem; font-weight:800; background:var(--dark3); color:var(--gray); border:2px solid transparent; transition:all .2s; cursor:pointer; font-family:var(--font-b); }
-    .size-btn.active, .size-btn:hover { border-color:var(--gold); color:var(--gold); }
-    .size-btn.active { background:rgba(245,166,35,.1); }
-    .base-btn { padding:7px 18px; border-radius:50px; font-size:.82rem; font-weight:800; background:var(--dark3); color:var(--gray); border:2px solid transparent; transition:all .2s; cursor:pointer; font-family:var(--font-b); display:flex; align-items:center; gap:6px; }
-    .base-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
-    .base-btn.active, .base-btn:hover { border-color:var(--red); color:#fff; }
-    .base-btn.active { background:rgba(212,43,43,.1); }
-    .pizza-base-badge { position:absolute; bottom:8px; left:8px; background:rgba(0,0,0,.75); backdrop-filter:blur(4px); padding:3px 10px; border-radius:20px; font-size:.68rem; font-weight:800; color:#fff; border:1px solid rgba(255,255,255,.15); }
+    .filter-row { display:flex; align-items:center; gap:7px; flex-wrap:wrap; }
+    .filter-row-label {
+      font-size:.68rem; font-weight:900; letter-spacing:1.5px; text-transform:uppercase;
+      color:var(--gray); min-width:44px; flex-shrink:0;
+    }
+    .filter-divider { width:1px; height:20px; background:rgba(255,255,255,.1); margin:0 2px; flex-shrink:0; }
+
+    .size-btn, .base-btn, .serie-btn {
+      padding:6px 14px; border-radius:50px; font-size:.78rem; font-weight:800;
+      background:var(--dark3); color:var(--gray); border:2px solid transparent;
+      transition:all .2s; cursor:pointer; font-family:var(--font-b); white-space:nowrap;
+    }
+    .size-btn.active,  .size-btn:hover  { border-color:var(--gold);  color:var(--gold); background:rgba(245,166,35,.1); }
+    .base-btn.active,  .base-btn:hover  { border-color:var(--red);   color:#fff;        background:rgba(212,43,43,.1); }
+    .serie-btn.active, .serie-btn:hover { border-color:#a855f7;      color:#c084fc;     background:rgba(168,85,247,.1); }
+
+    .base-btn { display:flex; align-items:center; gap:5px; }
+    .base-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+
+    /* badge série sur carte */
+    .pizza-serie-badge {
+      position:absolute; top:8px; right:8px;
+      background:rgba(0,0,0,.72); backdrop-filter:blur(4px);
+      padding:2px 8px; border-radius:20px; font-size:.62rem; font-weight:900;
+      color:#c084fc; letter-spacing:.5px; border:1px solid rgba(168,85,247,.3);
+    }
+    .pizza-base-badge {
+      position:absolute; bottom:8px; left:8px;
+      background:rgba(0,0,0,.75); backdrop-filter:blur(4px);
+      padding:2px 9px; border-radius:20px; font-size:.65rem; font-weight:800;
+      color:#fff; border:1px solid rgba(255,255,255,.15);
+    }
+    /* prix ligne */
+    .pizza-prices-line {
+      display:flex; gap:6px; flex-wrap:wrap; margin:4px 0 10px;
+    }
+    .price-chip {
+      font-size:.72rem; font-weight:800; padding:2px 8px; border-radius:20px;
+      background:var(--dark4); color:var(--gray); border:1px solid rgba(255,255,255,.07);
+    }
+    .price-chip.current { background:rgba(245,166,35,.15); color:var(--gold); border-color:var(--gold); }
   </style>
 </head>
 <body>
@@ -68,20 +99,35 @@
 
 <section class="menu-section">
   <div class="container">
+
+    <!-- Onglets catégories -->
     <div class="menu-tabs" id="menuTabs"></div>
 
-    <!-- Filtres pizza : Taille + Base côte à côte -->
+    <!-- ── Filtres pizza : Taille + Base + Série ── -->
     <div class="pizza-filters-wrap" id="pizzaFiltersWrap">
 
+      <!-- Ligne 1 : Série -->
+      <div class="filter-row">
+        <span class="filter-row-label">Série</span>
+        <div class="filter-divider"></div>
+        <button type="button" class="serie-btn active" data-serie="all">Toutes</button>
+        <button type="button" class="serie-btn" data-serie="favoris">Favoris</button>
+        <button type="button" class="serie-btn" data-serie="premium">Premium</button>
+        <button type="button" class="serie-btn" data-serie="mealLover">Meal Lover</button>
+        <button type="button" class="serie-btn" data-serie="signature">Signature</button>
+      </div>
+
+      <!-- Ligne 2 : Taille -->
       <div class="filter-row">
         <span class="filter-row-label">Taille</span>
         <div class="filter-divider"></div>
         <button type="button" class="size-btn active" data-size="all">Toutes</button>
-        <button type="button" class="size-btn" data-size="Junior">Junior</button>
-        <button type="button" class="size-btn" data-size="Senior">Senior</button>
-        <button type="button" class="size-btn" data-size="Mega">Mega</button>
+        <button type="button" class="size-btn" data-size="Junior">Junior · 29cm</button>
+        <button type="button" class="size-btn" data-size="Senior">Senior · 33cm</button>
+        <button type="button" class="size-btn" data-size="Mega">Méga · 40cm</button>
       </div>
 
+      <!-- Ligne 3 : Base -->
       <div class="filter-row">
         <span class="filter-row-label">Base</span>
         <div class="filter-divider"></div>
@@ -89,18 +135,22 @@
           <span class="base-dot" style="background:var(--gray)"></span>Toutes
         </button>
         <button type="button" class="base-btn" data-base="Base Tomate">
-          <span class="base-dot" style="background:#e63946"></span>Base Tomate
+          <span class="base-dot" style="background:#e63946"></span>Tomate
         </button>
         <button type="button" class="base-btn" data-base="Base Crème Fraîche">
-          <span class="base-dot" style="background:#f8e8c0"></span>Base Crème Fraîche
+          <span class="base-dot" style="background:#f8e8c0"></span>Crème Fraîche
         </button>
         <button type="button" class="base-btn" data-base="Base Spéciale">
-          <span class="base-dot" style="background:var(--gold)"></span>Base Spéciale
+          <span class="base-dot" style="background:var(--gold)"></span>Spéciale
         </button>
       </div>
 
+      <!-- Info prix selon série active -->
+      <div id="seriePriceInfo" style="font-size:.78rem;color:var(--gray);padding:6px 2px;display:none"></div>
+
     </div>
 
+    <!-- Grille articles -->
     <div class="menu-grid" id="menuGrid"></div>
   </div>
 </section>
@@ -133,26 +183,36 @@
 <script src="js/main.js"></script>
 <script>
 var currentCategory = 'pizzas';
+var currentSerie    = 'all';
 var currentSize     = 'all';
 var currentBase     = 'all';
 
+// ── Badge class ───────────────────────────────────────────
 function getBadgeClass(badge) {
   if (!badge) return '';
   if (badge === 'Best-seller' || badge === 'Populaire') return 'badge-red';
-  if (badge === 'Nouveau') return 'badge-gold';
+  if (badge === 'Nouveau' || badge === 'Duo')           return 'badge-gold';
+  if (badge === 'Signature' || badge === 'King')        return 'badge-dark';
   return 'badge-dark';
 }
 
+// ── Série label court ─────────────────────────────────────
+var SERIE_LABELS = { favoris:'Favoris', premium:'Premium', mealLover:'Meal Lover', signature:'Signature' };
+
+// ── Rendu carte ───────────────────────────────────────────
 function renderMenuCard(item) {
-  var baseLabel = (item.category === 'pizzas' && currentBase !== 'all')
+  var serieBadge = (item.category === 'pizzas' && item.serie)
+    ? '<div class="pizza-serie-badge">' + (SERIE_LABELS[item.serie] || item.serie) + '</div>' : '';
+  var baseBadge = (item.category === 'pizzas' && currentBase !== 'all')
     ? '<div class="pizza-base-badge">' + currentBase + '</div>' : '';
+
   return '<div class="menu-card" data-id="' + item.id + '">'
     + '<div class="menu-card-img-wrap">'
     + '<img src="' + item.image + '" alt="' + item.name + '" class="menu-card-img" loading="lazy"'
     + ' onerror="this.src=\'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400\'">'
     + (item.badge ? '<div class="menu-card-badge"><span class="badge ' + getBadgeClass(item.badge) + '">' + item.badge + '</span></div>' : '')
     + (item.size  ? '<div class="menu-card-size">' + item.size + '</div>' : '')
-    + baseLabel
+    + serieBadge + baseBadge
     + '</div>'
     + '<div class="menu-card-body">'
     + '<div class="menu-card-name">' + item.name + '</div>'
@@ -163,13 +223,17 @@ function renderMenuCard(item) {
     + '</div></div></div>';
 }
 
+// ── Rendu grille ──────────────────────────────────────────
 function renderMenu() {
   var grid = document.getElementById('menuGrid');
   if (!grid) return;
   var items = getItemsByCategory(currentCategory);
-  if (currentCategory === 'pizzas' && currentSize !== 'all') {
-    items = items.filter(function(i) { return i.size === currentSize; });
+
+  if (currentCategory === 'pizzas') {
+    if (currentSerie !== 'all') items = items.filter(function(i){ return i.serie === currentSerie; });
+    if (currentSize  !== 'all') items = items.filter(function(i){ return i.size && i.size.indexOf(currentSize) === 0; });
   }
+
   if (items.length === 0) {
     grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--gray)">Aucun article trouvé.</div>';
     return;
@@ -190,16 +254,16 @@ function renderMenu() {
   });
 }
 
+// ── Ouvrir modal avec base pré-sélectionnée ───────────────
 function openItemModalWithBase(itemId) {
   openItemModal(itemId);
   if (currentBase === 'all') return;
-  // Pré-sélectionner la base dans la modal
   setTimeout(function() {
     var groups = document.querySelectorAll('#option-form .option-group');
-    groups.forEach(function(group) {
-      var lbl = group.querySelector('.option-label');
+    groups.forEach(function(g) {
+      var lbl = g.querySelector('.option-label');
       if (lbl && lbl.textContent.trim().indexOf('Base') === 0) {
-        var sel = group.querySelector('select');
+        var sel = g.querySelector('select');
         if (sel) {
           for (var i = 0; i < sel.options.length; i++) {
             if (sel.options[i].value === currentBase) {
@@ -215,6 +279,7 @@ function openItemModalWithBase(itemId) {
   }, 60);
 }
 
+// ── Onglets catégories ────────────────────────────────────
 function buildTabs() {
   var el = document.getElementById('menuTabs');
   if (!el) return;
@@ -224,9 +289,8 @@ function buildTabs() {
   el.querySelectorAll('.menu-tab').forEach(function(btn) {
     btn.addEventListener('click', function() {
       currentCategory = btn.dataset.cat;
-      currentSize = 'all';
-      currentBase = 'all';
-      el.querySelectorAll('.menu-tab').forEach(function(b) { b.classList.remove('active'); });
+      currentSerie = 'all'; currentSize = 'all'; currentBase = 'all';
+      el.querySelectorAll('.menu-tab').forEach(function(b){ b.classList.remove('active'); });
       btn.classList.add('active');
       var wrap = document.getElementById('pizzaFiltersWrap');
       if (wrap) wrap.classList.toggle('visible', currentCategory === 'pizzas');
@@ -236,37 +300,61 @@ function buildTabs() {
   });
 }
 
+// ── Filtres pizza ─────────────────────────────────────────
 function buildPizzaFilters() {
   var wrap = document.getElementById('pizzaFiltersWrap');
   if (!wrap) return;
   if (currentCategory === 'pizzas') wrap.classList.add('visible');
 
+  wrap.querySelectorAll('.serie-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      currentSerie = btn.dataset.serie;
+      wrap.querySelectorAll('.serie-btn').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      updateSerieInfo();
+      renderMenu();
+    });
+  });
   wrap.querySelectorAll('.size-btn').forEach(function(btn) {
     btn.addEventListener('click', function() {
       currentSize = btn.dataset.size;
-      wrap.querySelectorAll('.size-btn').forEach(function(b) { b.classList.remove('active'); });
+      wrap.querySelectorAll('.size-btn').forEach(function(b){ b.classList.remove('active'); });
       btn.classList.add('active');
       renderMenu();
     });
   });
-
   wrap.querySelectorAll('.base-btn').forEach(function(btn) {
     btn.addEventListener('click', function() {
       currentBase = btn.dataset.base;
-      wrap.querySelectorAll('.base-btn').forEach(function(b) { b.classList.remove('active'); });
+      wrap.querySelectorAll('.base-btn').forEach(function(b){ b.classList.remove('active'); });
       btn.classList.add('active');
       renderMenu();
     });
   });
+}
+
+function updateSerieInfo() {
+  var infoEl = document.getElementById('seriePriceInfo');
+  if (!infoEl) return;
+  if (currentSerie === 'all') { infoEl.style.display = 'none'; return; }
+  var s = APK_MENU.pizzaSeries && APK_MENU.pizzaSeries.find(function(x){ return x.id === currentSerie; });
+  if (s) {
+    infoEl.textContent = s.label + ' — ' + s.prices;
+    infoEl.style.display = 'block';
+  }
 }
 
 function resetFilters() {
   var wrap = document.getElementById('pizzaFiltersWrap');
   if (!wrap) return;
-  wrap.querySelectorAll('.size-btn').forEach(function(b) { b.classList.toggle('active', b.dataset.size === 'all'); });
-  wrap.querySelectorAll('.base-btn').forEach(function(b) { b.classList.toggle('active', b.dataset.base === 'all'); });
+  wrap.querySelectorAll('.serie-btn').forEach(function(b){ b.classList.toggle('active', b.dataset.serie === 'all'); });
+  wrap.querySelectorAll('.size-btn').forEach(function(b){ b.classList.toggle('active', b.dataset.size === 'all'); });
+  wrap.querySelectorAll('.base-btn').forEach(function(b){ b.classList.toggle('active', b.dataset.base === 'all'); });
+  var infoEl = document.getElementById('seriePriceInfo');
+  if (infoEl) infoEl.style.display = 'none';
 }
 
+// ── Bandeau promos ────────────────────────────────────────
 function buildPromos() {
   var track = document.getElementById('promosTrack');
   if (!track) return;
@@ -278,7 +366,7 @@ function buildPromos() {
 
 function initFromHash() {
   var hash = window.location.hash.replace('#', '');
-  if (hash && APK_MENU.categories.find(function(c) { return c.id === hash; })) {
+  if (hash && APK_MENU.categories.find(function(c){ return c.id === hash; })) {
     currentCategory = hash;
   }
 }
