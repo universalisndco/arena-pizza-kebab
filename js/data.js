@@ -41,7 +41,7 @@ const APK_MENU = {
         choices: ["Base Tomate", "Base Crème Fraîche", "Base Spéciale"]
       }
     ] },
-    { id:"pizza-4fromages-junior",   category:"pizzas", name:"4 Fromages",     size:"Junior", description:"Mozzarella, cheddar, raclette, chèvre",                                                                       price:10.00, image:"https://images.unsplash.com/photo-1548365328-8b849c9d7e8d?w=600&q=85", badge:"Populaire",  options:[
+    { id:"pizza-4fromages-junior",   category:"pizzas", name:"4 Fromages",     size:"Junior", description:"Mozzarella, cheddar, raclette, chèvre",                                                                       price:10.00, image:"https://assets.afcdn.com/recipe/20200506/110673_w1024h768c1cx3120cy2080cxt0cyt0cxb6240cyb4160.webp", badge:"Populaire",  options:[
       {
         label: "Base",
         type: "select",
@@ -49,7 +49,7 @@ const APK_MENU = {
         choices: ["Base Tomate", "Base Crème Fraîche", "Base Spéciale"]
       }
     ] },
-    { id:"pizza-4fromages-senior",   category:"pizzas", name:"4 Fromages",     size:"Senior", description:"Mozzarella, cheddar, raclette, chèvre",                                                                       price:13.00, image:"https://images.unsplash.com/photo-1548365328-8b849c9d7e8d?w=600&q=85", badge:null,         options:[
+    { id:"pizza-4fromages-senior",   category:"pizzas", name:"4 Fromages",     size:"Senior", description:"Mozzarella, cheddar, raclette, chèvre",                                                                       price:13.00, image:"https://assets.afcdn.com/recipe/20200506/110673_w1024h768c1cx3120cy2080cxt0cyt0cxb6240cyb4160.webp", badge:null,         options:[
       {
         label: "Base",
         type: "select",
@@ -57,7 +57,7 @@ const APK_MENU = {
         choices: ["Base Tomate", "Base Crème Fraîche", "Base Spéciale"]
       }
     ] },
-    { id:"pizza-4fromages-mega",     category:"pizzas", name:"4 Fromages",     size:"Mega",   description:"Mozzarella, cheddar, raclette, chèvre",                                                                       price:17.00, image:"https://images.unsplash.com/photo-1548365328-8b849c9d7e8d?w=600&q=85", badge:null,         options:[
+    { id:"pizza-4fromages-mega",     category:"pizzas", name:"4 Fromages",     size:"Mega",   description:"Mozzarella, cheddar, raclette, chèvre",                                                                       price:17.00, image:"https://assets.afcdn.com/recipe/20200506/110673_w1024h768c1cx3120cy2080cxt0cyt0cxb6240cyb4160.webp", badge:null,         options:[
       {
         label: "Base",
         type: "select",
@@ -65,7 +65,7 @@ const APK_MENU = {
         choices: ["Base Tomate", "Base Crème Fraîche", "Base Spéciale"]
       }
     ] },
-    { id:"pizza-kebab-junior",       category:"pizzas", name:"Pizza Kebab",    size:"Junior", description:"Sauce blanche, viande kebab, oignons, poivrons, mozzarella",                                                  price:11.00, image:"https://images.unsplash.com/photo-1552539618-7eec9b4d1796?w=600&q=85", badge:"Best-seller", options:[
+    { id:"pizza-kebab-junior",       category:"pizzas", name:"Pizza Kebab",    size:"Junior", description:"Sauce blanche, viande kebab, oignons, poivrons, mozzarella",                                                  price:11.00, image:"https://www.delicha.fr/wp-content/uploads/2025/11/pizza-kebab-recette.jpeg", badge:"Best-seller", options:[
       {
         label: "Base",
         type: "select",
@@ -73,7 +73,7 @@ const APK_MENU = {
         choices: ["Base Tomate", "Base Crème Fraîche", "Base Spéciale"]
       }
     ] },
-    { id:"pizza-kebab-senior",       category:"pizzas", name:"Pizza Kebab",    size:"Senior", description:"Sauce blanche, viande kebab, oignons, poivrons, mozzarella",                                                  price:14.00, image:"https://images.unsplash.com/photo-1552539618-7eec9b4d1796?w=600&q=85", badge:null,         options:[
+    { id:"pizza-kebab-senior",       category:"pizzas", name:"Pizza Kebab",    size:"Senior", description:"Sauce blanche, viande kebab, oignons, poivrons, mozzarella",                                                  price:14.00, image:"https://www.delicha.fr/wp-content/uploads/2025/11/pizza-kebab-recette.jpeg", badge:null,         options:[
       {
         label: "Base",
         type: "select",
@@ -81,7 +81,7 @@ const APK_MENU = {
         choices: ["Base Tomate", "Base Crème Fraîche", "Base Spéciale"]
       }
     ] },
-    { id:"pizza-kebab-mega",         category:"pizzas", name:"Pizza Kebab",    size:"Mega",   description:"Sauce blanche, viande kebab, oignons, poivrons, mozzarella",                                                  price:18.00, image:"https://images.unsplash.com/photo-1552539618-7eec9b4d1796?w=600&q=85", badge:null,         options:[
+    { id:"pizza-kebab-mega",         category:"pizzas", name:"Pizza Kebab",    size:"Mega",   description:"Sauce blanche, viande kebab, oignons, poivrons, mozzarella",                                                  price:18.00, image:"https://www.delicha.fr/wp-content/uploads/2025/11/pizza-kebab-recette.jpeg", badge:null,         options:[
       {
         label: "Base",
         type: "select",
@@ -89,7 +89,7 @@ const APK_MENU = {
         choices: ["Base Tomate", "Base Crème Fraîche", "Base Spéciale"]
       }
     ] },
-    { id:"pizza-poulet-junior",      category:"pizzas", name:"Pizza Poulet",   size:"Junior", description:"Sauce tomate, poulet grillé, champignons, mozzarella",                                                        price:11.00, image:"https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=600&q=85", badge:null,         options:[
+    { id:"pizza-poulet-junior",      category:"pizzas", name:"Pizza Poulet",   size:"Junior", description:"Sauce tomate, poulet grillé, champignons, mozzarella",                                                        price:11.00, image:"https://www.delicha.fr/wp-content/uploads/2025/11/recette-pizza-poulet-creme-fraiche-1200x675.jpeg", badge:null,         options:[
       {
         label: "Base",
         type: "select",
@@ -97,7 +97,7 @@ const APK_MENU = {
         choices: ["Base Tomate", "Base Crème Fraîche", "Base Spéciale"]
       }
     ] },
-    { id:"pizza-poulet-senior",      category:"pizzas", name:"Pizza Poulet",   size:"Senior", description:"Sauce tomate, poulet grillé, champignons, mozzarella",                                                        price:14.00, image:"https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=600&q=85", badge:null,         options:[
+    { id:"pizza-poulet-senior",      category:"pizzas", name:"Pizza Poulet",   size:"Senior", description:"Sauce tomate, poulet grillé, champignons, mozzarella",                                                        price:14.00, image:"https://www.delicha.fr/wp-content/uploads/2025/11/recette-pizza-poulet-creme-fraiche-1200x675.jpeg", badge:null,         options:[
       {
         label: "Base",
         type: "select",
@@ -105,7 +105,7 @@ const APK_MENU = {
         choices: ["Base Tomate", "Base Crème Fraîche", "Base Spéciale"]
       }
     ] },
-    { id:"pizza-poulet-mega",        category:"pizzas", name:"Pizza Poulet",   size:"Mega",   description:"Sauce tomate, poulet grillé, champignons, mozzarella",                                                        price:18.00, image:"https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=600&q=85", badge:null,         options:[
+    { id:"pizza-poulet-mega",        category:"pizzas", name:"Pizza Poulet",   size:"Mega",   description:"Sauce tomate, poulet grillé, champignons, mozzarella",                                                        price:18.00, image:"https://www.delicha.fr/wp-content/uploads/2025/11/recette-pizza-poulet-creme-fraiche-1200x675.jpeg", badge:null,         options:[
       {
         label: "Base",
         type: "select",
@@ -141,7 +141,7 @@ const APK_MENU = {
     // TACOS
     {
       id:"tacos-1viande", category:"tacos", name:"Tacos 1 Viande", description:"Supplément frite +1€ · Supplément boisson +1€", price:8.00,
-      image:"https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600&q=85", badge:null,
+      image:"https://www.crousti-tacos.fr/data/uploads/2022/02/origine-tacos.jpg", badge:null,
       options:[
         { label:"Viande", type:"select", required:true, choices:["Steak Haché","Poulet","Tenders","Merguez","Chorizo","Nugett","Cordon Bleu","Kebab","Omelette","Poulet Tandoori","Poulet Curry"] },
         { label:"Suppléments", type:"multi", required:false, choices:[{name:"Frite",price:1},{name:"Boisson",price:1},{name:"Viande supplémentaire",price:2}] }
@@ -149,7 +149,7 @@ const APK_MENU = {
     },
     {
       id:"tacos-2viandes", category:"tacos", name:"Tacos 2 Viandes", description:"Supplément frite +1€ · Supplément boisson +1€", price:10.00,
-      image:"https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600&q=85", badge:"Populaire",
+      image:"https://www.crousti-tacos.fr/data/uploads/2022/02/origine-tacos.jpg", badge:"Populaire",
       options:[
         { label:"Viande 1", type:"select", required:true, choices:["Steak Haché","Poulet","Tenders","Merguez","Chorizo","Nugett","Cordon Bleu","Kebab","Omelette","Poulet Tandoori","Poulet Curry"] },
         { label:"Viande 2", type:"select", required:true, choices:["Steak Haché","Poulet","Tenders","Merguez","Chorizo","Nugett","Cordon Bleu","Kebab","Omelette","Poulet Tandoori","Poulet Curry"] },
@@ -158,7 +158,7 @@ const APK_MENU = {
     },
     {
       id:"tacos-3viandes", category:"tacos", name:"Tacos 3 Viandes", description:"Supplément frite +1€ · Supplément boisson +1€", price:12.00,
-      image:"https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600&q=85", badge:"Maxi",
+      image:"https://www.crousti-tacos.fr/data/uploads/2022/02/origine-tacos.jpg", badge:"Maxi",
       options:[
         { label:"Viande 1", type:"select", required:true, choices:["Steak Haché","Poulet","Tenders","Merguez","Chorizo","Nugett","Cordon Bleu","Kebab","Omelette","Poulet Tandoori","Poulet Curry"] },
         { label:"Viande 2", type:"select", required:true, choices:["Steak Haché","Poulet","Tenders","Merguez","Chorizo","Nugett","Cordon Bleu","Kebab","Omelette","Poulet Tandoori","Poulet Curry"] },
@@ -168,7 +168,7 @@ const APK_MENU = {
     },
     {
       id:"tacos-bowl", category:"tacos", name:"Tacos Bowl", description:"2 viandes au choix · Supplément boisson +1€", price:10.00,
-      image:"https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600&q=85", badge:"Nouveau",
+      image:"https://zotlivraison.com/assets/img/items/17162929422C5QPCBXXF.jpg", badge:"Nouveau",
       options:[
         { label:"Viande 1", type:"select", required:true, choices:["Steak Haché","Poulet","Tenders","Merguez","Chorizo","Nugett","Cordon Bleu","Kebab","Omelette","Poulet Tandoori","Poulet Curry"] },
         { label:"Viande 2", type:"select", required:true, choices:["Steak Haché","Poulet","Tenders","Merguez","Chorizo","Nugett","Cordon Bleu","Kebab","Omelette","Poulet Tandoori","Poulet Curry"] },
@@ -177,7 +177,7 @@ const APK_MENU = {
     },
     {
       id:"defsoce", category:"tacos", name:"Defsoce", description:"Viande Hachée OU Poulet OU Kebab OU Merguez + Boisson · Supplément viande +2€", price:12.00,
-      image:"https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600&q=85", badge:null,
+      image:"https://pinospizza51.fr/wp-content/uploads/2022/10/life.jpg", badge:null,
       options:[
         { label:"Viande", type:"select", required:true, choices:["Viande Hachée","Poulet","Kebab","Merguez"] },
         { label:"Suppléments", type:"multi", required:false, choices:[{name:"Viande supplémentaire",price:2}] }
@@ -187,19 +187,19 @@ const APK_MENU = {
     // ROLLS ARENA
     {
       id:"roll-bourssin", category:"rolls", name:"Roll Bourssin", description:"Galette, Tenders, Bourssin, Oeuf — servi avec frite + boisson", price:13.00,
-      image:"https://images.unsplash.com/photo-1542345812-d98b5cd6cf98?w=600&q=85", badge:null,
+      image:"https://cdn.cuisine-etudiant.fr/2025-07/wrap-au-poulet-froid-12492-1200.webp", badge:null,
       options:[{ label:"Supplément fromage (+1€)", type:"multi", required:false, choices:[{name:"Raclette",price:1},{name:"Reblochon",price:1},{name:"Chèvre",price:1},{name:"Cheddar",price:1}] }]
     },
     {
       id:"roll-queen-arena", category:"rolls", name:"Queen Arena", description:"Galette, Steak, Cheddar, Oeuf — servi avec frite + boisson", price:13.00,
-      image:"https://images.unsplash.com/photo-1542345812-d98b5cd6cf98?w=600&q=85", badge:"Signature",
+      image:"https://cdn.cuisine-etudiant.fr/2025-07/wrap-au-poulet-froid-12492-1200.webp", badge:"Signature",
       options:[{ label:"Supplément fromage (+1€)", type:"multi", required:false, choices:[{name:"Raclette",price:1},{name:"Reblochon",price:1},{name:"Chèvre",price:1},{name:"Cheddar",price:1}] }]
     },
 
     // KROUSTY APK
-    { id:"krousty-apk",              category:"krousty", name:"Krousty APK",          description:"Riz Blanc, Sauce Blanche Maison, Sauce Thaï Maison, Oignon Frits, Ciboulette — avec Boisson 33cl",                                                                              price:10.00, image:"https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=600&q=85", badge:"Nouveau", options:[] },
-    { id:"krousty-chicken-curry",    category:"krousty", name:"Riz Chicken Curry",    description:"Chicken, Crème de Curry, Riz Blanc, Sauce Blanche Maison, Sauce Thaï Maison, Oignon Frits, Ciboulette — avec Boisson 33cl",                                                      price:12.00, image:"https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=600&q=85", badge:"Nouveau", options:[] },
-    { id:"krousty-chicken-tandoori", category:"krousty", name:"Riz Chicken Tandoori", description:"Chicken, Marinade Tandoori, Riz Blanc, Sauce Blanche Maison, Sauce Thaï Maison, Oignon Frits, Ciboulette — avec Boisson 33cl",                                                   price:12.00, image:"https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=600&q=85", badge:"Nouveau", options:[] },
+    { id:"krousty-apk",              category:"krousty", name:"Krousty APK",          description:"Riz Blanc, Sauce Blanche Maison, Sauce Thaï Maison, Oignon Frits, Ciboulette — avec Boisson 33cl",                                                                              price:10.00, image:"https://cdn-www.konbini.com/files/2024/08/tasty-2.jpg?width=3840&quality=75&format=webp", badge:"Nouveau", options:[] },
+    { id:"krousty-chicken-curry",    category:"krousty", name:"Riz Chicken Curry",    description:"Chicken, Crème de Curry, Riz Blanc, Sauce Blanche Maison, Sauce Thaï Maison, Oignon Frits, Ciboulette — avec Boisson 33cl",                                                      price:12.00, image:"https://cdn-www.konbini.com/files/2024/08/tasty-2.jpg?width=3840&quality=75&format=webp", badge:"Nouveau", options:[] },
+    { id:"krousty-chicken-tandoori", category:"krousty", name:"Riz Chicken Tandoori", description:"Chicken, Marinade Tandoori, Riz Blanc, Sauce Blanche Maison, Sauce Thaï Maison, Oignon Frits, Ciboulette — avec Boisson 33cl",                                                   price:12.00, image:"https://cdn-www.konbini.com/files/2024/08/tasty-2.jpg?width=3840&quality=75&format=webp", badge:"Nouveau", options:[] },
 
     // PANINI
     {
@@ -216,11 +216,11 @@ const APK_MENU = {
     },
 
     // KIDS
-    { id:"kids-menu", category:"kids", name:"Kids Menu", description:"5 Nuggets + 1 Jus", price:6.00, image:"https://images.unsplash.com/photo-1562802378-063ec186a863?w=600&q=85", badge:null, options:[] },
+    { id:"kids-menu", category:"kids", name:"Kids Menu", description:"5 Nuggets + 1 Jus", price:6.00, image:"https://thumbs.dreamstime.com/b/nuggets-de-poulet-et-frites-jus-vue-dessus-repas-du-d%C3%A9jeuner-d-une-plaque-en-bois-noir-sur-fond-sombre-173517848.jpg", badge:null, options:[] },
 
     // DESSERTS
     { id:"tiramisu",       category:"desserts", name:"Tiramisu",          description:"Tiramisu maison, recette traditionnelle",          price:4.00,  image:"https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=600&q=85", badge:null,     options:[] },
-    { id:"tarte-daim",     category:"desserts", name:"Tarte au Daim",     description:"Tarte croustillante au caramel Daim",              price:3.50,  image:"https://images.unsplash.com/photo-1486427944299-d1955d23e34d?w=600&q=85", badge:null,     options:[] },
+    { id:"tarte-daim",     category:"desserts", name:"Tarte au Daim",     description:"Tarte croustillante au caramel Daim",              price:3.50,  image:"https://journaldesseniors.20minutes.fr/wp-content/uploads/2025/11/sQe8nDxVEY-1764190436.jpeg", badge:null,     options:[] },
     { id:"hagen-100",      category:"desserts", name:"Häagen-Dazs 100ml", description:"Glace premium individuelle",                       price:4.50,  image:"https://images.unsplash.com/photo-1501443762994-82bd5dace89a?w=600&q=85", badge:null,     options:[] },
     { id:"hagen-500",      category:"desserts", name:"Häagen-Dazs 500ml", description:"Glace premium grand format — à partager",          price:9.00,  image:"https://images.unsplash.com/photo-1501443762994-82bd5dace89a?w=600&q=85", badge:"Famille", options:[] },
 
@@ -232,7 +232,7 @@ const APK_MENU = {
     },
     {
       id:"bouteille", category:"boissons", name:"Bouteille 1.5L", description:"Grande bouteille 1.5L", price:3.50,
-      image:"https://images.unsplash.com/photo-1543253687-c931c8e01820?w=600&q=85", badge:null,
+      image:"https://raja.scene7.com/is/image/Raja/products/soda-coca-cola-z-ro-sucres-bouteille-lot-24-x-50-cl_261910.jpg?image=bfrB261910BA$default$&hei=600&wid=600&fmt=jpg&qlt=85,0&resMode=sharp2&op_usm=1.75,0.3,2,0", badge:null,
       options:[{ label:"Choix", type:"select", required:true, choices:["Coca-Cola","Coca-Cola Zero","Fanta Orange","Sprite","Eau"] }]
     }
   ],
