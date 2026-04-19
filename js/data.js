@@ -1899,30 +1899,30 @@ const APK_MENU = {
     { id:"krousty-apk", category:"krousty", name:"Krousty APK", description:"Riz Blanc, Sauce Blanche Maison, Sauce Thaï Maison, Oignon Frits, Ciboulette — avec Boisson 33cl", price:10.00, image:"https://cdn-www.konbini.com/files/2024/08/tasty-2.jpg?width=3840&quality=75&format=webp", badge:"Nouveau", options:[] },
     { id:"krousty-chicken-curry", category:"krousty", name:"Riz Chicken Curry", description:"Chicken, Crème de Curry, Riz Blanc, Sauce Blanche, Sauce Thaï, Oignon Frits, Ciboulette — avec Boisson 33cl", price:12.00, image:"https://cdn-www.konbini.com/files/2024/08/tasty-2.jpg?width=3840&quality=75&format=webp", badge:"Nouveau", options:[] },
     { id:"krousty-chicken-tandoori", category:"krousty", name:"Riz Chicken Tandoori", description:"Chicken Marinade Tandoori, Riz Blanc, Sauce Blanche, Sauce Thaï, Oignon Frits, Ciboulette — avec Boisson 33cl", price:12.00, image:"https://cdn-www.konbini.com/files/2024/08/tasty-2.jpg?width=3840&quality=75&format=webp", badge:"Nouveau", options:[] },
-    { id:"panini-menu", category:"panini", name:"Panini Menu", description:"Au choix : Poulet, Kebab, 4 Fromage, Jambon, Viande Hachée", price:8.00, image:"https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=600&q=85", badge:null, options:[
+    { id:"panini-menu", category:"panini", name:"Panini Menu", description:"Au choix : Poulet, Kebab, 4 Fromage, Jambon, Viande Hachée", price:8.00, image:"https://img.cuisineaz.com/660x495/2015/06/10/i72680-panini-au-thon-tomate-et-avocat.jpeg", badge:null, options:[
       { label: "Garniture", type: "select", required: true, choices: ["Poulet","Kebab","4 Fromage","Jambon","Viande Hachée"] }
     ] },
-    { id:"fc-tenders5", category:"fried-chicken", name:"Menu 1 Pers. — Tenders x5", description:"5 Tenders + 1 portion de frites + 1 boisson 33cl", price:9.90, image:"https://images.unsplash.com/photo-1562802378-063ec186a863?w=600&q=85", badge:null, options:[
+    { id:"fc-tenders5", category:"fried-chicken", name:"Menu 1 Pers. — Tenders x5", description:"5 Tenders + 1 portion de frites + 1 boisson 33cl", price:9.90, image:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQXIC2KEYs6YvIqLApS4xCMDI4Rxc5jHK2C5A&s", badge:null, options:[
       { label: "Sauce", type: "select", required: true,
         choices: ["Barbecue","Biggy","Blanche","Mayo","Ketchup","Andalouse","Samouraï","Harissa","Brézil","Chili Thaï","Algérienne"] }
     ] },
-    { id:"fc-wings8", category:"fried-chicken", name:"Menu 1 Pers. — Wings x8", description:"8 Wings + 1 portion de frites + 1 boisson 33cl", price:9.90, image:"https://images.unsplash.com/photo-1527477396000-e27163b481c2?w=600&q=85", badge:null, options:[
+    { id:"fc-wings8", category:"fried-chicken", name:"Menu 1 Pers. — Wings x8", description:"8 Wings + 1 portion de frites + 1 boisson 33cl", price:9.90, image:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQXIC2KEYs6YvIqLApS4xCMDI4Rxc5jHK2C5A&s", badge:null, options:[
       { label: "Sauce", type: "select", required: true,
         choices: ["Barbecue","Biggy","Blanche","Mayo","Ketchup","Andalouse","Samouraï","Harissa","Brézil","Chili Thaï","Algérienne"] }
     ] },
-    { id:"fc-tenders10", category:"fried-chicken", name:"Menu 2 Pers. — Tenders x10", description:"10 Tenders + 2 portions de frites + 2 boissons 33cl", price:19.00, image:"https://images.unsplash.com/photo-1562802378-063ec186a863?w=600&q=85", badge:"Duo", options:[
+    { id:"fc-tenders10", category:"fried-chicken", name:"Menu 2 Pers. — Tenders x10", description:"10 Tenders + 2 portions de frites + 2 boissons 33cl", price:19.00, image:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQXIC2KEYs6YvIqLApS4xCMDI4Rxc5jHK2C5A&s", badge:"Duo", options:[
       { label: "Sauce", type: "select", required: true,
         choices: ["Barbecue","Biggy","Blanche","Mayo","Ketchup","Andalouse","Samouraï","Harissa","Brézil","Chili Thaï","Algérienne"] }
     ] },
-    { id:"fc-wings16", category:"fried-chicken", name:"Menu 2 Pers. — Wings x16", description:"16 Wings + 2 portions de frites + 2 boissons 33cl", price:19.00, image:"https://images.unsplash.com/photo-1527477396000-e27163b481c2?w=600&q=85", badge:"Duo", options:[
+    { id:"fc-wings16", category:"fried-chicken", name:"Menu 2 Pers. — Wings x16", description:"16 Wings + 2 portions de frites + 2 boissons 33cl", price:19.00, image:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQXIC2KEYs6YvIqLApS4xCMDI4Rxc5jHK2C5A&s", badge:"Duo", options:[
       { label: "Sauce", type: "select", required: true,
         choices: ["Barbecue","Biggy","Blanche","Mayo","Ketchup","Andalouse","Samouraï","Harissa","Brézil","Chili Thaï","Algérienne"] }
     ] },
-    { id:"fc-mix", category:"fried-chicken", name:"Menu 2 Pers. — Mix Tenders x7 + Wings x7", description:"7 Tenders + 7 Wings + 2 portions de frites + 2 boissons 33cl", price:19.00, image:"https://images.unsplash.com/photo-1562802378-063ec186a863?w=600&q=85", badge:"Duo", options:[
+    { id:"fc-mix", category:"fried-chicken", name:"Menu 2 Pers. — Mix Tenders x7 + Wings x7", description:"7 Tenders + 7 Wings + 2 portions de frites + 2 boissons 33cl", price:19.00, image:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQXIC2KEYs6YvIqLApS4xCMDI4Rxc5jHK2C5A&s", badge:"Duo", options:[
       { label: "Sauce", type: "select", required: true,
         choices: ["Barbecue","Biggy","Blanche","Mayo","Ketchup","Andalouse","Samouraï","Harissa","Brézil","Chili Thaï","Algérienne"] }
     ] },
-    { id:"sw-kebab", category:"sandwichs", name:"Kebab", description:"Pain, viande kebab, salade, tomate, oignon — Maxi +2€ · Pain ou Durum", price:7.00, image:"https://images.unsplash.com/photo-1544025162-d76538b4ca4b?w=600&q=85", badge:null, options:[
+    { id:"sw-kebab", category:"sandwichs", name:"Kebab", description:"Pain, viande kebab, salade, tomate, oignon — Maxi +2€ · Pain ou Durum", price:7.00, image:"https://adc-dev-images-recipes.s3.eu-west-1.amazonaws.com/shutterstock_213726613.jpg", badge:null, options:[
       { label: "Format", type: "select", required: true,
         choices: ["Normal", "Maxi (+2,00€)", "Durum"] },
       { label: "Suppléments", type: "multi", required: false,
@@ -1932,7 +1932,7 @@ const APK_MENU = {
         ]
       }
     ] },
-    { id:"sw-americain", category:"sandwichs", name:"Américain", description:"Steak haché (90g), cheddar, salade, tomate, oignon", price:7.00, image:"https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=600&q=85", badge:null, options:[
+    { id:"sw-americain", category:"sandwichs", name:"Américain", description:"Steak haché (90g), cheddar, salade, tomate, oignon", price:7.00, image:"https://adc-dev-images-recipes.s3.eu-west-1.amazonaws.com/shutterstock_213726613.jpg", badge:null, options:[
       { label: "Suppléments", type: "multi", required: false,
         choices: [
           { name: "Boisson 33cl", price: 1.00 },
@@ -1940,7 +1940,7 @@ const APK_MENU = {
         ]
       }
     ] },
-    { id:"sw-chicken-tandoori", category:"sandwichs", name:"Chicken Tandoori", description:"Poulet tandoori, cheddar, salade, tomate, oignon", price:8.00, image:"https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=600&q=85", badge:null, options:[
+    { id:"sw-chicken-tandoori", category:"sandwichs", name:"Chicken Tandoori", description:"Poulet tandoori, cheddar, salade, tomate, oignon", price:8.00, image:"https://adc-dev-images-recipes.s3.eu-west-1.amazonaws.com/shutterstock_213726613.jpg", badge:null, options:[
       { label: "Suppléments", type: "multi", required: false,
         choices: [
           { name: "Boisson 33cl", price: 1.00 },
@@ -1948,7 +1948,7 @@ const APK_MENU = {
         ]
       }
     ] },
-    { id:"sw-chicken-cheese-curry", category:"sandwichs", name:"Chicken Cheese Curry", description:"Poulet curry, cheddar, salade, tomate, oignon", price:8.00, image:"https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=600&q=85", badge:null, options:[
+    { id:"sw-chicken-cheese-curry", category:"sandwichs", name:"Chicken Cheese Curry", description:"Poulet curry, cheddar, salade, tomate, oignon", price:8.00, image:"https://adc-dev-images-recipes.s3.eu-west-1.amazonaws.com/shutterstock_213726613.jpg", badge:null, options:[
       { label: "Suppléments", type: "multi", required: false,
         choices: [
           { name: "Boisson 33cl", price: 1.00 },
@@ -1956,7 +1956,7 @@ const APK_MENU = {
         ]
       }
     ] },
-    { id:"sw-big-americain", category:"sandwichs", name:"Big Américain", description:"2 steaks hachés (90g), 2 cheddars, oeuf, salade, tomate, oignon", price:9.00, image:"https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=600&q=85", badge:"Maxi", options:[
+    { id:"sw-big-americain", category:"sandwichs", name:"Big Américain", description:"2 steaks hachés (90g), 2 cheddars, oeuf, salade, tomate, oignon", price:9.00, image:"https://adc-dev-images-recipes.s3.eu-west-1.amazonaws.com/shutterstock_213726613.jpg", badge:"Maxi", options:[
       { label: "Suppléments", type: "multi", required: false,
         choices: [
           { name: "Boisson 33cl", price: 1.00 },
