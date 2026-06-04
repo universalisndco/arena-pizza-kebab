@@ -289,7 +289,11 @@ ul { list-style: none; }
 }
 .hero-stats .container {
   display: flex;
-  gap: 40px;
+  flex-direction: row !important;
+  flex-wrap: wrap;
+  gap: 32px;
+  flex: initial !important;
+  justify-content: flex-start;
 }
 .hero-stat {
   display: flex;
