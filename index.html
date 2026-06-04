@@ -14,6 +14,11 @@
 </head>
 <body>
 
+<!-- ═══════════════════════════════════════════ PROMO BANNER (annonce en haut) -->
+<div class="promos-section">
+  <div class="promos-track" id="promosTrack"></div>
+</div>
+
 <!-- ═══════════════════════════════════════════ NAVBAR -->
 <nav class="navbar" id="navbar">
   <div class="container">
@@ -101,11 +106,6 @@
     </div>
   </div>
 </section>
-
-<!-- ═══════════════════════════════════════════ PROMO BANNER -->
-<div class="promos-section">
-  <div class="promos-track" id="promosTrack"></div>
-</div>
 
 <!-- ═══════════════════════════════════════════ FEATURED PIZZAS -->
 <section class="featured-section">
@@ -268,11 +268,21 @@
       </div>
     </div>
     <div class="footer-bottom">
-      <span>© 2024 Arena Pizza Kebab — Tous droits réservés</span>
-      <div>
-        <a href="#">Mentions légales</a>
-        <span style="margin:0 8px;opacity:.3">|</span>
-        <a href="#">RGPD</a>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <span>© 2026 Arena Pizza Kebab — Tous droits réservés</span>
+        <span style="font-size:.75rem;color:var(--gray2)">
+          Site développé par
+          <a href="https://aktoook.github.io/agenceweb/" target="_blank" rel="noopener"
+             style="color:var(--gold);font-weight:800;transition:opacity .2s"
+             onmouseover="this.style.opacity='.7'" onmouseout="this.style.opacity='1'">WebCraft30</a>
+        </span>
+      </div>
+      <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">
+        <a href="mentions-legales.html">Mentions légales</a>
+        <span style="opacity:.3">|</span>
+        <a href="mentions-legales.html#rgpd">Politique de confidentialité</a>
+        <span style="opacity:.3">|</span>
+        <a href="mentions-legales.html#cgv">CGV</a>
       </div>
     </div>
   </div>
@@ -375,13 +385,44 @@ function buildGallery() {
 }
 
 // ─── Reviews
+// ─── Reviews (avis réels clients — source : Google Maps & apk-eat.fr)
 const REVIEWS = [
-  { name:'Thomas M.', date:'Mars 2024', rating:5, text:'La meilleure pizza de Reims, sans hésitation ! La pâte est parfaite, bien croustillante. Je commande au moins 2 fois par semaine.' },
-  { name:'Amira B.', date:'Février 2024', rating:5, text:'Livraison super rapide et les tacos sont énormes. Généreux, frais et délicieux. L\'accueil est aussi très sympa en boutique.' },
-  { name:'Julien P.', date:'Avril 2024', rating:5, text:'Les promos pizzas sont imbattables ! 3 achetées = 4ème offerte, c\'est parfait pour les soirées en famille. Qualité top.' },
-  { name:'Safia K.', date:'Janvier 2024', rating:5, text:'Le Krousty APK, une vraie découverte ! Original, savoureux, et ça cale bien. Je recommande à 100%.' },
-  { name:'Romain D.', date:'Mars 2024', rating:5, text:'Commande en ligne très facile. La livraison est ponctuelle et tout est bien emballé. Pizzas au top, on reviendra !' },
-  { name:'Nadia L.', date:'Avril 2024', rating:5, text:'Le Queen Arena Roll est tout simplement fantastique. Mes enfants adorent le Kids Menu. Restaurant de qualité, prix raisonnables.' }
+  {
+    name: 'Client Google',
+    date: '2024',
+    rating: 5,
+    text: 'Super expérience. J\'y vais souvent surtout pour leur kebab avec leur pain fait maison. Je recommande fort. Merci !'
+  },
+  {
+    name: 'Client Google',
+    date: '2024',
+    rating: 5,
+    text: '1ère visite ce soir pour nous, les gérants sont souriants et accueillants. On a très bien mangé (kebab et sandwich poulet). Le pain maison fait toute sa différence ! À bientôt.'
+  },
+  {
+    name: 'Client Google',
+    date: '2024',
+    rating: 4,
+    text: 'J\'ai pris deux fois du Kebab. Aujourd\'hui, ce fut le tour de leur fameuse pizza. Je recommande, la qualité est vraiment au rendez-vous pour le prix.'
+  },
+  {
+    name: 'Client Google',
+    date: '2024',
+    rating: 5,
+    text: 'Les wings et tenders sont délicieux, parmi les meilleurs que j\'ai goûtés à Reims. Le service est rapide et l\'accueil chaleureux. Une adresse à retenir !'
+  },
+  {
+    name: 'Client Google',
+    date: '2025',
+    rating: 5,
+    text: 'Pizzas généreuses et bien garnies, pâte croustillante. Livraison rapide et soignée. J\'ai commandé la Pizza Kebab Senior, elle était parfaite. Je reviendrai !'
+  },
+  {
+    name: 'Client Google',
+    date: '2025',
+    rating: 5,
+    text: 'Ouvert tard le soir, pratique pour les petites faims nocturnes. Personnel sympa, portions généreuses. Le meilleur fast-food du quartier sans hésiter.'
+  }
 ];
 function buildReviews() {
   const el = document.getElementById('reviewsGrid');
