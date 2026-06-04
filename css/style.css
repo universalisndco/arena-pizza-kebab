@@ -202,10 +202,12 @@ ul { list-style: none; }
   min-height: 100vh;
   position: relative;
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: stretch;
   overflow: hidden;
-  padding-top: var(--nav-h);
-  isolation: isolate;  /* empêche le z-index de déborder sur les sections suivantes */
+  padding-top: calc(var(--nav-h) + 46px);
+  padding-bottom: 80px;
+  isolation: isolate;
 }
 .hero-bg {
   position: absolute;
@@ -230,11 +232,15 @@ ul { list-style: none; }
 .hero .container {
   position: relative;
   z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex: 1;
 }
 .hero-stats {
-  position: absolute;
-  bottom: 48px; left: 0; right: 0;
+  position: relative;
   z-index: 2;
+  margin-top: 40px;
 }
 .hero-content {
   position: relative;
@@ -277,9 +283,9 @@ ul { list-style: none; }
 }
 .hero-actions { display: flex; gap: 16px; flex-wrap: wrap; }
 .hero-stats {
-  position: absolute;
-  bottom: 48px; left: 0; right: 0;
+  position: relative;
   z-index: 2;
+  margin-top: 40px;
 }
 .hero-stats .container {
   display: flex;
@@ -299,8 +305,15 @@ ul { list-style: none; }
 .hero-stat-label { font-size: .8rem; color: var(--gray); font-weight: 600; }
 
 /* ─── Promos Banner ──────────────────────────────────────────── */
-.promos-section { background: var(--red); padding: 0; overflow: hidden; }
-.promos-section.fixed-top { position: sticky; top: 0; z-index: 1001; }
+.promos-section {
+  background: var(--red);
+  padding: 0;
+  overflow: hidden;
+  position: sticky;
+  top: var(--nav-h);
+  z-index: 999;
+  width: 100%;
+}
 .promos-track {
   display: flex;
   animation: promoScroll 30s linear infinite;
@@ -1222,4 +1235,14 @@ ul { list-style: none; }
   .modal-item-header { flex-direction: column; }
   .modal-item-img { width: 100%; height: 160px; }
   .cart-item-img { width: 64px; height: 64px; }
+}
+
+/* ─── Hero Buttons (below stats) ─────────────────────────────── */
+.hero-actions-bottom {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 28px;
+  position: relative;
+  z-index: 2;
 }
