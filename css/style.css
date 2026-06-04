@@ -205,6 +205,7 @@ ul { list-style: none; }
   align-items: center;
   overflow: hidden;
   padding-top: var(--nav-h);
+  isolation: isolate;  /* empêche le z-index de déborder sur les sections suivantes */
 }
 .hero-bg {
   position: absolute;
@@ -223,8 +224,17 @@ ul { list-style: none; }
   position: absolute;
   inset: 0;
   background: linear-gradient(135deg, rgba(14,14,14,.92) 40%, rgba(212,43,43,.3) 100%);
-   pointer-events: none;  /* ← cette ligne manquait */
+  pointer-events: none;
   z-index: 1;
+}
+.hero .container {
+  position: relative;
+  z-index: 2;
+}
+.hero-stats {
+  position: absolute;
+  bottom: 48px; left: 0; right: 0;
+  z-index: 2;
 }
 .hero-content {
   position: relative;
@@ -290,6 +300,7 @@ ul { list-style: none; }
 
 /* ─── Promos Banner ──────────────────────────────────────────── */
 .promos-section { background: var(--red); padding: 0; overflow: hidden; }
+.promos-section.fixed-top { position: sticky; top: 0; z-index: 1001; }
 .promos-track {
   display: flex;
   animation: promoScroll 30s linear infinite;
