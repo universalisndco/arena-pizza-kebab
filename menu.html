@@ -131,6 +131,21 @@
 <script src="js/main.js"></script>
 <script>
 var currentCategory = 'pizzas';
+
+// ── Bannière horaires ──────────────────────────────────────
+(function() {
+  var status = getOrderingStatus();
+  if (status === 'closed' || status === 'call') {
+    var phone = APK_MENU && APK_MENU.info ? APK_MENU.info.phone1 : '09 83 39 82 20';
+    var msg = status === 'closed'
+      ? '⏰ Nous sommes fermés — Horaires : 11h00–13h15 et 18h00–22h15'
+      : '📞 Commandes en ligne terminées — Appelez le ' + phone;
+    var bar = document.createElement('div');
+    bar.style.cssText = 'background:var(--red);color:#fff;text-align:center;padding:12px 20px;font-weight:800;font-size:.88rem;position:sticky;top:0;z-index:1000';
+    bar.innerHTML = msg;
+    document.querySelector('.menu-section')?.prepend(bar);
+  }
+})();
 var currentSize     = 'all';
 var currentBase     = 'all';
 
