@@ -104,7 +104,7 @@
             </button>
           </div>
           <div style="margin-top:10px;font-size:.82rem;color:var(--gray);padding:10px;background:var(--dark4);border-radius:8px">
-            Livraison gratuite zone 1 (min. 15€) · Zone 2 min. 20€ · Zone 3 min. 25€
+            Livraison gratuite à partir de 15€ minimum
           </div>
         </div>
 
@@ -298,7 +298,10 @@ function renderSummary() {
     var opts  = '';
     if (item.selectedOptions) {
       var vals = Object.values(item.selectedOptions).filter(function(v){ return v; });
-      if (vals.length) opts = '<div style="color:var(--gray);font-size:.75rem;margin-top:2px">' + vals.join(' · ') + '</div>';
+      if (vals.length) opts += '<div style="color:var(--gray);font-size:.75rem;margin-top:2px">' + vals.join(' · ') + '</div>';
+    }
+    if (item.specialRequest) {
+      opts += '<div style="color:var(--gold);font-size:.72rem;margin-top:2px">📝 ' + item.specialRequest + '</div>';
     }
     html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:.85rem;gap:8px">'
           + '<div><span style="font-weight:800">' + (parseInt(item.qty)||1) + '×</span> ' + item.name + opts + '</div>'
@@ -367,6 +370,17 @@ function generateTicketText(o) {
 document.getElementById('btnConfirm').addEventListener('click', submitOrder);
 
 async function submitOrder() {
+  /* Vérification des horaires */
+  var hoursStatus = getOrderingStatus();
+  if (hoursStatus === 'closed') {
+    alert('⏰ Désolé, nous sommes fermés.\nHoraires de commande : 11h00–13h15 et 18h00–22h15.');
+    return;
+  }
+  if (hoursStatus === 'call') {
+    alert('📞 Les commandes en ligne se terminent.\nVeuillez appeler le ' + APK_MENU.info.phone1 + ' pour commander.');
+    return;
+  }
+
   /* Validation */
   var firstName = document.getElementById('firstName').value.trim();
   var lastName  = document.getElementById('lastName').value.trim();
