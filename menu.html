@@ -21,6 +21,26 @@
     .base-btn.active, .base-btn:hover { border-color:var(--red); color:#fff; }
     .base-btn.active { background:rgba(212,43,43,.1); }
     .pizza-base-badge { position:absolute; bottom:8px; left:8px; background:rgba(0,0,0,.75); backdrop-filter:blur(4px); padding:3px 10px; border-radius:20px; font-size:.68rem; font-weight:800; color:#fff; border:1px solid rgba(255,255,255,.15); }
+  /* Pizza section headers */
+  .pizza-serie-section { margin-bottom: 48px; }
+  .pizza-serie-header {
+    display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap;
+    margin-bottom: 18px; padding-bottom: 12px;
+    border-bottom: 2px solid rgba(245,166,35,.3);
+  }
+  .pizza-serie-title {
+    font-family: var(--font-h); font-size: clamp(1.3rem,3vw,1.8rem);
+    letter-spacing: 2px; color: #fff;
+  }
+  .pizza-serie-prices {
+    font-size: .82rem; font-weight: 800; color: var(--gold);
+    background: rgba(245,166,35,.1); padding: 4px 12px; border-radius: 20px;
+  }
+  .menu-grid-inner {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+  }
   </style>
 </head>
 <body>
@@ -34,7 +54,6 @@
     <ul class="nav-links">
       <li><a href="index.html">Accueil</a></li>
       <li><a href="menu.html" class="active">Menu</a></li>
-      <li><a href="reservation.html">Réservation</a></li>
       <li><a href="index.html#contact">Contact</a></li>
     </ul>
     <div class="nav-actions">
@@ -49,7 +68,6 @@
 <div class="nav-mobile" id="navMobile">
   <a href="index.html">Accueil</a>
   <a href="menu.html">Menu</a>
-  <a href="reservation.html">Réservation</a>
   <a href="index.html#contact">Contact</a>
   <a href="cart.html" style="color:var(--gold)">Mon Panier</a>
 </div>
@@ -187,7 +205,31 @@ function renderMenu() {
     grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--gray)">Aucun article trouvé.</div>';
     return;
   }
-  grid.innerHTML = items.map(renderMenuCard).join('');
+  // Pour les pizzas sans filtre de série : afficher par sections
+  if (currentCategory === 'pizzas' && currentSerie === 'all') {
+    var SERIE_FULL = {
+      favoris:   { label: 'Nos Pizzas Favoris',  prices: 'Junior 9€ / Senior 12€ / Méga 19€' },
+      premium:   { label: 'Nos Pizzas Premium',   prices: 'Junior 10€ / Senior 13€ / Méga 20€' },
+      mealLover: { label: 'The Meal Lover',        prices: 'Junior 11€ / Senior 14€ / Méga 21€' },
+      signature: { label: 'Signature du Chef',     prices: 'Junior 12€ / Senior 15€ / Méga 22€' }
+    };
+    var groups = {};
+    items.forEach(function(i) { if (!groups[i.serie]) groups[i.serie] = []; groups[i.serie].push(i); });
+    var html = '';
+    ['favoris','premium','mealLover','signature'].forEach(function(serieId) {
+      var group = groups[serieId];
+      if (!group || !group.length) return;
+      var s = SERIE_FULL[serieId];
+      html += '<div class="pizza-serie-section">'
+            + '<div class="pizza-serie-header"><div class="pizza-serie-title">' + s.label + '</div>'
+            + '<div class="pizza-serie-prices">' + s.prices + '</div></div>'
+            + '<div class="menu-grid-inner">' + group.map(renderMenuCard).join('') + '</div>'
+            + '</div>';
+    });
+    grid.innerHTML = html;
+  } else {
+    grid.innerHTML = items.map(renderMenuCard).join('');
+  }
 
   grid.querySelectorAll('.menu-card').forEach(function(card) {
     card.addEventListener('click', function(e) {
