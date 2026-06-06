@@ -290,27 +290,57 @@ function setQZStatus(ok, text) {
   if (span) { span.textContent = text; }
 }
 
-/* ── Construire le texte du ticket ───────────────────────── */
+/* ── Construire le texte du ticket (ESC/POS) ─────────────── */
 function buildTicketText(o) {
-  var W  = '================================';
-  var S  = '--------------------------------';
-  var NL = '\n';
+  // Commandes ESC/POS pour imprimante thermique
+  var ESC      = '\x1B';
+  var GS       = '\x1D';
+  var NL       = '\n';
+  var INIT     = ESC + '\x40';          // Reset imprimante
+  var CENTER   = ESC + '\x61\x01';     // Centrer
+  var LEFT     = ESC + '\x61\x00';     // Gauche
+  var BOLD_ON  = ESC + '\x45\x01';     // Gras ON
+  var BOLD_OFF = ESC + '\x45\x00';     // Gras OFF
+  var BIG_ON   = ESC + '\x21\x30';     // Grand + gras (titre)
+  var BIG_OFF  = ESC + '\x21\x00';     // Taille normale
+  var MED_ON   = ESC + '\x21\x10';     // Hauteur double (sous-titre)
+  var MED_OFF  = ESC + '\x21\x00';
+  var CUT      = GS  + '\x56\x00';     // Coupe papier
+
+  var W = '================================';
+  var S = '--------------------------------';
+
   var row = function(l, r) {
     var ls = String(l).substring(0, 30 - String(r).length);
     return ls + ' '.repeat(Math.max(1, 32 - ls.length - String(r).length)) + String(r);
   };
+
   var now  = new Date();
   var date = now.toLocaleDateString('fr-FR') + ' ' +
              now.toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' });
-  var t = '';
-  t += W + NL + '    ARENA PIZZA KEBAB [APK]' + NL +
-       '      88 Rue Lesage - REIMS' + NL +
-       '        09 83 39 82 20' + NL + W + NL;
-  t += ' N : ' + (o.orderNumber||'—') + NL + ' ' + date + NL;
-  t += S + NL + ' CLIENT :' + NL;
+
+  var t = INIT;
+
+  // ── EN-TÊTE ────────────────────────────────
+  t += CENTER;
+  t += BIG_ON + 'ARENA PIZZA KEBAB' + BIG_OFF + NL;
+  t += MED_ON + '[ APK ]' + MED_OFF + NL;
+  t += '88 Rue Lesage - 51100 REIMS' + NL;
+  t += 'Tel : 09 83 39 82 20' + NL;
+  t += LEFT + W + NL;
+
+  // ── NUMERO + DATE ──────────────────────────
+  t += BOLD_ON + ' N : ' + (o.orderNumber||'—') + BOLD_OFF + NL;
+  t += ' ' + date + NL;
+  t += S + NL;
+
+  // ── CLIENT ────────────────────────────────
+  t += BOLD_ON + ' CLIENT :' + BOLD_OFF + NL;
   t += ' ' + (o.firstName||'') + ' ' + (o.lastName||'') + NL;
   t += ' Tel : ' + (o.phone||'') + NL + NL;
-  t += ' MODE : ' + (o.mode==='delivery' ? 'LIVRAISON' : 'A EMPORTER') + NL;
+
+  // ── MODE + ADRESSE ────────────────────────
+  t += BOLD_ON + ' MODE : ' + (o.mode==='delivery'?'LIVRAISON':'A EMPORTER') + BOLD_OFF + NL;
   if (o.mode==='delivery' && o.address) {
     var a = typeof o.address==='string' ? JSON.parse(o.address) : o.address;
     if (a.street) t += ' ' + a.street + NL;
@@ -318,7 +348,10 @@ function buildTicketText(o) {
     if (a.notes)  t += ' Info: ' + a.notes + NL;
   }
   t += ' Heure : ' + (o.time==='ASAP'?'Des que possible':(o.time||'ASAP')) + NL;
-  t += S + NL + ' COMMANDE :' + NL;
+  t += S + NL;
+
+  // ── ARTICLES ──────────────────────────────
+  t += BOLD_ON + ' COMMANDE :' + BOLD_OFF + NL;
   (o.items||[]).forEach(function(item) {
     var lt = ((parseFloat(item.totalPrice)||0)*(parseInt(item.qty)||1)).toFixed(2)+'E';
     t += row(' '+(item.qty||1)+'x '+item.name, lt) + NL;
@@ -328,11 +361,24 @@ function buildTicketText(o) {
     }
   });
   t += S + NL;
-  if (o.notes) t += ' NOTE : ' + o.notes + NL + S + NL;
-  t += row(' TOTAL :', (parseFloat(o.total)||0).toFixed(2)+'E') + NL;
+
+  // ── NOTES ─────────────────────────────────
+  if (o.notes) {
+    t += BOLD_ON + ' NOTE : ' + BOLD_OFF + o.notes + NL + S + NL;
+  }
+
+  // ── TOTAL ─────────────────────────────────
+  t += BIG_ON + row(' TOTAL :', (parseFloat(o.total)||0).toFixed(2)+'E') + BIG_OFF + NL;
   t += ' PAIEMENT : Sur place' + NL;
-  t += W + NL + '    Merci et bon appetit !' + NL + W + NL;
-  t += NL + NL + NL; // avance papier / coupe
+  t += W + NL;
+
+  // ── PIED ──────────────────────────────────
+  t += CENTER;
+  t += BOLD_ON + 'Merci et bon appetit !' + BOLD_OFF + NL;
+  t += W + NL;
+  t += LEFT;
+  t += NL + NL + NL + CUT;
+
   return t;
 }
 
@@ -638,6 +684,34 @@ setInterval(function(){
     buildOrdersTable();
   }
 },30000);
+
+// ── Son d'alerte 5 secondes (bips répétés) ───────────────
+function playAlertSound() {
+  try {
+    var ctx   = new (window.AudioContext || window.webkitAudioContext)();
+    var total = 5;      // durée totale en secondes
+    var bip   = 0.18;  // durée d'un bip
+    var gap   = 0.12;  // silence entre bips
+    var cycle = bip + gap;
+    var nb    = Math.floor(total / cycle);
+
+    for (var i = 0; i < nb; i++) {
+      var t    = ctx.currentTime + i * cycle;
+      var osc  = ctx.createOscillator();
+      var gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(i % 2 === 0 ? 880 : 1100, t); // alternance grave/aigu
+      gain.gain.setValueAtTime(0.35, t);
+      gain.gain.setValueAtTime(0.001, t + bip);
+      osc.start(t);
+      osc.stop(t + bip + 0.01);
+    }
+  } catch(e) {
+    console.warn('Audio non disponible:', e);
+  }
+}
 
 // Lancer QZ Tray au chargement
 initQZ();
