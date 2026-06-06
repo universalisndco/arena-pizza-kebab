@@ -6,116 +6,95 @@
   <title>Commandes — Admin APK</title>
   <link rel="stylesheet" href="css/admin.css">
 
-  <!-- Firebase pour les commandes en temps réel -->
+  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
   <script src="../js/firebase-config.js"></script>
 
-  <style>
-    /* ── Bouton imprimer ─────────────────────────────── */
-    .btn-print-ticket {
-      width: 100%;
-      padding: 14px;
-      background: linear-gradient(135deg, #1a1a2e, #16213e);
-      border: 2px solid var(--gold);
-      color: var(--gold);
-      border-radius: 10px;
-      font-weight: 900;
-      font-size: 1rem;
-      cursor: pointer;
-      font-family: var(--font-b);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      transition: all .2s;
-      margin-bottom: 10px;
-    }
-    .btn-print-ticket:hover {
-      background: var(--gold);
-      color: #000;
-    }
-    .btn-print-ticket svg { width: 20px; height: 20px; flex-shrink: 0; }
+  <!-- QZ Tray — impression automatique sans dialog -->
+  <script src="https://cdn.jsdelivr.net/npm/qz-tray@2.2.4/qz-tray.js"></script>
 
-    /* ── Toast nouvelle commande ─────────────────────── */
+  <style>
+    /* ── Bouton imprimer ────────────────────── */
+    .btn-print-ticket {
+      width: 100%; padding: 14px;
+      background: linear-gradient(135deg,#1a1a2e,#16213e);
+      border: 2px solid var(--gold); color: var(--gold);
+      border-radius: 10px; font-weight: 900; font-size: 1rem;
+      cursor: pointer; font-family: var(--font-b);
+      display: flex; align-items: center; justify-content: center;
+      gap: 10px; transition: all .2s; margin-bottom: 10px;
+    }
+    .btn-print-ticket:hover { background: var(--gold); color: #000; }
+    .btn-print-ticket svg { width: 20px; height: 20px; }
+
+    /* ── Status QZ ──────────────────────────── */
+    .qz-status {
+      display: flex; align-items: center; gap: 8px;
+      padding: 6px 14px; border-radius: 8px;
+      background: var(--dark3); border: 1px solid rgba(255,255,255,.07);
+      font-size: .78rem; font-weight: 700;
+    }
+    .qz-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; background: #ef4444; }
+    .qz-dot.on { background: #22c55e; animation: pulse 2s infinite; }
+
+    /* ── Sélecteur imprimante ───────────────── */
+    #printerSelect {
+      display: none; padding: 6px 10px;
+      background: var(--dark3); border: 1px solid rgba(255,255,255,.1);
+      border-radius: 8px; color: #fff; font-size: .78rem;
+      font-family: var(--font-b); max-width: 220px; cursor: pointer;
+    }
+    #printerSelect option { background: var(--dark2); }
+
+    /* ── Toast nouvelle commande ────────────── */
     #newOrderToast {
-      position: fixed;
-      bottom: 24px; right: 24px;
-      background: var(--red);
-      color: #fff;
-      padding: 16px 22px;
-      border-radius: 14px;
-      font-weight: 900;
-      font-size: .95rem;
-      z-index: 9999;
-      display: none;
-      align-items: center;
-      gap: 12px;
-      box-shadow: 0 8px 30px rgba(212,43,43,.5);
-      cursor: pointer;
-      animation: bounceIn .4s ease-out;
+      position: fixed; bottom: 24px; right: 24px;
+      background: var(--red); color: #fff;
+      padding: 16px 22px; border-radius: 14px;
+      font-weight: 900; font-size: .95rem;
+      z-index: 9999; display: none; align-items: center;
+      gap: 12px; box-shadow: 0 8px 30px rgba(212,43,43,.5);
+      cursor: pointer; animation: bounceIn .4s ease-out;
     }
     @keyframes bounceIn {
-      0%   { transform: scale(.8) translateY(20px); opacity:0; }
-      100% { transform: scale(1)  translateY(0);    opacity:1; }
+      0%   { transform:scale(.8) translateY(20px); opacity:0; }
+      100% { transform:scale(1)  translateY(0);    opacity:1; }
     }
     #newOrderToast svg { width: 22px; height: 22px; flex-shrink: 0; }
 
-    /* ══════════════════════════════════════════════════
-       ZONE D'IMPRESSION — cachée à l'écran,
-       visible UNIQUEMENT quand window.print() est appelé
-    ════════════════════════════════════════════════════ */
-    #print-zone {
-      display: none;
-    }
+    /* ══════════════════════════════════════════
+       ZONE IMPRESSION — visible uniquement @print
+    ══════════════════════════════════════════ */
+    #print-zone { display: none; }
 
     @media print {
-      /* Masquer toute l'interface admin */
-      body > *          { display: none !important; }
-      .admin-layout     { display: none !important; }
-      #newOrderToast    { display: none !important; }
-
-      /* Afficher uniquement la zone ticket */
-      #print-zone {
-        display: block !important;
-        position: fixed !important;
-        top: 0; left: 0;
-        width: 100%;
-      }
-
-      @page {
-        size: 80mm auto;   /* papier thermique 80mm — pré-configuré */
-        margin: 1mm 2mm;
-      }
-      /* Force Chrome à utiliser cette taille dans la boîte d'impression */
-      html, body { width: 80mm !important; }
-
+      body > * { display: none !important; }
+      #print-zone { display: block !important; position: fixed !important; top:0; left:0; width:100%; }
+      @page { size: 80mm auto; margin: 1mm 2mm; }
       #ticket-content {
         font-family: 'Courier New', Courier, monospace;
-        font-size: 10.5pt;
-        color: #000;
-        background: #fff;
-        width: 100%;
-        line-height: 1.3;
+        font-size: 10.5pt; color: #000; background: #fff;
+        width: 100%; line-height: 1.35;
       }
-      #ticket-content .tc  { text-align: center; }
-      #ticket-content .tb  { font-weight: bold; }
-      #ticket-content .tl  { font-size: 12pt; }
-      #ticket-content .sep { border: none; border-top: 1px dashed #000; margin: 5px 0; }
-      #ticket-content .row { display: flex; justify-content: space-between; }
+      .tc  { text-align: center; }
+      .tb  { font-weight: bold; }
+      .tl  { font-size: 13pt; }
+      .sep { border: none; border-top: 1px dashed #000; margin: 5px 0; }
+      .row { display: flex; justify-content: space-between; }
     }
   </style>
 </head>
 <body>
 
-<!-- ══ ZONE IMPRESSION THERMIQUE (invisible à l'écran) ══════ -->
+<!-- ══ ZONE IMPRESSION ══════════════════════════════════════ -->
 <div id="print-zone">
   <div id="ticket-content">
     <div class="tc tb tl">ARENA PIZZA KEBAB</div>
     <div class="tc">88 Rue Lesage - 51100 REIMS</div>
     <div class="tc" style="margin-bottom:4px">Tel : 09 83 39 82 20</div>
     <hr class="sep">
-    <div id="pt-num" class="tb"></div>
+    <div id="pt-num"  class="tb"></div>
     <div id="pt-date"></div>
     <hr class="sep">
     <div class="tb">CLIENT :</div>
@@ -139,7 +118,7 @@
   </div>
 </div>
 
-<!-- ══ TOAST NOUVELLE COMMANDE ══════════════════════════════ -->
+<!-- ══ TOAST NOUVELLE COMMANDE ═════════════════════════════ -->
 <div id="newOrderToast" onclick="handleNewOrderToast()">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
     <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
@@ -150,7 +129,7 @@
     <div id="toastOrderNum" style="font-size:.78rem;opacity:.85;font-weight:700"></div>
   </div>
   <div style="margin-left:8px;background:rgba(255,255,255,.2);padding:8px 14px;border-radius:8px;font-size:.85rem">
-    Voir + Imprimer
+    Voir
   </div>
 </div>
 
@@ -158,7 +137,7 @@
 <div class="admin-layout">
 
   <!-- Sidebar -->
-  <aside class="sidebar" id="sidebar">
+  <aside class="sidebar">
     <div class="sidebar-logo">
       <div class="sidebar-logo-name">ARENA <span>PIZZA</span> KEBAB</div>
       <div class="sidebar-logo-sub">Administration</div>
@@ -192,7 +171,7 @@
     <div class="sidebar-footer">
       <div class="sidebar-user-avatar">A</div>
       <div><div class="sidebar-user-name">Admin APK</div><div class="sidebar-user-role">Administrateur</div></div>
-      <button class="btn-logout" onclick="logout()" title="Déconnexion">
+      <button class="btn-logout" onclick="logout()">
         <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
       </button>
     </div>
@@ -200,11 +179,17 @@
 
   <!-- Main -->
   <div class="admin-main">
-    <!-- Top bar -->
     <div class="topbar">
       <div class="topbar-title">TABLEAU DE BORD</div>
       <div class="topbar-actions">
-        <div class="live-dot" title="Temps réel actif"></div>
+        <!-- Status QZ Tray -->
+        <div class="qz-status">
+          <div class="qz-dot" id="qzDot"></div>
+          <span id="qzText">Connexion QZ...</span>
+        </div>
+        <!-- Sélecteur imprimante (apparaît après connexion QZ) -->
+        <select id="printerSelect" onchange="onPrinterChange(this.value)" title="Choisir l'imprimante"></select>
+        <div class="live-dot"></div>
         <button class="topbar-btn" onclick="location.reload()">
           <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
           Actualiser
@@ -212,15 +197,9 @@
       </div>
     </div>
 
-    <!-- Contenu -->
     <div class="page-content">
-      <!-- Stats -->
       <div class="stats-row" id="statsRow"></div>
-
-      <!-- Commandes + Détail -->
       <div class="two-col">
-
-        <!-- Liste commandes -->
         <div class="card">
           <div class="card-header">
             <div class="card-title">Commandes du jour</div>
@@ -233,21 +212,17 @@
           </div>
           <div id="ordersTable"></div>
         </div>
-
-        <!-- Panneau détail -->
         <div class="detail-panel" id="detailPanel">
           <div class="detail-placeholder">
             <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
             <p>Cliquez sur une commande<br>pour voir les détails</p>
           </div>
         </div>
-
       </div>
     </div>
   </div>
 </div>
 
-<!-- ══ Scripts ═══════════════════════════════════════════════ -->
 <script src="../js/data.js"></script>
 <script src="js/admin.js"></script>
 <script>
@@ -257,9 +232,186 @@ initDemoData();
 var currentFilter    = 'all';
 var selectedOrderNum = null;
 var allOrders        = [];
+var printedOrders    = new Set();
 
 /* ════════════════════════════════════════════════════════════
-   FIREBASE — Écoute les commandes en temps réel
+   QZ TRAY — Impression automatique sans aucun dialog
+════════════════════════════════════════════════════════════ */
+var qzReady   = false;
+var qzPrinter = localStorage.getItem('apk_printer') || null;
+
+async function initQZ() {
+  if (typeof qz === 'undefined') {
+    setQZStatus(false, 'QZ Tray non installé');
+    return;
+  }
+
+  // Mode non signé — invite d'approbation la 1ère fois seulement
+  qz.security.setCertificatePromise(function(resolve) { resolve(''); });
+  qz.security.setSignaturePromise(function() {
+    return function(resolve) { resolve(''); };
+  });
+
+  try {
+    await qz.websocket.connect({ retries: 3, delay: 1 });
+    qzReady = true;
+    setQZStatus(true, 'Impression auto active');
+
+    // Lister les imprimantes disponibles
+    var printers = await qz.printers.find();
+    var sel = document.getElementById('printerSelect');
+    sel.innerHTML = '<option value="">-- Choisir imprimante --</option>' +
+      printers.map(function(p) {
+        return '<option value="' + p + '"' + (p === qzPrinter ? ' selected' : '') + '>' + p + '</option>';
+      }).join('');
+    sel.style.display = 'block';
+
+    // Si imprimante déjà mémorisée
+    if (qzPrinter && printers.indexOf(qzPrinter) >= 0) {
+      setQZStatus(true, 'Prêt · ' + qzPrinter.substring(0, 20));
+    }
+
+  } catch(e) {
+    qzReady = false;
+    setQZStatus(false, 'QZ Tray non connecté');
+  }
+}
+
+function onPrinterChange(val) {
+  qzPrinter = val;
+  localStorage.setItem('apk_printer', val);
+  if (val) setQZStatus(true, 'Prêt · ' + val.substring(0, 20));
+}
+
+function setQZStatus(ok, text) {
+  var dot  = document.getElementById('qzDot');
+  var span = document.getElementById('qzText');
+  if (dot)  { dot.className = 'qz-dot' + (ok ? ' on' : ''); }
+  if (span) { span.textContent = text; }
+}
+
+/* ── Construire le texte du ticket ───────────────────────── */
+function buildTicketText(o) {
+  var W  = '================================';
+  var S  = '--------------------------------';
+  var NL = '\n';
+  var row = function(l, r) {
+    var ls = String(l).substring(0, 30 - String(r).length);
+    return ls + ' '.repeat(Math.max(1, 32 - ls.length - String(r).length)) + String(r);
+  };
+  var now  = new Date();
+  var date = now.toLocaleDateString('fr-FR') + ' ' +
+             now.toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' });
+  var t = '';
+  t += W + NL + '    ARENA PIZZA KEBAB [APK]' + NL +
+       '      88 Rue Lesage - REIMS' + NL +
+       '        09 83 39 82 20' + NL + W + NL;
+  t += ' N : ' + (o.orderNumber||'—') + NL + ' ' + date + NL;
+  t += S + NL + ' CLIENT :' + NL;
+  t += ' ' + (o.firstName||'') + ' ' + (o.lastName||'') + NL;
+  t += ' Tel : ' + (o.phone||'') + NL + NL;
+  t += ' MODE : ' + (o.mode==='delivery' ? 'LIVRAISON' : 'A EMPORTER') + NL;
+  if (o.mode==='delivery' && o.address) {
+    var a = typeof o.address==='string' ? JSON.parse(o.address) : o.address;
+    if (a.street) t += ' ' + a.street + NL;
+    if (a.city)   t += ' ' + a.city + ' ' + (a.zip||'') + NL;
+    if (a.notes)  t += ' Info: ' + a.notes + NL;
+  }
+  t += ' Heure : ' + (o.time==='ASAP'?'Des que possible':(o.time||'ASAP')) + NL;
+  t += S + NL + ' COMMANDE :' + NL;
+  (o.items||[]).forEach(function(item) {
+    var lt = ((parseFloat(item.totalPrice)||0)*(parseInt(item.qty)||1)).toFixed(2)+'E';
+    t += row(' '+(item.qty||1)+'x '+item.name, lt) + NL;
+    if (item.selectedOptions) {
+      Object.entries(item.selectedOptions).filter(function(e){return e[1];})
+        .forEach(function(e){ t += '   > '+e[0]+': '+e[1]+NL; });
+    }
+  });
+  t += S + NL;
+  if (o.notes) t += ' NOTE : ' + o.notes + NL + S + NL;
+  t += row(' TOTAL :', (parseFloat(o.total)||0).toFixed(2)+'E') + NL;
+  t += ' PAIEMENT : Sur place' + NL;
+  t += W + NL + '    Merci et bon appetit !' + NL + W + NL;
+  t += NL + NL + NL; // avance papier / coupe
+  return t;
+}
+
+/* ── Imprimer via QZ Tray (silencieux) ───────────────────── */
+async function printViaQZ(order) {
+  if (!qzReady || !qzPrinter) return false;
+  try {
+    var config = qz.configs.create(qzPrinter, { copies: 1 });
+    var text   = buildTicketText(order);
+    await qz.print(config, [{
+      type:   'raw',
+      format: 'plain',
+      data:   '\x1B\x40' + text + '\x1D\x56\x00' // init + texte + coupe
+    }]);
+    showToast('Ticket imprimé — ' + (order.orderNumber||''));
+    return true;
+  } catch(e) {
+    console.error('QZ print error:', e);
+    return false;
+  }
+}
+
+/* ── Imprimer via navigateur (fallback) ──────────────────── */
+function printTicket(order) {
+  order = order || allOrders.find(function(o){
+    return (o.orderNumber===selectedOrderNum)||(o.firestoreId===selectedOrderNum);
+  });
+  if (!order) return;
+
+  var now  = new Date();
+  var date = now.toLocaleDateString('fr-FR') + ' ' +
+             now.toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' });
+
+  document.getElementById('pt-num').textContent    = 'N° : ' + (order.orderNumber||'—');
+  document.getElementById('pt-date').textContent   = date;
+  document.getElementById('pt-client').textContent = (order.firstName||'') + ' ' + (order.lastName||'');
+  document.getElementById('pt-phone').textContent  = 'Tel : ' + (order.phone||'');
+  document.getElementById('pt-mode').textContent   = 'MODE : ' + (order.mode==='delivery'?'LIVRAISON':'A EMPORTER');
+  document.getElementById('pt-time').textContent   = 'Heure : ' + (order.time==='ASAP'?'Des que possible':(order.time||''));
+
+  var addrEl = document.getElementById('pt-address');
+  if (order.mode==='delivery' && order.address) {
+    var a = typeof order.address==='string' ? JSON.parse(order.address) : order.address;
+    addrEl.innerHTML = (a.street||'') + '<br>' + (a.city||'') + ' ' + (a.zip||'') +
+                       (a.notes ? '<br>Info: '+a.notes : '');
+  } else { addrEl.textContent = ''; }
+
+  var itemsEl = document.getElementById('pt-items');
+  itemsEl.innerHTML = (order.items||[]).map(function(i) {
+    var price = ((parseFloat(i.totalPrice)||0)*(parseInt(i.qty)||1)).toFixed(2)+'E';
+    var line  = '<div style="display:flex;justify-content:space-between"><span>'+(i.qty||1)+'x '+i.name+'</span><span>'+price+'</span></div>';
+    if (i.selectedOptions)
+      Object.entries(i.selectedOptions).filter(function(e){return e[1];})
+        .forEach(function(e){ line += '<div style="padding-left:10px;font-size:.9em">&gt; '+e[0]+': '+e[1]+'</div>'; });
+    return line;
+  }).join('');
+
+  var notesEl = document.getElementById('pt-notes');
+  notesEl.textContent = order.notes ? 'NOTE : '+order.notes : '';
+  notesEl.style.display = order.notes ? 'block' : 'none';
+
+  document.getElementById('pt-total').innerHTML =
+    '<span>TOTAL :</span><span>'+(parseFloat(order.total)||0).toFixed(2)+'E</span>';
+  document.getElementById('pt-payment').textContent = 'PAIEMENT : Sur place';
+
+  window.print();
+}
+
+/* ── Impression automatique (QZ → fallback navigateur) ───── */
+async function autoPrint(order) {
+  var printed = await printViaQZ(order);
+  if (!printed) {
+    // QZ non dispo → impression manuelle via navigateur
+    printTicket(order);
+  }
+}
+
+/* ════════════════════════════════════════════════════════════
+   FIREBASE — Commandes en temps réel
 ════════════════════════════════════════════════════════════ */
 var initialLoad = true;
 
@@ -271,41 +423,60 @@ if (typeof db !== 'undefined') {
       snapshot.forEach(function(doc) {
         fbOrders.push(Object.assign({ firestoreId: doc.id }, doc.data()));
       });
-
-      // Fusionner Firebase + localStorage
       var localOrders = getOrders();
-      var fbNums = fbOrders.map(function(o){ return o.orderNumber; });
-      var localOnly = localOrders.filter(function(o){ return !fbNums.includes(o.orderNumber); });
+      var fbNums      = fbOrders.map(function(o){ return o.orderNumber; });
+      var localOnly   = localOrders.filter(function(o){ return fbNums.indexOf(o.orderNumber) < 0; });
       allOrders = fbOrders.concat(localOnly);
       saveOrders(allOrders);
 
-      // Détecter nouvelles commandes (après chargement initial)
       if (!initialLoad) {
         snapshot.docChanges().forEach(function(change) {
           if (change.type === 'added') {
             var newOrder = Object.assign({ firestoreId: change.doc.id }, change.doc.data());
-            playAlertSound();
-            showNewOrderToast(newOrder);
+            var key = newOrder.orderNumber || newOrder.firestoreId;
+            if (!printedOrders.has(key)) {
+              printedOrders.add(key);
+              playAlertSound();
+              showNewOrderToast(newOrder);
+              // ── IMPRESSION AUTO ──────────────────────
+              setTimeout(function() {
+                if (!allOrders.find(function(o){ return (o.orderNumber||o.firestoreId)===key; })) {
+                  allOrders.unshift(newOrder);
+                }
+                selectedOrderNum = key;
+                autoPrint(newOrder);
+              }, 800);
+            }
           }
         });
       }
       initialLoad = false;
-
       buildStats();
       buildOrdersTable();
     }, function(err) {
-      console.warn('Firebase listener error:', err);
-      // Fallback localStorage
+      console.warn('Firebase error:', err);
       allOrders = getOrders();
       buildStats();
       buildOrdersTable();
     });
 } else {
-  // Pas de Firebase → localStorage uniquement
   allOrders = getOrders();
+  allOrders.forEach(function(o){ if(o.orderNumber) printedOrders.add(o.orderNumber); });
   buildStats();
   buildOrdersTable();
   startOrderPolling(function(orders) {
+    orders.forEach(function(o) {
+      if (o.orderNumber && !printedOrders.has(o.orderNumber)) {
+        printedOrders.add(o.orderNumber);
+        playAlertSound();
+        showNewOrderToast(o);
+        setTimeout(function() {
+          allOrders = orders;
+          selectedOrderNum = o.orderNumber;
+          autoPrint(o);
+        }, 800);
+      }
+    });
     allOrders = orders;
     buildStats();
     buildOrdersTable();
@@ -313,255 +484,163 @@ if (typeof db !== 'undefined') {
 }
 
 /* ════════════════════════════════════════════════════════════
-   TOAST NOUVELLE COMMANDE
+   UI
 ════════════════════════════════════════════════════════════ */
-var _toastOrder = null;
-
 function showNewOrderToast(order) {
-  _toastOrder = order;
   var toast = document.getElementById('newOrderToast');
   document.getElementById('toastOrderNum').textContent =
-    (order.orderNumber || '') + ' — ' + formatPrice(order.total||0) +
-    ' — ' + (order.mode === 'delivery' ? 'Livraison' : 'À emporter');
+    (order.orderNumber||'') + ' — ' + formatPrice(order.total||0) +
+    ' — ' + (order.mode==='delivery'?'Livraison':'À emporter');
   toast.style.display = 'flex';
-  // Auto-masquer après 30s
   clearTimeout(toast._t);
-  toast._t = setTimeout(function() { toast.style.display = 'none'; }, 30000);
+  toast._t = setTimeout(function(){ toast.style.display='none'; }, 30000);
 }
-
 function handleNewOrderToast() {
   document.getElementById('newOrderToast').style.display = 'none';
-  if (_toastOrder) {
-    showDetail(_toastOrder.orderNumber || _toastOrder.firestoreId);
-  }
 }
 
-/* ════════════════════════════════════════════════════════════
-   STATS
-════════════════════════════════════════════════════════════ */
 function buildStats() {
-  var today   = new Date().toDateString();
-  var orders  = allOrders;
-  var todayO  = orders.filter(function(o){ return new Date(o.timestamp||o.createdAt?.seconds*1000).toDateString()===today; });
-  var pending = orders.filter(function(o){ return o.status==='pending'; }).length;
+  var today  = new Date().toDateString();
+  var todayO = allOrders.filter(function(o){
+    var d = o.timestamp || (o.createdAt&&o.createdAt.seconds?new Date(o.createdAt.seconds*1000).toISOString():null);
+    return d && new Date(d).toDateString()===today;
+  });
+  var pending = allOrders.filter(function(o){ return o.status==='pending'; }).length;
   var revenue = todayO.filter(function(o){ return o.status!=='cancelled'; })
-                      .reduce(function(s,o){ return s+(parseFloat(o.total)||0); }, 0);
+                      .reduce(function(s,o){ return s+(parseFloat(o.total)||0); },0);
 
   document.getElementById('statsRow').innerHTML =
-    '<div class="stat-card red"><div class="stat-label">En attente</div><div class="stat-value" style="color:var(--red)">' + pending + '</div><div class="stat-sub">À traiter</div></div>' +
-    '<div class="stat-card gold"><div class="stat-label">Aujourd\'hui</div><div class="stat-value" style="color:var(--gold)">' + todayO.length + '</div><div class="stat-sub">Commandes</div></div>' +
-    '<div class="stat-card green"><div class="stat-label">CA du jour</div><div class="stat-value" style="color:var(--green)">' + formatPrice(revenue) + '</div><div class="stat-sub">Chiffre d\'affaires</div></div>' +
-    '<div class="stat-card blue"><div class="stat-label">Total</div><div class="stat-value" style="color:var(--blue)">' + orders.length + '</div><div class="stat-sub">Commandes totales</div></div>';
+    '<div class="stat-card red"><div class="stat-label">En attente</div><div class="stat-value" style="color:var(--red)">'+pending+'</div><div class="stat-sub">À traiter</div></div>'+
+    '<div class="stat-card gold"><div class="stat-label">Aujourd\'hui</div><div class="stat-value" style="color:var(--gold)">'+todayO.length+'</div><div class="stat-sub">Commandes</div></div>'+
+    '<div class="stat-card green"><div class="stat-label">CA du jour</div><div class="stat-value" style="color:var(--green)">'+formatPrice(revenue)+'</div><div class="stat-sub">Chiffre d\'affaires</div></div>'+
+    '<div class="stat-card blue"><div class="stat-label">Total</div><div class="stat-value" style="color:var(--blue)">'+allOrders.length+'</div><div class="stat-sub">Commandes totales</div></div>';
 
   var b = document.getElementById('sidebarBadge');
-  if (pending>0) { b.style.display='flex'; b.textContent=pending; } else { b.style.display='none'; }
+  if(pending>0){b.style.display='flex';b.textContent=pending;}else{b.style.display='none';}
 }
 
-/* ════════════════════════════════════════════════════════════
-   TABLEAU COMMANDES
-════════════════════════════════════════════════════════════ */
 function buildOrdersTable() {
-  var orders = allOrders;
-  var today  = new Date().toDateString();
-
-  var filtered = orders.filter(function(o){
-    var d = new Date((o.timestamp)||(o.createdAt&&o.createdAt.seconds?o.createdAt.seconds*1000:null));
-    return d.toDateString() === today;
+  var today    = new Date().toDateString();
+  var filtered = allOrders.filter(function(o){
+    var d = o.timestamp||(o.createdAt&&o.createdAt.seconds?new Date(o.createdAt.seconds*1000).toISOString():null);
+    return d && new Date(d).toDateString()===today;
   });
-
-  if (currentFilter === 'pending')    filtered = filtered.filter(function(o){ return o.status==='pending'; });
-  else if (currentFilter === 'active') filtered = filtered.filter(function(o){ return ['accepted','preparing','ready','delivering'].includes(o.status); });
-  else if (currentFilter === 'done')   filtered = filtered.filter(function(o){ return o.status==='done'; });
+  if(currentFilter==='pending')    filtered=filtered.filter(function(o){return o.status==='pending';});
+  else if(currentFilter==='active') filtered=filtered.filter(function(o){return['accepted','preparing','ready','delivering'].indexOf(o.status)>=0;});
+  else if(currentFilter==='done')   filtered=filtered.filter(function(o){return o.status==='done';});
 
   var el = document.getElementById('ordersTable');
-  if (!el) return;
-
-  if (filtered.length === 0) {
-    el.innerHTML = '<div style="padding:40px;text-align:center;color:var(--gray);font-size:.88rem">Aucune commande pour ce filtre.</div>';
+  if(!el) return;
+  if(filtered.length===0){
+    el.innerHTML='<div style="padding:40px;text-align:center;color:var(--gray)">Aucune commande pour ce filtre.</div>';
     return;
   }
-
-  el.innerHTML =
-    '<div style="display:grid;grid-template-columns:80px 1fr 100px 120px 100px 90px;gap:10px;padding:10px 20px;font-size:.7rem;font-weight:900;letter-spacing:1px;text-transform:uppercase;color:var(--gray2);border-bottom:1px solid rgba(255,255,255,.05)">' +
-    '<div>N°</div><div>Client</div><div>Total</div><div>Mode</div><div>Statut</div><div>Heure</div></div>' +
-    filtered.map(function(o) {
-      return '<div class="order-row' + (o.status==='pending'?' new':'') + '" onclick="showDetail(\'' + (o.orderNumber||o.firestoreId) + '\')">' +
-        '<div class="order-id" style="font-size:.85rem">' + (o.orderNumber||'—') + '</div>' +
-        '<div><div class="order-client">' + (o.firstName||'') + ' ' + (o.lastName||'') + '</div>' +
-        '<div class="order-client-phone">' + (o.phone||'') + '</div></div>' +
-        '<div class="order-total">' + formatPrice(o.total||0) + '</div>' +
-        '<div><span class="order-mode mode-' + (o.mode==='delivery'?'delivery':'pickup') + '">' + (o.mode==='delivery'?'Livraison':'À emporter') + '</span></div>' +
-        '<div>' + statusBadge(o.status) + '</div>' +
-        '<div class="order-time">' + timeAgo(o.timestamp||(o.createdAt&&o.createdAt.seconds?new Date(o.createdAt.seconds*1000).toISOString():null)) + '</div>' +
+  el.innerHTML=
+    '<div style="display:grid;grid-template-columns:80px 1fr 100px 120px 100px 90px;gap:10px;padding:10px 20px;font-size:.7rem;font-weight:900;letter-spacing:1px;text-transform:uppercase;color:var(--gray2);border-bottom:1px solid rgba(255,255,255,.05)">'+
+    '<div>N°</div><div>Client</div><div>Total</div><div>Mode</div><div>Statut</div><div>Heure</div></div>'+
+    filtered.map(function(o){
+      var key=o.orderNumber||o.firestoreId;
+      return '<div class="order-row'+(o.status==='pending'?' new':'')+'" onclick="showDetail(\''+key+'\')">'+
+        '<div class="order-id" style="font-size:.85rem">'+(o.orderNumber||'—')+'</div>'+
+        '<div><div class="order-client">'+(o.firstName||'')+' '+(o.lastName||'')+'</div>'+
+        '<div class="order-client-phone">'+(o.phone||'')+'</div></div>'+
+        '<div class="order-total">'+formatPrice(o.total||0)+'</div>'+
+        '<div><span class="order-mode mode-'+(o.mode==='delivery'?'delivery':'pickup')+'">'+(o.mode==='delivery'?'Livraison':'À emporter')+'</span></div>'+
+        '<div>'+statusBadge(o.status)+'</div>'+
+        '<div class="order-time">'+timeAgo(o.timestamp||(o.createdAt&&o.createdAt.seconds?new Date(o.createdAt.seconds*1000).toISOString():null))+'</div>'+
         '</div>';
     }).join('');
 }
 
-/* ════════════════════════════════════════════════════════════
-   DÉTAIL COMMANDE + BOUTON IMPRIMER
-════════════════════════════════════════════════════════════ */
 function showDetail(orderNum) {
   selectedOrderNum = orderNum;
   var order = allOrders.find(function(o){ return (o.orderNumber===orderNum)||(o.firestoreId===orderNum); });
-  if (!order) return;
+  if(!order) return;
 
-  var addrHtml = '';
-  if (order.mode==='delivery' && order.address) {
-    var a = typeof order.address==='string' ? JSON.parse(order.address) : order.address;
-    addrHtml = '<div class="detail-row"><label>Adresse</label><span>' + (a.street||'') + ', ' + (a.city||'') + ' ' + (a.zip||'') + '</span></div>';
-    if (a.notes) addrHtml += '<div class="detail-row"><label>Instructions</label><span>' + a.notes + '</span></div>';
+  var addrHtml='';
+  if(order.mode==='delivery'&&order.address){
+    var a=typeof order.address==='string'?JSON.parse(order.address):order.address;
+    addrHtml='<div class="detail-row"><label>Adresse</label><span>'+(a.street||'')+', '+(a.city||'')+' '+(a.zip||'')+'</span></div>';
+    if(a.notes) addrHtml+='<div class="detail-row"><label>Instructions</label><span>'+a.notes+'</span></div>';
   }
-
-  var itemsHtml = (order.items||[]).map(function(i) {
-    var opts = Object.entries(i.selectedOptions||{}).filter(function(e){return e[1];}).map(function(e){return e[0]+': '+e[1];}).join(' · ');
-    return '<div class="detail-item"><span class="detail-item-price">' + formatPrice((parseFloat(i.totalPrice)||0)*(parseInt(i.qty)||1)) + '</span>' +
-           '<div class="detail-item-name">' + (i.qty||1) + '× ' + i.name + '</div>' +
-           (opts ? '<div class="detail-item-opts">' + opts + '</div>' : '') +
+  var itemsHtml=(order.items||[]).map(function(i){
+    var opts=Object.entries(i.selectedOptions||{}).filter(function(e){return e[1];}).map(function(e){return e[0]+': '+e[1];}).join(' · ');
+    return '<div class="detail-item"><span class="detail-item-price">'+formatPrice((parseFloat(i.totalPrice)||0)*(parseInt(i.qty)||1))+'</span>'+
+           '<div class="detail-item-name">'+(i.qty||1)+'× '+i.name+'</div>'+
+           (opts?'<div class="detail-item-opts">'+opts+'</div>':'')+
            '</div>';
   }).join('');
 
-  document.getElementById('detailPanel').innerHTML =
-    '<div class="detail-header">' +
-    '<div><div class="detail-order-id">' + (order.orderNumber||'—') + '</div>' +
-    '<div style="font-size:.75rem;color:var(--gray)">' + formatDate(order.timestamp||(order.createdAt&&order.createdAt.seconds?new Date(order.createdAt.seconds*1000).toISOString():null)) + '</div></div>' +
-    statusBadge(order.status) +
-    '</div>' +
-    '<div class="detail-body">' +
+  document.getElementById('detailPanel').innerHTML=
+    '<div class="detail-header">'+
+    '<div><div class="detail-order-id">'+(order.orderNumber||'—')+'</div>'+
+    '<div style="font-size:.75rem;color:var(--gray)">'+formatDate(order.timestamp||(order.createdAt&&order.createdAt.seconds?new Date(order.createdAt.seconds*1000).toISOString():null))+'</div></div>'+
+    statusBadge(order.status)+
+    '</div>'+
+    '<div class="detail-body">'+
 
-    /* ── Bouton imprimer (en haut, bien visible) ── */
-    '<button class="btn-print-ticket" id="printBtn" onclick="printTicket()" title="Ctrl+P — Imprime directement si Chrome est ouvert avec --kiosk-printing">' +
-    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>' +
-    'Imprimer le ticket' +
-    '</button>' +
+    // ── Bouton imprimer ──
+    '<button class="btn-print-ticket" onclick="printTicket()">'+
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>'+
+    'Imprimer le ticket'+
+    '</button>'+
 
-    '<div class="detail-section"><div class="detail-section-title">Client</div>' +
-    '<div class="detail-row"><label>Nom</label><span>' + (order.firstName||'') + ' ' + (order.lastName||'') + '</span></div>' +
-    '<div class="detail-row"><label>Téléphone</label><span><a href="tel:' + (order.phone||'') + '" style="color:var(--gold)">' + (order.phone||'') + '</a></span></div>' +
-    (order.email ? '<div class="detail-row"><label>Email</label><span style="font-size:.8rem">' + order.email + '</span></div>' : '') +
-    '<div class="detail-row"><label>Mode</label><span>' + (order.mode==='delivery'?'Livraison':'À emporter') + '</span></div>' +
-    '<div class="detail-row"><label>Heure</label><span>' + (order.time==='ASAP'?'Dès que possible':(order.time||'ASAP')) + '</span></div>' +
-    addrHtml + '</div>' +
-
-    (order.notes ? '<div class="detail-section"><div class="detail-section-title">Notes</div><div style="font-size:.85rem;color:var(--gray);line-height:1.5;padding:8px;background:var(--dark3);border-radius:8px">' + order.notes + '</div></div>' : '') +
-
-    '<div class="detail-section"><div class="detail-section-title">Articles</div>' +
-    itemsHtml +
-    '<div style="display:flex;justify-content:space-between;padding:10px 0;margin-top:4px;border-top:1px solid rgba(255,255,255,.08);font-weight:900">' +
-    '<span>Total</span><span style="color:var(--gold);font-size:1.1rem">' + formatPrice(order.total||0) + '</span></div></div>' +
-
-    '<div class="detail-section"><div class="detail-section-title">Changer le statut</div>' +
-    '<select class="status-select" id="statusSelect">' +
+    '<div class="detail-section"><div class="detail-section-title">Client</div>'+
+    '<div class="detail-row"><label>Nom</label><span>'+(order.firstName||'')+' '+(order.lastName||'')+'</span></div>'+
+    '<div class="detail-row"><label>Téléphone</label><span><a href="tel:'+(order.phone||'')+'" style="color:var(--gold)">'+(order.phone||'')+'</a></span></div>'+
+    (order.email?'<div class="detail-row"><label>Email</label><span style="font-size:.8rem">'+order.email+'</span></div>':'')+
+    '<div class="detail-row"><label>Mode</label><span>'+(order.mode==='delivery'?'Livraison':'À emporter')+'</span></div>'+
+    '<div class="detail-row"><label>Heure</label><span>'+(order.time==='ASAP'?'Dès que possible':(order.time||'ASAP'))+'</span></div>'+
+    addrHtml+'</div>'+
+    (order.notes?'<div class="detail-section"><div class="detail-section-title">Notes</div><div style="font-size:.85rem;color:var(--gray);padding:8px;background:var(--dark3);border-radius:8px">'+order.notes+'</div></div>':'')+
+    '<div class="detail-section"><div class="detail-section-title">Articles</div>'+
+    itemsHtml+
+    '<div style="display:flex;justify-content:space-between;padding:10px 0;border-top:1px solid rgba(255,255,255,.08);font-weight:900">'+
+    '<span>Total</span><span style="color:var(--gold);font-size:1.1rem">'+formatPrice(order.total||0)+'</span></div></div>'+
+    '<div class="detail-section"><div class="detail-section-title">Changer le statut</div>'+
+    '<select class="status-select" id="statusSelect">'+
     ['pending','accepted','preparing','ready','delivering','done','cancelled'].map(function(s){
-      return '<option value="' + s + '"' + (order.status===s?' selected':'') + '>' + STATUS_LABELS[s] + '</option>';
-    }).join('') +
-    '</select>' +
-    '<button class="btn-update-status" onclick="updateStatus(\'' + (order.orderNumber||order.firestoreId) + '\')">Mettre à jour</button>' +
-    '</div>' +
-
-    '</div>';
+      return '<option value="'+s+'"'+(order.status===s?' selected':'')+'>'+STATUS_LABELS[s]+'</option>';
+    }).join('')+
+    '</select>'+
+    '<button class="btn-update-status" onclick="updateStatus(\''+(order.orderNumber||order.firestoreId)+'\')">Mettre à jour</button>'+
+    '</div></div>';
 }
 
 function updateStatus(orderNum) {
   var newStatus = document.getElementById('statusSelect').value;
-  var orders    = allOrders;
-  var idx       = orders.findIndex(function(o){ return (o.orderNumber===orderNum)||(o.firestoreId===orderNum); });
-  if (idx < 0) return;
-
-  orders[idx].status = newStatus;
-  saveOrders(orders);
-
-  // Mettre à jour Firebase aussi si disponible
-  if (typeof db !== 'undefined' && orders[idx].firestoreId) {
-    db.collection('orders').doc(orders[idx].firestoreId).update({ status: newStatus }).catch(function(){});
+  var idx = allOrders.findIndex(function(o){ return (o.orderNumber===orderNum)||(o.firestoreId===orderNum); });
+  if(idx<0) return;
+  allOrders[idx].status = newStatus;
+  saveOrders(allOrders);
+  if(typeof db!=='undefined'&&allOrders[idx].firestoreId){
+    db.collection('orders').doc(allOrders[idx].firestoreId).update({status:newStatus}).catch(function(){});
   }
-
-  showToast('Statut mis à jour : ' + STATUS_LABELS[newStatus]);
+  showToast('Statut mis à jour : '+STATUS_LABELS[newStatus]);
   buildStats();
   buildOrdersTable();
   showDetail(orderNum);
 }
 
-/* ════════════════════════════════════════════════════════════
-   IMPRESSION DU TICKET
-════════════════════════════════════════════════════════════ */
-function printTicket() {
-  if (!selectedOrderNum) return;
-  var order = allOrders.find(function(o){
-    return (o.orderNumber===selectedOrderNum)||(o.firestoreId===selectedOrderNum);
-  });
-  if (!order) return;
-
-  var now  = new Date();
-  var date = now.toLocaleDateString('fr-FR') + ' ' +
-             now.toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' });
-
-  /* Remplir la zone d'impression */
-  document.getElementById('pt-num').textContent  = 'N° : ' + (order.orderNumber||'—');
-  document.getElementById('pt-date').textContent = date;
-  document.getElementById('pt-client').textContent = (order.firstName||'') + ' ' + (order.lastName||'');
-  document.getElementById('pt-phone').textContent  = 'Tel : ' + (order.phone||'');
-  document.getElementById('pt-mode').textContent   = 'MODE : ' + (order.mode==='delivery' ? 'LIVRAISON' : 'A EMPORTER');
-  document.getElementById('pt-time').textContent   = 'Heure : ' + (order.time==='ASAP'?'Des que possible':(order.time||''));
-
-  /* Adresse */
-  var addrEl = document.getElementById('pt-address');
-  if (order.mode==='delivery' && order.address) {
-    var a = typeof order.address==='string' ? JSON.parse(order.address) : order.address;
-    addrEl.innerHTML = (a.street||'') + '<br>' + (a.city||'') + ' ' + (a.zip||'') +
-                       (a.notes ? '<br>Info: ' + a.notes : '');
-  } else {
-    addrEl.textContent = '';
-  }
-
-  /* Articles */
-  var itemsEl = document.getElementById('pt-items');
-  var itemsHtml = (order.items||[]).map(function(i) {
-    var price = ((parseFloat(i.totalPrice)||0)*(parseInt(i.qty)||1)).toFixed(2) + 'E';
-    var line  = '<div style="display:flex;justify-content:space-between">' +
-                '<span>' + (i.qty||1) + 'x ' + i.name + '</span>' +
-                '<span>' + price + '</span></div>';
-    if (i.selectedOptions) {
-      var opts = Object.entries(i.selectedOptions).filter(function(e){return e[1];});
-      opts.forEach(function(e){ line += '<div style="padding-left:12px;font-size:.9em">&gt; ' + e[0] + ': ' + e[1] + '</div>'; });
-    }
-    return line;
-  }).join('');
-  itemsEl.innerHTML = itemsHtml;
-
-  /* Notes */
-  var notesEl = document.getElementById('pt-notes');
-  notesEl.textContent = order.notes ? 'NOTE : ' + order.notes : '';
-  notesEl.style.display = order.notes ? 'block' : 'none';
-
-  /* Total */
-  document.getElementById('pt-total').innerHTML =
-    '<span>TOTAL :</span><span>' + (parseFloat(order.total)||0).toFixed(2) + 'E</span>';
-  document.getElementById('pt-payment').textContent = 'PAIEMENT : Sur place';
-
-  /* Lancer l'impression */
-  window.print();
-}
-
-/* ════════════════════════════════════════════════════════════
-   FILTRES
-════════════════════════════════════════════════════════════ */
-document.querySelectorAll('.filter-btn').forEach(function(btn) {
-  btn.addEventListener('click', function() {
-    document.querySelectorAll('.filter-btn').forEach(function(b){ b.classList.remove('active'); });
+document.querySelectorAll('.filter-btn').forEach(function(btn){
+  btn.addEventListener('click',function(){
+    document.querySelectorAll('.filter-btn').forEach(function(b){b.classList.remove('active');});
     btn.classList.add('active');
-    currentFilter = btn.dataset.filter;
+    currentFilter=btn.dataset.filter;
     buildOrdersTable();
   });
 });
 
-/* Refresh toutes les 30s (fallback si pas de Firebase) */
-setInterval(function() {
-  if (typeof db === 'undefined') {
-    allOrders = getOrders();
+setInterval(function(){
+  if(typeof db==='undefined'){
+    allOrders=getOrders();
     buildStats();
     buildOrdersTable();
   }
-}, 30000);
+},30000);
+
+// Lancer QZ Tray au chargement
+initQZ();
 </script>
 </body>
 </html>
