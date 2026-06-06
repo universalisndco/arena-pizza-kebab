@@ -84,9 +84,11 @@
       }
 
       @page {
-        size: 80mm auto;   /* largeur papier thermique 80mm */
-        margin: 2mm 3mm;
+        size: 80mm auto;   /* papier thermique 80mm — pré-configuré */
+        margin: 1mm 2mm;
       }
+      /* Force Chrome à utiliser cette taille dans la boîte d'impression */
+      html, body { width: 80mm !important; }
 
       #ticket-content {
         font-family: 'Courier New', Courier, monospace;
@@ -255,7 +257,6 @@ initDemoData();
 var currentFilter    = 'all';
 var selectedOrderNum = null;
 var allOrders        = [];
-var printedOrders    = new Set(); // Evite les doublons d'impression
 
 /* ════════════════════════════════════════════════════════════
    FIREBASE — Écoute les commandes en temps réel
@@ -283,23 +284,8 @@ if (typeof db !== 'undefined') {
         snapshot.docChanges().forEach(function(change) {
           if (change.type === 'added') {
             var newOrder = Object.assign({ firestoreId: change.doc.id }, change.doc.data());
-            var key = newOrder.orderNumber || newOrder.firestoreId;
-
-            if (!printedOrders.has(key)) {
-              printedOrders.add(key);
-              playAlertSound();
-              showNewOrderToast(newOrder);
-
-              // ── AUTO-IMPRESSION ──────────────────────────────
-              setTimeout(function() {
-                // S'assurer que la commande est dans allOrders
-                if (!allOrders.find(function(o){ return (o.orderNumber||o.firestoreId)===key; })) {
-                  allOrders.unshift(newOrder);
-                }
-                selectedOrderNum = key;
-                printTicket();  // → window.print() déclenché automatiquement
-              }, 600); // 600ms pour laisser Firebase finir la mise à jour
-            }
+            playAlertSound();
+            showNewOrderToast(newOrder);
           }
         });
       }
@@ -317,26 +303,9 @@ if (typeof db !== 'undefined') {
 } else {
   // Pas de Firebase → localStorage uniquement
   allOrders = getOrders();
-  // Marquer les commandes existantes comme déjà traitées (pas d'impression au chargement)
-  allOrders.forEach(function(o){ if (o.orderNumber) printedOrders.add(o.orderNumber); });
   buildStats();
   buildOrdersTable();
-
   startOrderPolling(function(orders) {
-    // Trouver les nouvelles commandes non encore imprimées
-    orders.forEach(function(o) {
-      if (o.orderNumber && !printedOrders.has(o.orderNumber)) {
-        printedOrders.add(o.orderNumber);
-        playAlertSound();
-        showNewOrderToast(o);
-        // AUTO-IMPRESSION
-        setTimeout(function() {
-          allOrders = orders;
-          selectedOrderNum = o.orderNumber;
-          printTicket();
-        }, 600);
-      }
-    });
     allOrders = orders;
     buildStats();
     buildOrdersTable();
@@ -460,7 +429,7 @@ function showDetail(orderNum) {
     '<div class="detail-body">' +
 
     /* ── Bouton imprimer (en haut, bien visible) ── */
-    '<button class="btn-print-ticket" onclick="printTicket()">' +
+    '<button class="btn-print-ticket" id="printBtn" onclick="printTicket()" title="Ctrl+P — Imprime directement si Chrome est ouvert avec --kiosk-printing">' +
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>' +
     'Imprimer le ticket' +
     '</button>' +
