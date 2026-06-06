@@ -3,44 +3,41 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Menu — Arena Pizza Kebab Reims</title>
-  <meta name="description" content="Découvrez le menu complet d'Arena Pizza Kebab : pizzas, tacos, kebabs, rolls, krousty, desserts. Commandez en ligne.">
+  <title>Menu — Arena Pizza Kebab</title>
   <link rel="stylesheet" href="css/style.css">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍕</text></svg>">
   <style>
-    .pizza-filters-wrap { display:none; flex-direction:column; gap:10px; margin-bottom:28px; }
+    /* ── Filtres pizza ───────────────────────────────── */
+    .pizza-filters-wrap { display:none; flex-direction:column; gap:8px; margin-bottom:24px; }
     .pizza-filters-wrap.visible { display:flex; }
-    .filter-row { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
-    .filter-row-label { font-size:.72rem; font-weight:900; letter-spacing:1.5px; text-transform:uppercase; color:var(--gray); min-width:46px; }
-    .filter-divider { width:1px; height:22px; background:rgba(255,255,255,.1); margin:0 4px; }
-    .size-btn { padding:7px 18px; border-radius:50px; font-size:.82rem; font-weight:800; background:var(--dark3); color:var(--gray); border:2px solid transparent; transition:all .2s; cursor:pointer; font-family:var(--font-b); }
-    .size-btn.active, .size-btn:hover { border-color:var(--gold); color:var(--gold); }
-    .size-btn.active { background:rgba(245,166,35,.1); }
-    .base-btn { padding:7px 18px; border-radius:50px; font-size:.82rem; font-weight:800; background:var(--dark3); color:var(--gray); border:2px solid transparent; transition:all .2s; cursor:pointer; font-family:var(--font-b); display:flex; align-items:center; gap:6px; }
-    .base-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
-    .base-btn.active, .base-btn:hover { border-color:var(--red); color:#fff; }
-    .base-btn.active { background:rgba(212,43,43,.1); }
-    .pizza-base-badge { position:absolute; bottom:8px; left:8px; background:rgba(0,0,0,.75); backdrop-filter:blur(4px); padding:3px 10px; border-radius:20px; font-size:.68rem; font-weight:800; color:#fff; border:1px solid rgba(255,255,255,.15); }
-  /* Pizza section headers */
-  .pizza-serie-section { margin-bottom: 48px; }
-  .pizza-serie-header {
-    display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap;
-    margin-bottom: 18px; padding-bottom: 12px;
-    border-bottom: 2px solid rgba(245,166,35,.3);
-  }
-  .pizza-serie-title {
-    font-family: var(--font-h); font-size: clamp(1.3rem,3vw,1.8rem);
-    letter-spacing: 2px; color: #fff;
-  }
-  .pizza-serie-prices {
-    font-size: .82rem; font-weight: 800; color: var(--gold);
-    background: rgba(245,166,35,.1); padding: 4px 12px; border-radius: 20px;
-  }
-  .menu-grid-inner {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 20px;
-  }
+    .filter-row { display:flex; align-items:center; gap:7px; flex-wrap:wrap; }
+    .filter-row-label { font-size:.68rem; font-weight:900; letter-spacing:1.5px; text-transform:uppercase; color:var(--gray); min-width:44px; flex-shrink:0; }
+    .filter-divider { width:1px; height:20px; background:rgba(255,255,255,.1); margin:0 4px; flex-shrink:0; }
+
+    .serie-btn, .base-btn {
+      padding:6px 14px; border-radius:50px; font-size:.78rem; font-weight:800;
+      background:var(--dark3); color:var(--gray); border:2px solid transparent;
+      transition:all .2s; cursor:pointer; font-family:var(--font-b); white-space:nowrap;
+    }
+    .serie-btn.active, .serie-btn:hover { border-color:#a855f7; color:#c084fc; background:rgba(168,85,247,.1); }
+    .base-btn { display:flex; align-items:center; gap:5px; }
+    .base-btn.active,  .base-btn:hover  { border-color:var(--red); color:#fff; background:rgba(212,43,43,.1); }
+    .base-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+
+    /* ── Sections pizzas ─────────────────────────────── */
+    .pizza-serie-section { margin-bottom: 48px; }
+    .pizza-serie-header {
+      display:flex; align-items:baseline; gap:14px; flex-wrap:wrap;
+      margin-bottom:18px; padding-bottom:12px;
+      border-bottom:2px solid rgba(245,166,35,.3);
+    }
+    .pizza-serie-title { font-family:var(--font-h); font-size:clamp(1.2rem,3vw,1.7rem); letter-spacing:2px; color:#fff; }
+    .pizza-serie-prices { font-size:.8rem; font-weight:800; color:var(--gold); background:rgba(245,166,35,.1); padding:4px 12px; border-radius:20px; }
+    .menu-grid-inner {
+      display:grid;
+      grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+      gap:20px;
+    }
   </style>
 </head>
 <body>
@@ -86,18 +83,21 @@
 
 <section class="menu-section">
   <div class="container">
+
+    <!-- Onglets catégories -->
     <div class="menu-tabs" id="menuTabs"></div>
 
-    <!-- Filtres pizza : Taille + Base côte à côte -->
+    <!-- Filtres pizzas : Série + Base uniquement (pas de taille) -->
     <div class="pizza-filters-wrap" id="pizzaFiltersWrap">
 
       <div class="filter-row">
-        <span class="filter-row-label">Taille</span>
+        <span class="filter-row-label">Série</span>
         <div class="filter-divider"></div>
-        <button type="button" class="size-btn active" data-size="all">Toutes</button>
-        <button type="button" class="size-btn" data-size="Junior">Junior</button>
-        <button type="button" class="size-btn" data-size="Senior">Senior</button>
-        <button type="button" class="size-btn" data-size="Mega">Mega</button>
+        <button type="button" class="serie-btn active" data-serie="all">Toutes</button>
+        <button type="button" class="serie-btn" data-serie="favoris">Favoris</button>
+        <button type="button" class="serie-btn" data-serie="premium">Premium</button>
+        <button type="button" class="serie-btn" data-serie="mealLover">Meal Lover</button>
+        <button type="button" class="serie-btn" data-serie="signature">Signature</button>
       </div>
 
       <div class="filter-row">
@@ -107,17 +107,18 @@
           <span class="base-dot" style="background:var(--gray)"></span>Toutes
         </button>
         <button type="button" class="base-btn" data-base="Base Tomate">
-          <span class="base-dot" style="background:#e63946"></span>Base Tomate
+          <span class="base-dot" style="background:#e63946"></span>Tomate
         </button>
         <button type="button" class="base-btn" data-base="Base Crème Fraîche">
-          <span class="base-dot" style="background:#f8e8c0"></span>Base Crème Fraîche
+          <span class="base-dot" style="background:#f8e8c0"></span>Crème Fraîche
         </button>
-
       </div>
 
+      <div id="seriePriceInfo" style="display:none;font-size:.78rem;color:var(--gray);padding:4px 2px"></div>
     </div>
 
-    <div class="menu-grid" id="menuGrid"></div>
+    <!-- Grille articles -->
+    <div id="menuGrid"></div>
   </div>
 </section>
 
@@ -138,7 +139,7 @@
 <footer class="footer">
   <div class="container">
     <div class="footer-bottom" style="border-top:none;padding-top:0">
-      <span>© 2024 Arena Pizza Kebab · 88 Rue Lesage · 51100 Reims</span>
+      <span>© 2026 Arena Pizza Kebab · 88 Rue Lesage · 51100 Reims</span>
       <a href="index.html" class="btn btn-secondary" style="padding:8px 20px;font-size:.85rem">Retour Accueil</a>
     </div>
   </div>
@@ -149,158 +150,153 @@
 <script src="js/main.js"></script>
 <script>
 var currentCategory = 'pizzas';
-
-// ── Bannière horaires ──────────────────────────────────────
-(function() {
-  var status = getOrderingStatus();
-  if (status === 'closed' || status === 'call') {
-    var phone = APK_MENU && APK_MENU.info ? APK_MENU.info.phone1 : '09 83 39 82 20';
-    var msg = status === 'closed'
-      ? '⏰ Nous sommes fermés — Horaires : 11h00–13h15 et 18h00–22h15'
-      : '📞 Commandes en ligne terminées — Appelez le ' + phone;
-    var bar = document.createElement('div');
-    bar.style.cssText = 'background:var(--red);color:#fff;text-align:center;padding:12px 20px;font-weight:800;font-size:.88rem;position:sticky;top:0;z-index:1000';
-    bar.innerHTML = msg;
-    document.querySelector('.menu-section')?.prepend(bar);
-  }
-})();
-var currentSize     = 'all';
+var currentSerie    = 'all';
 var currentBase     = 'all';
 
-function getBadgeClass(badge) {
-  if (!badge) return '';
-  if (badge === 'Best-seller' || badge === 'Populaire') return 'badge-red';
-  if (badge === 'Nouveau') return 'badge-gold';
+/* ── Infos sections pizzas ───────────────────────────────── */
+var SERIE_INFO = {
+  favoris:   { label:'Nos Pizzas Favoris',  prices:'Junior 9€ · Senior 12€ · Méga 19€' },
+  premium:   { label:'Nos Pizzas Premium',   prices:'Junior 10€ · Senior 13€ · Méga 20€' },
+  mealLover: { label:'The Meal Lover',        prices:'Junior 11€ · Senior 14€ · Méga 21€' },
+  signature: { label:'Signature du Chef',     prices:'Junior 12€ · Senior 15€ · Méga 22€' }
+};
+
+/* ── Badge ──────────────────────────────────────────────── */
+function getBadgeClass(b) {
+  if (!b) return '';
+  if (b==='Best-seller'||b==='Populaire') return 'badge-red';
+  if (b==='Nouveau'||b==='Duo') return 'badge-gold';
   return 'badge-dark';
 }
 
-function renderMenuCard(item) {
-  var baseLabel = (item.category === 'pizzas' && currentBase !== 'all')
-    ? '<div class="pizza-base-badge">' + currentBase + '</div>' : '';
+/* ── Carte article ───────────────────────────────────────── */
+function renderCard(item) {
+  var priceFrom = item.options && item.options.find(function(o){ return o.type==='size_radio'; })
+    ? 'À partir de ' : '';
   return '<div class="menu-card" data-id="' + item.id + '">'
     + '<div class="menu-card-img-wrap">'
     + '<img src="' + item.image + '" alt="' + item.name + '" class="menu-card-img" loading="lazy"'
     + ' onerror="this.src=\'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400\'">'
     + (item.badge ? '<div class="menu-card-badge"><span class="badge ' + getBadgeClass(item.badge) + '">' + item.badge + '</span></div>' : '')
-    + (item.size  ? '<div class="menu-card-size">' + item.size + '</div>' : '')
-    + baseLabel
     + '</div>'
     + '<div class="menu-card-body">'
     + '<div class="menu-card-name">' + item.name + '</div>'
     + '<div class="menu-card-desc">' + item.description + '</div>'
     + '<div class="menu-card-footer">'
-    + '<div class="menu-card-price">' + formatPrice(item.price) + '</div>'
+    + '<div class="menu-card-price">' + priceFrom + formatPrice(item.price) + '</div>'
     + '<button type="button" class="btn-add" data-id="' + item.id + '" aria-label="Ajouter">+</button>'
     + '</div></div></div>';
 }
 
+/* ── Rendu grille ────────────────────────────────────────── */
 function renderMenu() {
   var grid = document.getElementById('menuGrid');
   if (!grid) return;
+
   var items = getItemsByCategory(currentCategory);
-  if (currentCategory === 'pizzas' && currentSize !== 'all') {
-    items = items.filter(function(i) { return i.size === currentSize; });
-  }
-  if (items.length === 0) {
-    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--gray)">Aucun article trouvé.</div>';
-    return;
-  }
-  // Pour les pizzas sans filtre de série : afficher par sections
-  if (currentCategory === 'pizzas' && currentSerie === 'all') {
-    var SERIE_FULL = {
-      favoris:   { label: 'Nos Pizzas Favoris',  prices: 'Junior 9€ / Senior 12€ / Méga 19€' },
-      premium:   { label: 'Nos Pizzas Premium',   prices: 'Junior 10€ / Senior 13€ / Méga 20€' },
-      mealLover: { label: 'The Meal Lover',        prices: 'Junior 11€ / Senior 14€ / Méga 21€' },
-      signature: { label: 'Signature du Chef',     prices: 'Junior 12€ / Senior 15€ / Méga 22€' }
-    };
-    var groups = {};
-    items.forEach(function(i) { if (!groups[i.serie]) groups[i.serie] = []; groups[i.serie].push(i); });
-    var html = '';
-    ['favoris','premium','mealLover','signature'].forEach(function(serieId) {
-      var group = groups[serieId];
-      if (!group || !group.length) return;
-      var s = SERIE_FULL[serieId];
-      html += '<div class="pizza-serie-section">'
-            + '<div class="pizza-serie-header"><div class="pizza-serie-title">' + s.label + '</div>'
-            + '<div class="pizza-serie-prices">' + s.prices + '</div></div>'
-            + '<div class="menu-grid-inner">' + group.map(renderMenuCard).join('') + '</div>'
-            + '</div>';
-    });
-    grid.innerHTML = html;
+
+  if (currentCategory === 'pizzas') {
+    /* ── Filtrer par série si filtre actif ── */
+    if (currentSerie !== 'all') {
+      items = items.filter(function(i){ return i.serie === currentSerie; });
+    }
+
+    /* ── Afficher avec sections quand "Toutes" ── */
+    if (currentSerie === 'all') {
+      var groups = {};
+      items.forEach(function(i){ if (!groups[i.serie]) groups[i.serie] = []; groups[i.serie].push(i); });
+      var html = '';
+      ['favoris','premium','mealLover','signature'].forEach(function(sid) {
+        var grp = groups[sid];
+        if (!grp || !grp.length) return;
+        var s = SERIE_INFO[sid];
+        html += '<div class="pizza-serie-section">'
+              + '<div class="pizza-serie-header">'
+              + '<div class="pizza-serie-title">' + s.label + '</div>'
+              + '<div class="pizza-serie-prices">' + s.prices + '</div>'
+              + '</div>'
+              + '<div class="menu-grid-inner">' + grp.map(renderCard).join('') + '</div>'
+              + '</div>';
+      });
+      grid.innerHTML = html || '<div style="padding:40px;text-align:center;color:var(--gray)">Aucun article.</div>';
+    } else {
+      /* ── Série filtrée : grille simple ── */
+      if (!items.length) {
+        grid.innerHTML = '<div style="padding:40px;text-align:center;color:var(--gray)">Aucun article.</div>';
+      } else {
+        var s = SERIE_INFO[currentSerie];
+        grid.innerHTML = '<div class="pizza-serie-section">'
+          + '<div class="pizza-serie-header">'
+          + '<div class="pizza-serie-title">' + s.label + '</div>'
+          + '<div class="pizza-serie-prices">' + s.prices + '</div>'
+          + '</div>'
+          + '<div class="menu-grid-inner">' + items.map(renderCard).join('') + '</div>'
+          + '</div>';
+      }
+    }
   } else {
-    grid.innerHTML = items.map(renderMenuCard).join('');
+    /* ── Autres catégories ── */
+    if (!items.length) {
+      grid.innerHTML = '<div style="padding:40px;text-align:center;color:var(--gray)">Aucun article.</div>';
+      return;
+    }
+    grid.innerHTML = '<div class="menu-grid">' + items.map(renderCard).join('') + '</div>';
   }
 
+  /* ── Événements cartes ── */
   grid.querySelectorAll('.menu-card').forEach(function(card) {
     card.addEventListener('click', function(e) {
       if (e.target.closest('.btn-add')) return;
-      openItemModalWithBase(card.dataset.id);
+      openItemModal(card.dataset.id);
     });
   });
   grid.querySelectorAll('.btn-add').forEach(function(btn) {
     btn.addEventListener('click', function(e) {
       e.stopPropagation();
-      openItemModalWithBase(btn.dataset.id);
+      openItemModal(btn.dataset.id);
     });
   });
 }
 
-function openItemModalWithBase(itemId) {
-  openItemModal(itemId);
-  if (currentBase === 'all') return;
-  // Pré-sélectionner la base dans la modal
-  setTimeout(function() {
-    var groups = document.querySelectorAll('#option-form .option-group');
-    groups.forEach(function(group) {
-      var lbl = group.querySelector('.option-label');
-      if (lbl && lbl.textContent.trim().indexOf('Base') === 0) {
-        var sel = group.querySelector('select');
-        if (sel) {
-          for (var i = 0; i < sel.options.length; i++) {
-            if (sel.options[i].value === currentBase) {
-              sel.selectedIndex = i;
-              var item = getItemById(itemId);
-              if (item) updateModalTotal(item.price);
-              break;
-            }
-          }
-        }
-      }
-    });
-  }, 60);
-}
-
+/* ── Onglets catégories ──────────────────────────────────── */
 function buildTabs() {
   var el = document.getElementById('menuTabs');
   if (!el) return;
   el.innerHTML = APK_MENU.categories.map(function(c) {
-    return '<button type="button" class="menu-tab' + (c.id === currentCategory ? ' active' : '') + '" data-cat="' + c.id + '">' + c.label + '</button>';
+    return '<button type="button" class="menu-tab' + (c.id===currentCategory?' active':'') + '" data-cat="' + c.id + '">' + c.label + '</button>';
   }).join('');
   el.querySelectorAll('.menu-tab').forEach(function(btn) {
     btn.addEventListener('click', function() {
       currentCategory = btn.dataset.cat;
-      currentSize = 'all';
-      currentBase = 'all';
-      el.querySelectorAll('.menu-tab').forEach(function(b) { b.classList.remove('active'); });
+      currentSerie = 'all'; currentBase = 'all';
+      el.querySelectorAll('.menu-tab').forEach(function(b){ b.classList.remove('active'); });
       btn.classList.add('active');
       var wrap = document.getElementById('pizzaFiltersWrap');
-      if (wrap) wrap.classList.toggle('visible', currentCategory === 'pizzas');
+      if (wrap) wrap.classList.toggle('visible', currentCategory==='pizzas');
       resetFilters();
       renderMenu();
     });
   });
 }
 
-function buildPizzaFilters() {
+/* ── Filtres pizza ───────────────────────────────────────── */
+function buildFilters() {
   var wrap = document.getElementById('pizzaFiltersWrap');
   if (!wrap) return;
   if (currentCategory === 'pizzas') wrap.classList.add('visible');
 
-  wrap.querySelectorAll('.size-btn').forEach(function(btn) {
+  wrap.querySelectorAll('.serie-btn').forEach(function(btn) {
     btn.addEventListener('click', function() {
-      currentSize = btn.dataset.size;
-      wrap.querySelectorAll('.size-btn').forEach(function(b) { b.classList.remove('active'); });
+      currentSerie = btn.dataset.serie;
+      wrap.querySelectorAll('.serie-btn').forEach(function(b){ b.classList.remove('active'); });
       btn.classList.add('active');
+      var info = document.getElementById('seriePriceInfo');
+      if (info) {
+        if (currentSerie !== 'all' && SERIE_INFO[currentSerie]) {
+          info.textContent = SERIE_INFO[currentSerie].label + ' — ' + SERIE_INFO[currentSerie].prices;
+          info.style.display = 'block';
+        } else { info.style.display = 'none'; }
+      }
       renderMenu();
     });
   });
@@ -308,7 +304,7 @@ function buildPizzaFilters() {
   wrap.querySelectorAll('.base-btn').forEach(function(btn) {
     btn.addEventListener('click', function() {
       currentBase = btn.dataset.base;
-      wrap.querySelectorAll('.base-btn').forEach(function(b) { b.classList.remove('active'); });
+      wrap.querySelectorAll('.base-btn').forEach(function(b){ b.classList.remove('active'); });
       btn.classList.add('active');
       renderMenu();
     });
@@ -318,10 +314,13 @@ function buildPizzaFilters() {
 function resetFilters() {
   var wrap = document.getElementById('pizzaFiltersWrap');
   if (!wrap) return;
-  wrap.querySelectorAll('.size-btn').forEach(function(b) { b.classList.toggle('active', b.dataset.size === 'all'); });
-  wrap.querySelectorAll('.base-btn').forEach(function(b) { b.classList.toggle('active', b.dataset.base === 'all'); });
+  wrap.querySelectorAll('.serie-btn').forEach(function(b){ b.classList.toggle('active', b.dataset.serie==='all'); });
+  wrap.querySelectorAll('.base-btn').forEach(function(b){ b.classList.toggle('active', b.dataset.base==='all'); });
+  var info = document.getElementById('seriePriceInfo');
+  if (info) info.style.display = 'none';
 }
 
+/* ── Promos ──────────────────────────────────────────────── */
 function buildPromos() {
   var track = document.getElementById('promosTrack');
   if (!track) return;
@@ -331,17 +330,33 @@ function buildPromos() {
   }).join('');
 }
 
+/* ── Init ────────────────────────────────────────────────── */
 function initFromHash() {
   var hash = window.location.hash.replace('#', '');
-  if (hash && APK_MENU.categories.find(function(c) { return c.id === hash; })) {
+  if (hash && APK_MENU.categories.find(function(c){ return c.id===hash; })) {
     currentCategory = hash;
   }
 }
 
+/* ── Bannière horaires si fermé ──────────────────────────── */
+(function() {
+  if (typeof getOrderingStatus === 'undefined') return;
+  var status = getOrderingStatus();
+  if (status === 'open') return;
+  var phone = APK_MENU && APK_MENU.info ? APK_MENU.info.phone1 : '09 83 39 82 20';
+  var msg = status === 'closed'
+    ? '⏰ Nous sommes fermés — Horaires : 11h–13h15 et 18h–22h15'
+    : '📞 Commandes en ligne terminées — Appelez le ' + phone;
+  var bar = document.createElement('div');
+  bar.style.cssText = 'background:var(--red);color:#fff;text-align:center;padding:10px 20px;font-weight:800;font-size:.85rem';
+  bar.textContent = msg;
+  document.querySelector('.promos-section')?.insertAdjacentElement('afterend', bar);
+})();
+
 initFromHash();
 buildPromos();
 buildTabs();
-buildPizzaFilters();
+buildFilters();
 renderMenu();
 Cart.load();
 </script>
