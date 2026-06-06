@@ -255,6 +255,7 @@ initDemoData();
 var currentFilter    = 'all';
 var selectedOrderNum = null;
 var allOrders        = [];
+var printedOrders    = new Set(); // Evite les doublons d'impression
 
 /* ════════════════════════════════════════════════════════════
    FIREBASE — Écoute les commandes en temps réel
@@ -282,8 +283,23 @@ if (typeof db !== 'undefined') {
         snapshot.docChanges().forEach(function(change) {
           if (change.type === 'added') {
             var newOrder = Object.assign({ firestoreId: change.doc.id }, change.doc.data());
-            playAlertSound();
-            showNewOrderToast(newOrder);
+            var key = newOrder.orderNumber || newOrder.firestoreId;
+
+            if (!printedOrders.has(key)) {
+              printedOrders.add(key);
+              playAlertSound();
+              showNewOrderToast(newOrder);
+
+              // ── AUTO-IMPRESSION ──────────────────────────────
+              setTimeout(function() {
+                // S'assurer que la commande est dans allOrders
+                if (!allOrders.find(function(o){ return (o.orderNumber||o.firestoreId)===key; })) {
+                  allOrders.unshift(newOrder);
+                }
+                selectedOrderNum = key;
+                printTicket();  // → window.print() déclenché automatiquement
+              }, 600); // 600ms pour laisser Firebase finir la mise à jour
+            }
           }
         });
       }
@@ -301,9 +317,26 @@ if (typeof db !== 'undefined') {
 } else {
   // Pas de Firebase → localStorage uniquement
   allOrders = getOrders();
+  // Marquer les commandes existantes comme déjà traitées (pas d'impression au chargement)
+  allOrders.forEach(function(o){ if (o.orderNumber) printedOrders.add(o.orderNumber); });
   buildStats();
   buildOrdersTable();
+
   startOrderPolling(function(orders) {
+    // Trouver les nouvelles commandes non encore imprimées
+    orders.forEach(function(o) {
+      if (o.orderNumber && !printedOrders.has(o.orderNumber)) {
+        printedOrders.add(o.orderNumber);
+        playAlertSound();
+        showNewOrderToast(o);
+        // AUTO-IMPRESSION
+        setTimeout(function() {
+          allOrders = orders;
+          selectedOrderNum = o.orderNumber;
+          printTicket();
+        }, 600);
+      }
+    });
     allOrders = orders;
     buildStats();
     buildOrdersTable();
