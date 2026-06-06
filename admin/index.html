@@ -4,16 +4,158 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Commandes — Admin APK</title>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-<script src="../js/firebase-config.js"></script>
   <link rel="stylesheet" href="css/admin.css">
+
+  <!-- Firebase pour les commandes en temps réel -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script src="../js/firebase-config.js"></script>
+
+  <style>
+    /* ── Bouton imprimer ─────────────────────────────── */
+    .btn-print-ticket {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #1a1a2e, #16213e);
+      border: 2px solid var(--gold);
+      color: var(--gold);
+      border-radius: 10px;
+      font-weight: 900;
+      font-size: 1rem;
+      cursor: pointer;
+      font-family: var(--font-b);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: all .2s;
+      margin-bottom: 10px;
+    }
+    .btn-print-ticket:hover {
+      background: var(--gold);
+      color: #000;
+    }
+    .btn-print-ticket svg { width: 20px; height: 20px; flex-shrink: 0; }
+
+    /* ── Toast nouvelle commande ─────────────────────── */
+    #newOrderToast {
+      position: fixed;
+      bottom: 24px; right: 24px;
+      background: var(--red);
+      color: #fff;
+      padding: 16px 22px;
+      border-radius: 14px;
+      font-weight: 900;
+      font-size: .95rem;
+      z-index: 9999;
+      display: none;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 8px 30px rgba(212,43,43,.5);
+      cursor: pointer;
+      animation: bounceIn .4s ease-out;
+    }
+    @keyframes bounceIn {
+      0%   { transform: scale(.8) translateY(20px); opacity:0; }
+      100% { transform: scale(1)  translateY(0);    opacity:1; }
+    }
+    #newOrderToast svg { width: 22px; height: 22px; flex-shrink: 0; }
+
+    /* ══════════════════════════════════════════════════
+       ZONE D'IMPRESSION — cachée à l'écran,
+       visible UNIQUEMENT quand window.print() est appelé
+    ════════════════════════════════════════════════════ */
+    #print-zone {
+      display: none;
+    }
+
+    @media print {
+      /* Masquer toute l'interface admin */
+      body > *          { display: none !important; }
+      .admin-layout     { display: none !important; }
+      #newOrderToast    { display: none !important; }
+
+      /* Afficher uniquement la zone ticket */
+      #print-zone {
+        display: block !important;
+        position: fixed !important;
+        top: 0; left: 0;
+        width: 100%;
+      }
+
+      @page {
+        size: 80mm auto;   /* largeur papier thermique 80mm */
+        margin: 2mm 3mm;
+      }
+
+      #ticket-content {
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 10.5pt;
+        color: #000;
+        background: #fff;
+        width: 100%;
+        line-height: 1.3;
+      }
+      #ticket-content .tc  { text-align: center; }
+      #ticket-content .tb  { font-weight: bold; }
+      #ticket-content .tl  { font-size: 12pt; }
+      #ticket-content .sep { border: none; border-top: 1px dashed #000; margin: 5px 0; }
+      #ticket-content .row { display: flex; justify-content: space-between; }
+    }
+  </style>
 </head>
 <body>
+
+<!-- ══ ZONE IMPRESSION THERMIQUE (invisible à l'écran) ══════ -->
+<div id="print-zone">
+  <div id="ticket-content">
+    <div class="tc tb tl">ARENA PIZZA KEBAB</div>
+    <div class="tc">88 Rue Lesage - 51100 REIMS</div>
+    <div class="tc" style="margin-bottom:4px">Tel : 09 83 39 82 20</div>
+    <hr class="sep">
+    <div id="pt-num" class="tb"></div>
+    <div id="pt-date"></div>
+    <hr class="sep">
+    <div class="tb">CLIENT :</div>
+    <div id="pt-client"></div>
+    <div id="pt-phone"></div>
+    <br>
+    <div id="pt-mode" class="tb"></div>
+    <div id="pt-address"></div>
+    <div id="pt-time"></div>
+    <hr class="sep">
+    <div class="tb">COMMANDE :</div>
+    <div id="pt-items"></div>
+    <hr class="sep">
+    <div id="pt-notes"></div>
+    <div id="pt-total" class="row tb" style="font-size:12pt"></div>
+    <div id="pt-payment"></div>
+    <hr class="sep">
+    <div class="tc tb" style="margin-top:6px">Merci et bon appetit !</div>
+    <div class="tc">================================</div>
+    <br><br><br>
+  </div>
+</div>
+
+<!-- ══ TOAST NOUVELLE COMMANDE ══════════════════════════════ -->
+<div id="newOrderToast" onclick="handleNewOrderToast()">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+    <path d="M13.73 21a2 2 0 01-3.46 0"/>
+  </svg>
+  <div>
+    <div>NOUVELLE COMMANDE</div>
+    <div id="toastOrderNum" style="font-size:.78rem;opacity:.85;font-weight:700"></div>
+  </div>
+  <div style="margin-left:8px;background:rgba(255,255,255,.2);padding:8px 14px;border-radius:8px;font-size:.85rem">
+    Voir + Imprimer
+  </div>
+</div>
+
+<!-- ══ LAYOUT ADMIN ══════════════════════════════════════════ -->
 <div class="admin-layout">
 
-  <!-- SIDEBAR -->
+  <!-- Sidebar -->
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo">
       <div class="sidebar-logo-name">ARENA <span>PIZZA</span> KEBAB</div>
@@ -24,7 +166,7 @@
       <a href="index.html" class="nav-item active">
         <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
         Tableau de bord
-        <span class="nav-badge" id="sidebarPendingCount" style="display:none">0</span>
+        <span class="nav-badge" id="sidebarBadge" style="display:none">0</span>
       </a>
       <a href="orders.html" class="nav-item">
         <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
@@ -33,37 +175,34 @@
       <a href="reservations.html" class="nav-item">
         <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
         Réservations
-        <span class="nav-badge" id="sidebarResCount" style="display:none">0</span>
+      </a>
+      <div class="nav-section-title">Gestion</div>
+      <a href="menu-manager.html" class="nav-item">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/></svg>
+        Gestion du Menu
       </a>
       <div class="nav-section-title">Paramètres</div>
       <a href="../index.html" class="nav-item">
-        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
         Voir le site
       </a>
     </nav>
     <div class="sidebar-footer">
       <div class="sidebar-user-avatar">A</div>
-      <div>
-        <div class="sidebar-user-name">Admin APK</div>
-        <div class="sidebar-user-role">Administrateur</div>
-      </div>
+      <div><div class="sidebar-user-name">Admin APK</div><div class="sidebar-user-role">Administrateur</div></div>
       <button class="btn-logout" onclick="logout()" title="Déconnexion">
         <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
       </button>
     </div>
   </aside>
 
-  <!-- MAIN -->
+  <!-- Main -->
   <div class="admin-main">
-    <!-- Top Bar -->
+    <!-- Top bar -->
     <div class="topbar">
       <div class="topbar-title">TABLEAU DE BORD</div>
       <div class="topbar-actions">
         <div class="live-dot" title="Temps réel actif"></div>
-        <button class="sound-btn active" id="soundBtn" onclick="toggleSound()">
-          <svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 010 7.07"/></svg>
-          Son
-        </button>
         <button class="topbar-btn" onclick="location.reload()">
           <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
           Actualiser
@@ -71,14 +210,15 @@
       </div>
     </div>
 
-    <!-- Content -->
+    <!-- Contenu -->
     <div class="page-content">
       <!-- Stats -->
       <div class="stats-row" id="statsRow"></div>
 
-      <!-- Orders + Detail -->
+      <!-- Commandes + Détail -->
       <div class="two-col">
-        <!-- Orders Today -->
+
+        <!-- Liste commandes -->
         <div class="card">
           <div class="card-header">
             <div class="card-title">Commandes du jour</div>
@@ -89,103 +229,149 @@
               <button class="filter-btn" data-filter="done">Terminées</button>
             </div>
           </div>
-          <div class="card-body">
-            <div id="ordersTable"></div>
-          </div>
+          <div id="ordersTable"></div>
         </div>
 
-        <!-- Detail -->
+        <!-- Panneau détail -->
         <div class="detail-panel" id="detailPanel">
           <div class="detail-placeholder">
             <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
             <p>Cliquez sur une commande<br>pour voir les détails</p>
           </div>
         </div>
+
       </div>
     </div>
   </div>
 </div>
 
+<!-- ══ Scripts ═══════════════════════════════════════════════ -->
 <script src="../js/data.js"></script>
 <script src="js/admin.js"></script>
 <script>
 checkAuth();
 initDemoData();
-  // Écoute les commandes Firebase en temps réel
+
+var currentFilter    = 'all';
+var selectedOrderNum = null;
+var allOrders        = [];
+
+/* ════════════════════════════════════════════════════════════
+   FIREBASE — Écoute les commandes en temps réel
+════════════════════════════════════════════════════════════ */
+var initialLoad = true;
+
 if (typeof db !== 'undefined') {
   db.collection('orders')
-    .orderBy('timestamp', 'desc')
+    .orderBy('createdAt', 'desc')
     .onSnapshot(function(snapshot) {
-      var orders = [];
+      var fbOrders = [];
       snapshot.forEach(function(doc) {
-        orders.push(Object.assign({ firestoreId: doc.id }, doc.data()));
+        fbOrders.push(Object.assign({ firestoreId: doc.id }, doc.data()));
       });
-      // Fusionner avec les commandes localStorage
-      var localOrders = JSON.parse(localStorage.getItem('apk_orders') || '[]');
-      var allIds = orders.map(function(o) { return o.orderNumber; });
-      var onlyLocal = localOrders.filter(function(o) { return !allIds.includes(o.orderNumber); });
-      var merged = orders.concat(onlyLocal);
-      saveOrders(merged);
+
+      // Fusionner Firebase + localStorage
+      var localOrders = getOrders();
+      var fbNums = fbOrders.map(function(o){ return o.orderNumber; });
+      var localOnly = localOrders.filter(function(o){ return !fbNums.includes(o.orderNumber); });
+      allOrders = fbOrders.concat(localOnly);
+      saveOrders(allOrders);
+
+      // Détecter nouvelles commandes (après chargement initial)
+      if (!initialLoad) {
+        snapshot.docChanges().forEach(function(change) {
+          if (change.type === 'added') {
+            var newOrder = Object.assign({ firestoreId: change.doc.id }, change.doc.data());
+            playAlertSound();
+            showNewOrderToast(newOrder);
+          }
+        });
+      }
+      initialLoad = false;
+
+      buildStats();
+      buildOrdersTable();
+    }, function(err) {
+      console.warn('Firebase listener error:', err);
+      // Fallback localStorage
+      allOrders = getOrders();
       buildStats();
       buildOrdersTable();
     });
+} else {
+  // Pas de Firebase → localStorage uniquement
+  allOrders = getOrders();
+  buildStats();
+  buildOrdersTable();
+  startOrderPolling(function(orders) {
+    allOrders = orders;
+    buildStats();
+    buildOrdersTable();
+  });
 }
 
-let currentFilter = 'all';
-let selectedOrderNum = null;
+/* ════════════════════════════════════════════════════════════
+   TOAST NOUVELLE COMMANDE
+════════════════════════════════════════════════════════════ */
+var _toastOrder = null;
 
-// ─── Stats ────────────────────────────────────────────────────
+function showNewOrderToast(order) {
+  _toastOrder = order;
+  var toast = document.getElementById('newOrderToast');
+  document.getElementById('toastOrderNum').textContent =
+    (order.orderNumber || '') + ' — ' + formatPrice(order.total||0) +
+    ' — ' + (order.mode === 'delivery' ? 'Livraison' : 'À emporter');
+  toast.style.display = 'flex';
+  // Auto-masquer après 30s
+  clearTimeout(toast._t);
+  toast._t = setTimeout(function() { toast.style.display = 'none'; }, 30000);
+}
+
+function handleNewOrderToast() {
+  document.getElementById('newOrderToast').style.display = 'none';
+  if (_toastOrder) {
+    showDetail(_toastOrder.orderNumber || _toastOrder.firestoreId);
+  }
+}
+
+/* ════════════════════════════════════════════════════════════
+   STATS
+════════════════════════════════════════════════════════════ */
 function buildStats() {
-  const orders = getOrders();
-  const today = new Date().toDateString();
-  const todayOrders = orders.filter(o => new Date(o.timestamp).toDateString() === today);
-  const pending = orders.filter(o => o.status === 'pending').length;
-  const todayRevenue = todayOrders.filter(o => o.status !== 'cancelled').reduce((s, o) => s + (o.total || 0), 0);
-  const res = getReservations().filter(r => r.status === 'pending').length;
+  var today   = new Date().toDateString();
+  var orders  = allOrders;
+  var todayO  = orders.filter(function(o){ return new Date(o.timestamp||o.createdAt?.seconds*1000).toDateString()===today; });
+  var pending = orders.filter(function(o){ return o.status==='pending'; }).length;
+  var revenue = todayO.filter(function(o){ return o.status!=='cancelled'; })
+                      .reduce(function(s,o){ return s+(parseFloat(o.total)||0); }, 0);
 
-  document.getElementById('statsRow').innerHTML = `
-    <div class="stat-card red">
-      <div class="stat-label">En attente</div>
-      <div class="stat-value" style="color:var(--red)">${pending}</div>
-      <div class="stat-sub">Commandes à traiter</div>
-    </div>
-    <div class="stat-card gold">
-      <div class="stat-label">Aujourd'hui</div>
-      <div class="stat-value" style="color:var(--gold)">${todayOrders.length}</div>
-      <div class="stat-sub">Commandes reçues</div>
-    </div>
-    <div class="stat-card green">
-      <div class="stat-label">CA du jour</div>
-      <div class="stat-value" style="color:var(--green)">${formatPrice(todayRevenue)}</div>
-      <div class="stat-sub">Chiffre d'affaires</div>
-    </div>
-    <div class="stat-card blue">
-      <div class="stat-label">Réservations</div>
-      <div class="stat-value" style="color:var(--blue)">${res}</div>
-      <div class="stat-sub">En attente de confirmation</div>
-    </div>
-  `;
+  document.getElementById('statsRow').innerHTML =
+    '<div class="stat-card red"><div class="stat-label">En attente</div><div class="stat-value" style="color:var(--red)">' + pending + '</div><div class="stat-sub">À traiter</div></div>' +
+    '<div class="stat-card gold"><div class="stat-label">Aujourd\'hui</div><div class="stat-value" style="color:var(--gold)">' + todayO.length + '</div><div class="stat-sub">Commandes</div></div>' +
+    '<div class="stat-card green"><div class="stat-label">CA du jour</div><div class="stat-value" style="color:var(--green)">' + formatPrice(revenue) + '</div><div class="stat-sub">Chiffre d\'affaires</div></div>' +
+    '<div class="stat-card blue"><div class="stat-label">Total</div><div class="stat-value" style="color:var(--blue)">' + orders.length + '</div><div class="stat-sub">Commandes totales</div></div>';
 
-  // Sidebar badges
-  const pendingBadge = document.getElementById('sidebarPendingCount');
-  if (pending > 0) { pendingBadge.style.display = 'flex'; pendingBadge.textContent = pending; }
-  else pendingBadge.style.display = 'none';
-  const resBadge = document.getElementById('sidebarResCount');
-  if (res > 0) { resBadge.style.display = 'flex'; resBadge.textContent = res; }
-  else resBadge.style.display = 'none';
+  var b = document.getElementById('sidebarBadge');
+  if (pending>0) { b.style.display='flex'; b.textContent=pending; } else { b.style.display='none'; }
 }
 
-// ─── Orders Table ─────────────────────────────────────────────
+/* ════════════════════════════════════════════════════════════
+   TABLEAU COMMANDES
+════════════════════════════════════════════════════════════ */
 function buildOrdersTable() {
-  const orders = getOrders();
-  const today = new Date().toDateString();
-  let filtered = orders.filter(o => new Date(o.timestamp).toDateString() === today);
+  var orders = allOrders;
+  var today  = new Date().toDateString();
 
-  if (currentFilter === 'pending')    filtered = filtered.filter(o => o.status === 'pending');
-  else if (currentFilter === 'active') filtered = filtered.filter(o => ['accepted','preparing','ready','delivering'].includes(o.status));
-  else if (currentFilter === 'done')   filtered = filtered.filter(o => o.status === 'done');
+  var filtered = orders.filter(function(o){
+    var d = new Date((o.timestamp)||(o.createdAt&&o.createdAt.seconds?o.createdAt.seconds*1000:null));
+    return d.toDateString() === today;
+  });
 
-  const el = document.getElementById('ordersTable');
+  if (currentFilter === 'pending')    filtered = filtered.filter(function(o){ return o.status==='pending'; });
+  else if (currentFilter === 'active') filtered = filtered.filter(function(o){ return ['accepted','preparing','ready','delivering'].includes(o.status); });
+  else if (currentFilter === 'done')   filtered = filtered.filter(function(o){ return o.status==='done'; });
+
+  var el = document.getElementById('ordersTable');
   if (!el) return;
 
   if (filtered.length === 0) {
@@ -193,134 +379,187 @@ function buildOrdersTable() {
     return;
   }
 
-  el.innerHTML = `
-    <div style="display:grid;grid-template-columns:80px 1fr 110px 120px 110px 100px;gap:12px;padding:10px 20px;font-size:.72rem;font-weight:900;letter-spacing:1px;text-transform:uppercase;color:var(--gray2);border-bottom:1px solid rgba(255,255,255,.05)">
-      <div>N°</div><div>Client</div><div>Total</div><div>Mode</div><div>Statut</div><div>Heure</div>
-    </div>
-    ${filtered.map(o => `
-      <div class="order-row${o.status === 'pending' ? ' new' : ''}${o.orderNumber === selectedOrderNum ? '' : ''}" onclick="showDetail('${o.orderNumber}')">
-        <div class="order-id">${o.orderNumber}</div>
-        <div>
-          <div class="order-client">${o.firstName} ${o.lastName}</div>
-          <div class="order-client-phone">${o.phone}</div>
-        </div>
-        <div class="order-total">${formatPrice(o.total)}</div>
-        <div><span class="order-mode mode-${o.mode === 'delivery' ? 'delivery' : 'pickup'}">${o.mode === 'delivery' ? 'Livraison' : 'À emporter'}</span></div>
-        <div>${statusBadge(o.status)}</div>
-        <div class="order-time">${timeAgo(o.timestamp)}</div>
-      </div>
-    `).join('')}
-  `;
+  el.innerHTML =
+    '<div style="display:grid;grid-template-columns:80px 1fr 100px 120px 100px 90px;gap:10px;padding:10px 20px;font-size:.7rem;font-weight:900;letter-spacing:1px;text-transform:uppercase;color:var(--gray2);border-bottom:1px solid rgba(255,255,255,.05)">' +
+    '<div>N°</div><div>Client</div><div>Total</div><div>Mode</div><div>Statut</div><div>Heure</div></div>' +
+    filtered.map(function(o) {
+      return '<div class="order-row' + (o.status==='pending'?' new':'') + '" onclick="showDetail(\'' + (o.orderNumber||o.firestoreId) + '\')">' +
+        '<div class="order-id" style="font-size:.85rem">' + (o.orderNumber||'—') + '</div>' +
+        '<div><div class="order-client">' + (o.firstName||'') + ' ' + (o.lastName||'') + '</div>' +
+        '<div class="order-client-phone">' + (o.phone||'') + '</div></div>' +
+        '<div class="order-total">' + formatPrice(o.total||0) + '</div>' +
+        '<div><span class="order-mode mode-' + (o.mode==='delivery'?'delivery':'pickup') + '">' + (o.mode==='delivery'?'Livraison':'À emporter') + '</span></div>' +
+        '<div>' + statusBadge(o.status) + '</div>' +
+        '<div class="order-time">' + timeAgo(o.timestamp||(o.createdAt&&o.createdAt.seconds?new Date(o.createdAt.seconds*1000).toISOString():null)) + '</div>' +
+        '</div>';
+    }).join('');
 }
 
-// ─── Detail Panel ─────────────────────────────────────────────
+/* ════════════════════════════════════════════════════════════
+   DÉTAIL COMMANDE + BOUTON IMPRIMER
+════════════════════════════════════════════════════════════ */
 function showDetail(orderNum) {
   selectedOrderNum = orderNum;
-  const order = getOrders().find(o => o.orderNumber === orderNum);
+  var order = allOrders.find(function(o){ return (o.orderNumber===orderNum)||(o.firestoreId===orderNum); });
   if (!order) return;
 
-  const panel = document.getElementById('detailPanel');
-  const addrHtml = order.mode === 'delivery' && order.address
-    ? `<div class="detail-row"><label>Adresse</label><span>${order.address.street}, ${order.address.city} ${order.address.zip}</span></div>
-       ${order.address.notes ? `<div class="detail-row"><label>Instructions</label><span>${order.address.notes}</span></div>` : ''}`
-    : '';
+  var addrHtml = '';
+  if (order.mode==='delivery' && order.address) {
+    var a = typeof order.address==='string' ? JSON.parse(order.address) : order.address;
+    addrHtml = '<div class="detail-row"><label>Adresse</label><span>' + (a.street||'') + ', ' + (a.city||'') + ' ' + (a.zip||'') + '</span></div>';
+    if (a.notes) addrHtml += '<div class="detail-row"><label>Instructions</label><span>' + a.notes + '</span></div>';
+  }
 
-  const itemsHtml = (order.items || []).map(i => `
-    <div class="detail-item">
-      <span class="detail-item-price">${formatPrice(i.totalPrice * i.qty)}</span>
-      <div class="detail-item-name">${i.qty}× ${i.name}</div>
-      ${i.selectedOptions && Object.keys(i.selectedOptions).length
-        ? `<div class="detail-item-opts">${Object.entries(i.selectedOptions).map(([k,v])=>`${k}: ${v}`).join(' · ')}</div>`
-        : ''}
-    </div>
-  `).join('');
+  var itemsHtml = (order.items||[]).map(function(i) {
+    var opts = Object.entries(i.selectedOptions||{}).filter(function(e){return e[1];}).map(function(e){return e[0]+': '+e[1];}).join(' · ');
+    return '<div class="detail-item"><span class="detail-item-price">' + formatPrice((parseFloat(i.totalPrice)||0)*(parseInt(i.qty)||1)) + '</span>' +
+           '<div class="detail-item-name">' + (i.qty||1) + '× ' + i.name + '</div>' +
+           (opts ? '<div class="detail-item-opts">' + opts + '</div>' : '') +
+           '</div>';
+  }).join('');
 
-  panel.innerHTML = `
-    <div class="detail-header">
-      <div>
-        <div class="detail-order-id">${order.orderNumber}</div>
-        <div style="font-size:.75rem;color:var(--gray)">${formatDate(order.timestamp)}</div>
-      </div>
-      ${statusBadge(order.status)}
-    </div>
-    <div class="detail-body">
-      <div class="detail-section">
-        <div class="detail-section-title">Client</div>
-        <div class="detail-row"><label>Nom</label><span>${order.firstName} ${order.lastName}</span></div>
-        <div class="detail-row"><label>Téléphone</label><span><a href="tel:${order.phone}" style="color:var(--gold)">${order.phone}</a></span></div>
-        ${order.email ? `<div class="detail-row"><label>Email</label><span style="font-size:.8rem">${order.email}</span></div>` : ''}
-        <div class="detail-row"><label>Mode</label><span>${order.mode === 'delivery' ? 'Livraison' : 'À emporter'}</span></div>
-        <div class="detail-row"><label>Horaire</label><span>${order.time === 'ASAP' ? 'Dès que possible' : order.time}</span></div>
-        <div class="detail-row"><label>Paiement</label><span>${{card:'Carte',paypal:'PayPal',cash:'Livraison'}[order.payment]||''}</span></div>
-        ${addrHtml}
-      </div>
-      ${order.notes ? `<div class="detail-section"><div class="detail-section-title">Notes</div><div style="font-size:.85rem;color:var(--gray);line-height:1.5;padding:8px;background:var(--dark3);border-radius:8px">${order.notes}</div></div>` : ''}
-      <div class="detail-section">
-        <div class="detail-section-title">Articles</div>
-        ${itemsHtml}
-        <div style="display:flex;justify-content:space-between;padding:10px 0;margin-top:4px;border-top:1px solid rgba(255,255,255,.08);font-weight:900">
-          <span>Total</span>
-          <span style="color:var(--gold);font-size:1.1rem">${formatPrice(order.total)}</span>
-        </div>
-      </div>
-      <div class="detail-section">
-        <div class="detail-section-title">Changer le statut</div>
-        <select class="status-select" id="statusSelect">
-          <option value="pending"    ${order.status==='pending'    ?'selected':''}>En attente</option>
-          <option value="accepted"   ${order.status==='accepted'   ?'selected':''}>Acceptée</option>
-          <option value="preparing"  ${order.status==='preparing'  ?'selected':''}>En préparation</option>
-          <option value="ready"      ${order.status==='ready'      ?'selected':''}>Prête</option>
-          <option value="delivering" ${order.status==='delivering' ?'selected':''}>En livraison</option>
-          <option value="done"       ${order.status==='done'       ?'selected':''}>Terminée</option>
-          <option value="cancelled"  ${order.status==='cancelled'  ?'selected':''}>Annulée</option>
-        </select>
-        <button class="btn-update-status" onclick="updateStatus('${order.orderNumber}')">Mettre à jour</button>
-      </div>
-    </div>
-  `;
+  document.getElementById('detailPanel').innerHTML =
+    '<div class="detail-header">' +
+    '<div><div class="detail-order-id">' + (order.orderNumber||'—') + '</div>' +
+    '<div style="font-size:.75rem;color:var(--gray)">' + formatDate(order.timestamp||(order.createdAt&&order.createdAt.seconds?new Date(order.createdAt.seconds*1000).toISOString():null)) + '</div></div>' +
+    statusBadge(order.status) +
+    '</div>' +
+    '<div class="detail-body">' +
+
+    /* ── Bouton imprimer (en haut, bien visible) ── */
+    '<button class="btn-print-ticket" onclick="printTicket()">' +
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>' +
+    'Imprimer le ticket' +
+    '</button>' +
+
+    '<div class="detail-section"><div class="detail-section-title">Client</div>' +
+    '<div class="detail-row"><label>Nom</label><span>' + (order.firstName||'') + ' ' + (order.lastName||'') + '</span></div>' +
+    '<div class="detail-row"><label>Téléphone</label><span><a href="tel:' + (order.phone||'') + '" style="color:var(--gold)">' + (order.phone||'') + '</a></span></div>' +
+    (order.email ? '<div class="detail-row"><label>Email</label><span style="font-size:.8rem">' + order.email + '</span></div>' : '') +
+    '<div class="detail-row"><label>Mode</label><span>' + (order.mode==='delivery'?'Livraison':'À emporter') + '</span></div>' +
+    '<div class="detail-row"><label>Heure</label><span>' + (order.time==='ASAP'?'Dès que possible':(order.time||'ASAP')) + '</span></div>' +
+    addrHtml + '</div>' +
+
+    (order.notes ? '<div class="detail-section"><div class="detail-section-title">Notes</div><div style="font-size:.85rem;color:var(--gray);line-height:1.5;padding:8px;background:var(--dark3);border-radius:8px">' + order.notes + '</div></div>' : '') +
+
+    '<div class="detail-section"><div class="detail-section-title">Articles</div>' +
+    itemsHtml +
+    '<div style="display:flex;justify-content:space-between;padding:10px 0;margin-top:4px;border-top:1px solid rgba(255,255,255,.08);font-weight:900">' +
+    '<span>Total</span><span style="color:var(--gold);font-size:1.1rem">' + formatPrice(order.total||0) + '</span></div></div>' +
+
+    '<div class="detail-section"><div class="detail-section-title">Changer le statut</div>' +
+    '<select class="status-select" id="statusSelect">' +
+    ['pending','accepted','preparing','ready','delivering','done','cancelled'].map(function(s){
+      return '<option value="' + s + '"' + (order.status===s?' selected':'') + '>' + STATUS_LABELS[s] + '</option>';
+    }).join('') +
+    '</select>' +
+    '<button class="btn-update-status" onclick="updateStatus(\'' + (order.orderNumber||order.firestoreId) + '\')">Mettre à jour</button>' +
+    '</div>' +
+
+    '</div>';
 }
 
 function updateStatus(orderNum) {
-  const newStatus = document.getElementById('statusSelect').value;
-  let orders = getOrders();
-  const idx = orders.findIndex(o => o.orderNumber === orderNum);
-  if (idx >= 0) {
-    orders[idx].status = newStatus;
-    saveOrders(orders);
-    showToast('Statut mis à jour : ' + STATUS_LABELS[newStatus]);
-    buildStats();
-    buildOrdersTable();
-    showDetail(orderNum);
+  var newStatus = document.getElementById('statusSelect').value;
+  var orders    = allOrders;
+  var idx       = orders.findIndex(function(o){ return (o.orderNumber===orderNum)||(o.firestoreId===orderNum); });
+  if (idx < 0) return;
+
+  orders[idx].status = newStatus;
+  saveOrders(orders);
+
+  // Mettre à jour Firebase aussi si disponible
+  if (typeof db !== 'undefined' && orders[idx].firestoreId) {
+    db.collection('orders').doc(orders[idx].firestoreId).update({ status: newStatus }).catch(function(){});
   }
+
+  showToast('Statut mis à jour : ' + STATUS_LABELS[newStatus]);
+  buildStats();
+  buildOrdersTable();
+  showDetail(orderNum);
 }
 
-// ─── Filters ──────────────────────────────────────────────────
-document.querySelectorAll('.filter-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+/* ════════════════════════════════════════════════════════════
+   IMPRESSION DU TICKET
+════════════════════════════════════════════════════════════ */
+function printTicket() {
+  if (!selectedOrderNum) return;
+  var order = allOrders.find(function(o){
+    return (o.orderNumber===selectedOrderNum)||(o.firestoreId===selectedOrderNum);
+  });
+  if (!order) return;
+
+  var now  = new Date();
+  var date = now.toLocaleDateString('fr-FR') + ' ' +
+             now.toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' });
+
+  /* Remplir la zone d'impression */
+  document.getElementById('pt-num').textContent  = 'N° : ' + (order.orderNumber||'—');
+  document.getElementById('pt-date').textContent = date;
+  document.getElementById('pt-client').textContent = (order.firstName||'') + ' ' + (order.lastName||'');
+  document.getElementById('pt-phone').textContent  = 'Tel : ' + (order.phone||'');
+  document.getElementById('pt-mode').textContent   = 'MODE : ' + (order.mode==='delivery' ? 'LIVRAISON' : 'A EMPORTER');
+  document.getElementById('pt-time').textContent   = 'Heure : ' + (order.time==='ASAP'?'Des que possible':(order.time||''));
+
+  /* Adresse */
+  var addrEl = document.getElementById('pt-address');
+  if (order.mode==='delivery' && order.address) {
+    var a = typeof order.address==='string' ? JSON.parse(order.address) : order.address;
+    addrEl.innerHTML = (a.street||'') + '<br>' + (a.city||'') + ' ' + (a.zip||'') +
+                       (a.notes ? '<br>Info: ' + a.notes : '');
+  } else {
+    addrEl.textContent = '';
+  }
+
+  /* Articles */
+  var itemsEl = document.getElementById('pt-items');
+  var itemsHtml = (order.items||[]).map(function(i) {
+    var price = ((parseFloat(i.totalPrice)||0)*(parseInt(i.qty)||1)).toFixed(2) + 'E';
+    var line  = '<div style="display:flex;justify-content:space-between">' +
+                '<span>' + (i.qty||1) + 'x ' + i.name + '</span>' +
+                '<span>' + price + '</span></div>';
+    if (i.selectedOptions) {
+      var opts = Object.entries(i.selectedOptions).filter(function(e){return e[1];});
+      opts.forEach(function(e){ line += '<div style="padding-left:12px;font-size:.9em">&gt; ' + e[0] + ': ' + e[1] + '</div>'; });
+    }
+    return line;
+  }).join('');
+  itemsEl.innerHTML = itemsHtml;
+
+  /* Notes */
+  var notesEl = document.getElementById('pt-notes');
+  notesEl.textContent = order.notes ? 'NOTE : ' + order.notes : '';
+  notesEl.style.display = order.notes ? 'block' : 'none';
+
+  /* Total */
+  document.getElementById('pt-total').innerHTML =
+    '<span>TOTAL :</span><span>' + (parseFloat(order.total)||0).toFixed(2) + 'E</span>';
+  document.getElementById('pt-payment').textContent = 'PAIEMENT : Sur place';
+
+  /* Lancer l'impression */
+  window.print();
+}
+
+/* ════════════════════════════════════════════════════════════
+   FILTRES
+════════════════════════════════════════════════════════════ */
+document.querySelectorAll('.filter-btn').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.filter-btn').forEach(function(b){ b.classList.remove('active'); });
     btn.classList.add('active');
     currentFilter = btn.dataset.filter;
     buildOrdersTable();
   });
 });
 
-// ─── Sound Toggle ─────────────────────────────────────────────
-function toggleSound() {
-  soundEnabled = !soundEnabled;
-  const btn = document.getElementById('soundBtn');
-  btn.classList.toggle('active', soundEnabled);
-  btn.innerHTML = soundEnabled
-    ? `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 010 7.07"/></svg>Son`
-    : `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>Son off`;
-}
-
-// ─── Init ─────────────────────────────────────────────────────
-buildStats();
-buildOrdersTable();
-startOrderPolling(() => { buildStats(); buildOrdersTable(); });
-
-// Auto-refresh every 30s
-setInterval(() => { buildStats(); buildOrdersTable(); }, 30000);
+/* Refresh toutes les 30s (fallback si pas de Firebase) */
+setInterval(function() {
+  if (typeof db === 'undefined') {
+    allOrders = getOrders();
+    buildStats();
+    buildOrdersTable();
+  }
+}, 30000);
 </script>
 </body>
 </html>
