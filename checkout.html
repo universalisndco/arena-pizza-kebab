@@ -355,6 +355,9 @@ function generateTicketText(o) {
       Object.entries(item.selectedOptions).filter(function(e){ return e[1]; })
         .forEach(function(e){ t += '   > ' + e[0] + ': ' + e[1] + NL; });
     }
+    if (item.specialRequest) {
+      t += '   * NOTE : ' + item.specialRequest + NL;
+    }
   });
   t += S + NL;
   if (o.notes) t += ' NOTE : ' + o.notes + NL + S + NL;
