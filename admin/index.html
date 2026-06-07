@@ -619,6 +619,7 @@ function showDetail(orderNum) {
     return '<div class="detail-item"><span class="detail-item-price">'+formatPrice((parseFloat(i.totalPrice)||0)*(parseInt(i.qty)||1))+'</span>'+
            '<div class="detail-item-name">'+(i.qty||1)+'× '+i.name+'</div>'+
            (opts?'<div class="detail-item-opts">'+opts+'</div>':'')+
+           (i.specialRequest?'<div style="font-size:.8rem;color:#f59e0b;margin-top:2px">📝 '+i.specialRequest+'</div>':'')+
            '</div>';
   }).join('');
 
