@@ -359,6 +359,9 @@ function buildTicketText(o) {
       Object.entries(item.selectedOptions).filter(function(e){return e[1];})
         .forEach(function(e){ t += '   > '+e[0]+': '+e[1]+NL; });
     }
+    if (item.specialRequest) {
+      t += '   * NOTE : ' + item.specialRequest + NL;
+    }
   });
   t += S + NL;
 
@@ -433,6 +436,8 @@ function printTicket(order) {
     if (i.selectedOptions)
       Object.entries(i.selectedOptions).filter(function(e){return e[1];})
         .forEach(function(e){ line += '<div style="padding-left:10px;font-size:.9em">&gt; '+e[0]+': '+e[1]+'</div>'; });
+    if (i.specialRequest)
+      line += '<div style="padding-left:10px;font-size:.9em;color:#c8a84b">* NOTE : '+i.specialRequest+'</div>';
     return line;
   }).join('');
 
