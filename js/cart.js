@@ -224,6 +224,24 @@ function openItemModal(itemId) {
   });
 
   updateModalTotal();
+
+  // ── Limiter les sauces à 3 max ─────────────────────────
+  const sauceGroups = [...modalBody.querySelectorAll('.option-group')].filter(g =>
+    g.querySelector('.option-label')?.textContent.trim().startsWith('Sauces')
+  );
+  sauceGroups.forEach(group => {
+    const label = group.querySelector('.option-label');
+    if (label) label.innerHTML += ' <small style="color:#aaa;font-weight:400">(3 max)</small>';
+    const cbs = group.querySelectorAll('input[type=checkbox]');
+    cbs.forEach(cb => {
+      cb.addEventListener('change', () => {
+        const checked = [...cbs].filter(c => c.checked).length;
+        cbs.forEach(c => { if (!c.checked) c.disabled = checked >= 3; });
+        const sm = label.querySelector('small');
+        if (sm) sm.textContent = checked > 0 ? `(${checked}/3)` : '(3 max)';
+      });
+    });
+  });
 }
 
 function updateModalTotal() {
