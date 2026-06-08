@@ -48,6 +48,7 @@
     .promo-deal-note { font-size:.8rem; color:var(--gray); }
     .promo-deal-card .btn-promo { margin-top:auto; padding:10px 0; background:var(--red); border:none; border-radius:8px; color:#fff; font-weight:800; font-size:.9rem; cursor:pointer; width:100%; font-family:var(--font-b); letter-spacing:.5px; transition:opacity .2s; }
     .promo-deal-card .btn-promo:hover { opacity:.85; }
+    .promo-deal-img { width:100%; height:160px; object-fit:cover; border-radius:8px; }
   </style>
 </head>
 <body>
@@ -310,6 +311,7 @@ function renderPromos() {
   var html = '<div class="promo-cards-grid">';
   APK_MENU.promos.forEach(function(p) {
     html += '<div class="promo-deal-card" style="border-top-color:' + p.color + '">'
+      + (p.image ? '<img src="' + p.image + '" alt="' + p.title + '" class="promo-deal-img" onerror="this.style.display=\'none\'">' : '')
       + '<div class="promo-deal-header" style="color:' + p.color + '">' + p.title + '</div>'
       + '<div class="promo-deal-desc">' + p.description + '</div>'
       + '<div class="promo-deal-note">' + p.note + '</div>'

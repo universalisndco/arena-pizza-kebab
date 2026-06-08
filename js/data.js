@@ -601,10 +601,10 @@ const APK_MENU = {
   ],
 
   promos: [
-    { id:"promo1", title:"Promo 1", description:"2 Pizzas achetées = la 3ème à -50%",  note:"En livraison uniquement",                        color:"#E8272A" },
-    { id:"promo2", title:"Promo 2", description:"3 Pizzas achetées = la 4ème offerte", note:"En livraison uniquement",                        color:"#E8272A" },
-    { id:"promo3", title:"Promo 3", description:"2+1 GRATUIT",                          note:"À emporter ou sur place · Pizza Senior ou Méga", color:"#F5A623" },
-    { id:"promo4", title:"Promo 4", description:"1 Pizza achetée = 1 à -50%",          note:"À emporter ou sur place · Pizza Senior ou Méga", color:"#F5A623" }
+    { id:"promo1", title:"Promo 1", description:"2 Pizzas achetées = la 3ème à -50%",  note:"En livraison uniquement",                        color:"#E8272A", image:"https://images.unsplash.com/photo-1571407970349-bc81e7e96d47?w=600&q=85" },
+    { id:"promo2", title:"Promo 2", description:"3 Pizzas achetées = la 4ème offerte", note:"En livraison uniquement",                        color:"#E8272A", image:"https://images.unsplash.com/photo-1571997478779-2adcbbe9ab2f?w=600&q=85" },
+    { id:"promo3", title:"Promo 3", description:"2+1 GRATUIT",                          note:"À emporter ou sur place · Pizza Senior ou Méga", color:"#F5A623", image:"https://images.unsplash.com/photo-1613564834361-9436948817d1?w=600&q=85" },
+    { id:"promo4", title:"Promo 4", description:"1 Pizza achetée = 1 à -50%",          note:"À emporter ou sur place · Pizza Senior ou Méga", color:"#F5A623", image:"https://images.unsplash.com/photo-1700760934249-93efbb574d23?w=600&q=85" }
   ],
 
   pizzaDeals: [
