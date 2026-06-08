@@ -38,6 +38,16 @@
       grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
       gap:20px;
     }
+
+    /* ── Promos ──────────────────────────────────────────────── */
+    .promo-cards-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:20px; padding:8px 0; }
+    .promo-deal-card { background:var(--dark2); border-radius:14px; padding:24px; display:flex; flex-direction:column; gap:12px; border-top:3px solid transparent; transition:transform .2s, box-shadow .2s; }
+    .promo-deal-card:hover { transform:translateY(-3px); box-shadow:0 8px 30px rgba(0,0,0,.4); }
+    .promo-deal-header { font-family:var(--font-h); font-size:1rem; letter-spacing:2px; font-weight:900; }
+    .promo-deal-desc { font-size:1.05rem; font-weight:700; color:#fff; line-height:1.4; }
+    .promo-deal-note { font-size:.8rem; color:var(--gray); }
+    .promo-deal-card .btn-promo { margin-top:auto; padding:10px 0; background:var(--red); border:none; border-radius:8px; color:#fff; font-weight:800; font-size:.9rem; cursor:pointer; width:100%; font-family:var(--font-b); letter-spacing:.5px; transition:opacity .2s; }
+    .promo-deal-card .btn-promo:hover { opacity:.85; }
   </style>
 </head>
 <body>
@@ -129,6 +139,13 @@
   </div>
 </div>
 
+<div class="item-modal" id="promo-modal">
+  <div class="modal-inner">
+    <button class="modal-close" onclick="closePromoModal()">&#x2715;</button>
+    <div id="promo-modal-body"></div>
+  </div>
+</div>
+
 <a href="cart.html" id="sticky-cart">
   <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
   <span class="cart-count">0</span>
@@ -152,6 +169,30 @@
 var currentCategory = 'pizzas';
 var currentSerie    = 'all';
 var currentBase     = 'all';
+
+/* ── Slots promos ─────────────────────────────────────────── */
+var PROMO_SLOTS = {
+  promo1: { slots:[
+    { label:'Pizza 1',         price:9.00,  badge:'' },
+    { label:'Pizza 2',         price:9.00,  badge:'' },
+    { label:'Pizza 3',         price:4.50,  badge:'-50%' }
+  ]},
+  promo2: { slots:[
+    { label:'Pizza 1',         price:9.00,  badge:'' },
+    { label:'Pizza 2',         price:9.00,  badge:'' },
+    { label:'Pizza 3',         price:9.00,  badge:'' },
+    { label:'Pizza 4',         price:0.00,  badge:'Offerte' }
+  ]},
+  promo3: { slots:[
+    { label:'Pizza 1 (Senior ou Méga)', price:12.00, badge:'' },
+    { label:'Pizza 2 (Senior ou Méga)', price:12.00, badge:'' },
+    { label:'Pizza 3 (Senior ou Méga)', price:0.00,  badge:'Gratuite' }
+  ]},
+  promo4: { slots:[
+    { label:'Pizza 1 (Senior ou Méga)', price:12.00, badge:'' },
+    { label:'Pizza 2 (Senior ou Méga)', price:6.00,  badge:'-50%' }
+  ]}
+};
 
 /* ── Infos sections pizzas ───────────────────────────────── */
 var SERIE_INFO = {
@@ -234,6 +275,10 @@ function renderMenu() {
           + '</div>';
       }
     }
+  } else if (currentCategory === 'promos') {
+    /* ── Promos ── */
+    renderPromos();
+    return;
   } else {
     /* ── Autres catégories ── */
     if (!items.length) {
@@ -256,6 +301,89 @@ function renderMenu() {
       openItemModal(btn.dataset.id);
     });
   });
+}
+
+/* ── Rendu promos ────────────────────────────────────────── */
+function renderPromos() {
+  var grid = document.getElementById('menuGrid');
+  if (!grid) return;
+  var html = '<div class="promo-cards-grid">';
+  APK_MENU.promos.forEach(function(p) {
+    html += '<div class="promo-deal-card" style="border-top-color:' + p.color + '">'
+      + '<div class="promo-deal-header" style="color:' + p.color + '">' + p.title + '</div>'
+      + '<div class="promo-deal-desc">' + p.description + '</div>'
+      + '<div class="promo-deal-note">' + p.note + '</div>'
+      + '<button class="btn-promo" onclick="openPromoModal(\'' + p.id + '\')">Commander cette promo</button>'
+      + '</div>';
+  });
+  html += '</div>';
+  grid.innerHTML = html;
+}
+
+function openPromoModal(promoId) {
+  if (typeof getOrderingStatus !== 'undefined') {
+    var st = getOrderingStatus();
+    if (st === 'closed') { showHoursMessage('closed'); return; }
+    if (st === 'call')   { showHoursMessage('call');   return; }
+  }
+  var promo = APK_MENU.promos.find(function(p){ return p.id === promoId; });
+  var def   = PROMO_SLOTS[promoId];
+  if (!promo || !def) return;
+  var modal = document.getElementById('promo-modal');
+  var body  = document.getElementById('promo-modal-body');
+  if (!modal || !body) return;
+
+  var total = def.slots.reduce(function(s, sl){ return s + sl.price; }, 0);
+
+  var html = '<div style="border-bottom:1px solid rgba(255,255,255,.1);margin-bottom:16px;padding-bottom:14px">'
+    + '<h3 style="color:' + promo.color + ';font-family:var(--font-h);letter-spacing:2px;margin-bottom:6px">' + promo.title + '</h3>'
+    + '<p style="color:#fff;font-weight:700">' + promo.description + '</p>'
+    + '<small style="color:var(--gray)">' + promo.note + '</small>'
+    + '</div>';
+
+  html += '<form id="promo-form">';
+  def.slots.forEach(function(slot, i) {
+    var badgeHtml = slot.badge ? ' <span class="badge badge-' + (slot.badge === 'Offerte' || slot.badge === 'Gratuite' ? 'gold' : 'red') + '">' + slot.badge + '</span>' : '';
+    html += '<div class="option-group">'
+      + '<label class="option-label">' + slot.label + badgeHtml + '</label>'
+      + '<textarea class="form-textarea promo-slot-req" data-idx="' + i + '" data-price="' + slot.price + '"'
+      + ' placeholder="Demandes spéciales : ex. sans oignons, base crème, bien cuit…"'
+      + ' style="min-height:60px;font-size:.85rem"></textarea>'
+      + '</div>';
+  });
+  html += '</form>';
+
+  html += '<div class="modal-footer">'
+    + '<div class="modal-price-line">Total promo : <strong>' + formatPrice(total) + '</strong></div>'
+    + '<button class="btn-add-confirm" onclick="confirmPromoCart(\'' + promoId + '\')">Ajouter au panier</button>'
+    + '</div>';
+
+  body.innerHTML = html;
+  modal.classList.add('active');
+}
+
+function confirmPromoCart(promoId) {
+  var promo = APK_MENU.promos.find(function(p){ return p.id === promoId; });
+  var def   = PROMO_SLOTS[promoId];
+  if (!promo || !def) return;
+  var reqs = document.querySelectorAll('#promo-form .promo-slot-req');
+  def.slots.forEach(function(slot, i) {
+    var req = reqs[i] ? reqs[i].value.trim() : '';
+    Cart.add({
+      id:              promoId + '-p' + i + '-' + Date.now(),
+      name:            promo.title + ' · ' + slot.label,
+      totalPrice:      slot.price,
+      selectedOptions: {},
+      specialRequest:  req,
+      image:           'https://images.unsplash.com/photo-1598023696416-0193a0bcd302?w=400'
+    });
+  });
+  closePromoModal();
+}
+
+function closePromoModal() {
+  var modal = document.getElementById('promo-modal');
+  if (modal) modal.classList.remove('active');
 }
 
 /* ── Onglets catégories ──────────────────────────────────── */
@@ -359,6 +487,10 @@ buildTabs();
 buildFilters();
 renderMenu();
 Cart.load();
+
+document.addEventListener('click', function(e) {
+  if (e.target.id === 'promo-modal') closePromoModal();
+});
 </script>
 </body>
 </html>
