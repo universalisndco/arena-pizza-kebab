@@ -248,9 +248,9 @@
   </div>
 </main>
 
-<script src="js/data.js"></script>
-<script src="js/cart.js"></script>
-<script src="js/main.js"></script>
+<script src="js/data.js?v=20260607"></script>
+<script src="js/cart.js?v=20260607"></script>
+<script src="js/main.js?v=20260607"></script>
 <script>
 /* ── État ─────────────────────────────────────────────────── */
 var orderMode = 'delivery';
@@ -354,6 +354,9 @@ function generateTicketText(o) {
     if (item.selectedOptions) {
       Object.entries(item.selectedOptions).filter(function(e){ return e[1]; })
         .forEach(function(e){ t += '   > ' + e[0] + ': ' + e[1] + NL; });
+    }
+    if (item.specialRequest) {
+      t += '   * NOTE : ' + item.specialRequest + NL;
     }
   });
   t += S + NL;

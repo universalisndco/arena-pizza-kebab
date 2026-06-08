@@ -359,6 +359,9 @@ function buildTicketText(o) {
       Object.entries(item.selectedOptions).filter(function(e){return e[1];})
         .forEach(function(e){ t += '   > '+e[0]+': '+e[1]+NL; });
     }
+    if (item.specialRequest) {
+      t += '   * NOTE : ' + item.specialRequest + NL;
+    }
   });
   t += S + NL;
 
@@ -433,6 +436,8 @@ function printTicket(order) {
     if (i.selectedOptions)
       Object.entries(i.selectedOptions).filter(function(e){return e[1];})
         .forEach(function(e){ line += '<div style="padding-left:10px;font-size:.9em">&gt; '+e[0]+': '+e[1]+'</div>'; });
+    if (i.specialRequest)
+      line += '<div style="padding-left:10px;font-size:.9em;color:#c8a84b">* NOTE : '+i.specialRequest+'</div>';
     return line;
   }).join('');
 
@@ -614,6 +619,7 @@ function showDetail(orderNum) {
     return '<div class="detail-item"><span class="detail-item-price">'+formatPrice((parseFloat(i.totalPrice)||0)*(parseInt(i.qty)||1))+'</span>'+
            '<div class="detail-item-name">'+(i.qty||1)+'× '+i.name+'</div>'+
            (opts?'<div class="detail-item-opts">'+opts+'</div>':'')+
+           (i.specialRequest?'<div style="font-size:.8rem;color:#f59e0b;margin-top:2px">📝 '+i.specialRequest+'</div>':'')+
            '</div>';
   }).join('');
 
