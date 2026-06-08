@@ -172,26 +172,36 @@ var currentSerie    = 'all';
 var currentBase     = 'all';
 
 /* ── Slots promos ─────────────────────────────────────────── */
+var SIZE_ALL = [
+  { name:'Junior · 29cm', priceAdd:0  },
+  { name:'Senior · 33cm', priceAdd:3  },
+  { name:'Méga · 40cm',   priceAdd:10 }
+];
+var SIZE_SR = [
+  { name:'Senior · 33cm', priceAdd:3  },
+  { name:'Méga · 40cm',   priceAdd:10 }
+];
+
 var PROMO_SLOTS = {
   promo1: { slots:[
-    { label:'Pizza 1',         price:9.00,  badge:'' },
-    { label:'Pizza 2',         price:9.00,  badge:'' },
-    { label:'Pizza 3',         price:4.50,  badge:'-50%' }
+    { label:'Pizza 1', badge:'',        discount:null,   sizes:SIZE_ALL },
+    { label:'Pizza 2', badge:'',        discount:null,   sizes:SIZE_ALL },
+    { label:'Pizza 3', badge:'-50%',    discount:'half', sizes:SIZE_ALL }
   ]},
   promo2: { slots:[
-    { label:'Pizza 1',         price:9.00,  badge:'' },
-    { label:'Pizza 2',         price:9.00,  badge:'' },
-    { label:'Pizza 3',         price:9.00,  badge:'' },
-    { label:'Pizza 4',         price:0.00,  badge:'Offerte' }
+    { label:'Pizza 1', badge:'',        discount:null,   sizes:SIZE_ALL },
+    { label:'Pizza 2', badge:'',        discount:null,   sizes:SIZE_ALL },
+    { label:'Pizza 3', badge:'',        discount:null,   sizes:SIZE_ALL },
+    { label:'Pizza 4', badge:'Offerte', discount:'free', sizes:SIZE_ALL }
   ]},
   promo3: { slots:[
-    { label:'Pizza 1 (Senior ou Méga)', price:12.00, badge:'' },
-    { label:'Pizza 2 (Senior ou Méga)', price:12.00, badge:'' },
-    { label:'Pizza 3 (Senior ou Méga)', price:0.00,  badge:'Gratuite' }
+    { label:'Pizza 1', badge:'',         discount:null,   sizes:SIZE_SR },
+    { label:'Pizza 2', badge:'',         discount:null,   sizes:SIZE_SR },
+    { label:'Pizza 3', badge:'Gratuite', discount:'free', sizes:SIZE_SR }
   ]},
   promo4: { slots:[
-    { label:'Pizza 1 (Senior ou Méga)', price:12.00, badge:'' },
-    { label:'Pizza 2 (Senior ou Méga)', price:6.00,  badge:'-50%' }
+    { label:'Pizza 1', badge:'',      discount:null,   sizes:SIZE_SR },
+    { label:'Pizza 2', badge:'-50%',  discount:'half', sizes:SIZE_SR }
   ]}
 };
 
@@ -335,7 +345,7 @@ function openPromoModal(promoId) {
   var body  = document.getElementById('promo-modal-body');
   if (!modal || !body) return;
 
-  var total = def.slots.reduce(function(s, sl){ return s + sl.price; }, 0);
+  var pizzas = APK_MENU.items.filter(function(it){ return it.category === 'pizzas'; });
 
   var html = '<div style="border-bottom:1px solid rgba(255,255,255,.1);margin-bottom:16px;padding-bottom:14px">'
     + '<h3 style="color:' + promo.color + ';font-family:var(--font-h);letter-spacing:2px;margin-bottom:6px">' + promo.title + '</h3>'
@@ -344,42 +354,157 @@ function openPromoModal(promoId) {
     + '</div>';
 
   html += '<form id="promo-form">';
-  def.slots.forEach(function(slot, i) {
-    var badgeHtml = slot.badge ? ' <span class="badge badge-' + (slot.badge === 'Offerte' || slot.badge === 'Gratuite' ? 'gold' : 'red') + '">' + slot.badge + '</span>' : '';
-    html += '<div class="option-group">'
-      + '<label class="option-label">' + slot.label + badgeHtml + '</label>'
-      + '<textarea class="form-textarea promo-slot-req" data-idx="' + i + '" data-price="' + slot.price + '"'
-      + ' placeholder="Demandes spéciales : ex. sans oignons, base crème, bien cuit…"'
-      + ' style="min-height:60px;font-size:.85rem"></textarea>'
-      + '</div>';
-  });
-  html += '</form>';
 
+  def.slots.forEach(function(slot, i) {
+    var isFree  = slot.discount === 'free';
+    var isHalf  = slot.discount === 'half';
+    var badgeHtml = slot.badge
+      ? ' <span class="badge badge-' + (isFree ? 'gold' : 'red') + '">' + slot.badge + '</span>'
+      : '';
+    var sep = i > 0 ? 'border-top:1px solid rgba(255,255,255,.08);margin-top:12px;padding-top:14px' : '';
+
+    html += '<div class="promo-slot-block" data-slot="' + i + '" style="' + sep + '">'
+      + '<div style="font-weight:800;font-size:.95rem;margin-bottom:10px;color:' + (isFree ? 'var(--gold)' : '#fff') + '">'
+      + slot.label + badgeHtml + '</div>';
+
+    /* Pizza selector */
+    html += '<div class="option-group" style="margin-bottom:8px">'
+      + '<label class="option-label">Pizza <span class="req">*</span></label>'
+      + '<select class="option-select promo-pizza-sel" name="promo_pizza_' + i + '" data-slot="' + i + '" required>'
+      + '<option value="">— Sélectionner une pizza —</option>';
+    pizzas.forEach(function(pz) {
+      html += '<option value="' + pz.id + '" data-price="' + pz.price + '" data-img="' + pz.image + '">'
+        + pz.name + ' — ' + pz.description + '</option>';
+    });
+    html += '</select></div>';
+
+    /* Taille */
+    html += '<div class="option-group" style="margin-bottom:8px">'
+      + '<label class="option-label">Taille <span class="req">*</span></label>'
+      + '<div class="radio-group size-group">';
+    slot.sizes.forEach(function(sz, si) {
+      html += '<label class="radio-label size-label' + (si===0?' selected':'') + '">'
+        + '<input type="radio" name="promo_size_' + i + '" value="' + sz.name + '" data-price-add="' + sz.priceAdd + '"' + (si===0?' checked':'') + ' required>'
+        + '<span class="size-name">' + sz.name + '</span>'
+        + '<span class="size-price promo-sz-price" id="psz-' + i + '-' + si + '">'
+        + (isFree ? '<span style="color:var(--gold)">Gratuit</span>' : '—') + '</span>'
+        + '</label>';
+    });
+    html += '</div></div>';
+
+    /* Base */
+    html += '<div class="option-group" style="margin-bottom:8px">'
+      + '<label class="option-label">Base <span class="req">*</span></label>'
+      + '<div class="radio-group">'
+      + '<label class="radio-label"><input type="radio" name="promo_base_' + i + '" value="Base Tomate" checked required><span>Tomate</span></label>'
+      + '<label class="radio-label"><input type="radio" name="promo_base_' + i + '" value="Base Crème Fraîche"><span>Crème Fraîche</span></label>'
+      + '</div></div>';
+
+    /* Demandes spéciales */
+    html += '<div class="option-group">'
+      + '<label class="option-label">Demandes spéciales</label>'
+      + '<textarea class="form-textarea promo-slot-req" data-idx="' + i + '"'
+      + ' placeholder="ex. sans oignons, bien cuit…"'
+      + ' style="min-height:50px;font-size:.85rem"></textarea>'
+      + '</div>';
+
+    html += '</div>';
+  });
+
+  html += '</form>';
   html += '<div class="modal-footer">'
-    + '<div class="modal-price-line">Total promo : <strong>' + formatPrice(total) + '</strong></div>'
-    + '<button class="btn-add-confirm" onclick="confirmPromoCart(\'' + promoId + '\')">Ajouter au panier</button>'
+    + '<div class="modal-price-line">Total promo : <strong id="promo-total">—</strong></div>'
+    + '<button class="btn-add-confirm" id="promo-confirm-btn" onclick="confirmPromoCart(\'' + promoId + '\')" style="opacity:.4;cursor:not-allowed" disabled>Ajouter au panier</button>'
     + '</div>';
 
   body.innerHTML = html;
   modal.classList.add('active');
+  _setupPromoListeners(promoId);
+}
+
+function _setupPromoListeners(promoId) {
+  var def = PROMO_SLOTS[promoId];
+
+  function recalc() {
+    var total = 0;
+    var allOk = true;
+
+    def.slots.forEach(function(slot, i) {
+      var sel  = document.querySelector('.promo-pizza-sel[data-slot="' + i + '"]');
+      var sInp = document.querySelector('input[name="promo_size_' + i + '"]:checked');
+      var pxPrice = sel && sel.value ? parseFloat(sel.selectedOptions[0].dataset.price||0) : NaN;
+      var sAdd    = sInp ? parseFloat(sInp.dataset.priceAdd||0) : 0;
+
+      /* Update size price labels */
+      slot.sizes.forEach(function(sz, si) {
+        var el = document.getElementById('psz-' + i + '-' + si);
+        if (!el || slot.discount === 'free') return;
+        if (isNaN(pxPrice)) { el.textContent = '—'; return; }
+        var p = pxPrice + sz.priceAdd;
+        if (slot.discount === 'half') p = p * 0.5;
+        el.textContent = formatPrice(p);
+      });
+
+      if (slot.discount === 'free') return;
+      if (!sel || !sel.value) { allOk = false; return; }
+      var price = pxPrice + sAdd;
+      if (slot.discount === 'half') price = price * 0.5;
+      total += price;
+    });
+
+    var tEl = document.getElementById('promo-total');
+    var btn = document.getElementById('promo-confirm-btn');
+    if (tEl) tEl.textContent = allOk ? formatPrice(total) : '—';
+    if (btn) {
+      btn.disabled = !allOk;
+      btn.style.opacity  = allOk ? '1' : '.4';
+      btn.style.cursor   = allOk ? 'pointer' : 'not-allowed';
+    }
+  }
+
+  document.querySelectorAll('#promo-form .promo-pizza-sel, #promo-form input[type=radio]').forEach(function(el) {
+    el.addEventListener('change', recalc);
+  });
+  recalc();
 }
 
 function confirmPromoCart(promoId) {
   var promo = APK_MENU.promos.find(function(p){ return p.id === promoId; });
   var def   = PROMO_SLOTS[promoId];
   if (!promo || !def) return;
-  var reqs = document.querySelectorAll('#promo-form .promo-slot-req');
+
   def.slots.forEach(function(slot, i) {
-    var req = reqs[i] ? reqs[i].value.trim() : '';
+    var sel    = document.querySelector('.promo-pizza-sel[data-slot="' + i + '"]');
+    var sInp   = document.querySelector('input[name="promo_size_' + i + '"]:checked');
+    var bInp   = document.querySelector('input[name="promo_base_' + i + '"]:checked');
+    var reqEl  = document.querySelector('.promo-slot-req[data-idx="' + i + '"]');
+
+    var pizza  = sel && sel.value ? getItemById(sel.value) : null;
+    var pxPrice= pizza ? pizza.price : 0;
+    var sAdd   = sInp ? parseFloat(sInp.dataset.priceAdd||0) : 0;
+    var sizeLbl= sInp ? sInp.value : '';
+    var baseLbl= bInp ? bInp.value : 'Base Tomate';
+    var req    = reqEl ? reqEl.value.trim() : '';
+
+    var price  = pxPrice + sAdd;
+    if (slot.discount === 'half') price = Math.round(price * 50) / 100;
+    if (slot.discount === 'free') price = 0;
+
+    var shortSize = sizeLbl ? sizeLbl.split('·')[0].trim() : '';
+    var itemName  = promo.title + ' · ' + slot.label
+      + (pizza ? ' — ' + pizza.name : '')
+      + (shortSize ? ' ' + shortSize : '');
+
     Cart.add({
       id:              promoId + '-p' + i + '-' + Date.now(),
-      name:            promo.title + ' · ' + slot.label,
-      totalPrice:      slot.price,
-      selectedOptions: {},
+      name:            itemName,
+      totalPrice:      Math.round(price * 100) / 100,
+      selectedOptions: { Taille: sizeLbl, Base: baseLbl },
       specialRequest:  req,
-      image:           'https://images.unsplash.com/photo-1598023696416-0193a0bcd302?w=400'
+      image:           pizza ? pizza.image : 'https://images.unsplash.com/photo-1598023696416-0193a0bcd302?w=400'
     });
   });
+
   closePromoModal();
 }
 
