@@ -181,12 +181,23 @@
               <textarea class="mm-textarea" id="newDescription" placeholder="Ingrédients, composition..."></textarea>
             </div>
 
+            <div class="mm-field">
+              <label class="mm-label">URL Image</label>
+              <input type="url" class="mm-input" id="newImage" placeholder="https://images.unsplash.com/...">
+            </div>
+
+            <div class="mm-field">
+              <label class="mm-label">Offre spéciale (optionnel)</label>
+              <div class="mm-special-grid" id="newSpecialGrid"></div>
+              <div style="font-size:.74rem;color:var(--gray);margin-top:6px" id="newSpecialHint"></div>
+            </div>
+
             <div class="mm-row2">
               <div class="mm-field">
                 <label class="mm-label">Prix (€) *</label>
                 <input type="number" class="mm-input" id="newPrice" placeholder="0.00" step="0.50" min="0">
               </div>
-              <div class="mm-field">
+              <div class="mm-field" id="newCategoryField">
                 <label class="mm-label">Catégorie *</label>
                 <select class="mm-select" id="newCategory" onchange="onCategoryChange('new')">
                   <option value="">Choisir…</option>
@@ -196,16 +207,6 @@
                   <input type="text" class="mm-input" id="newCatLabel" placeholder="Nom de la nouvelle catégorie">
                 </div>
               </div>
-            </div>
-
-            <div class="mm-field">
-              <label class="mm-label">URL Image</label>
-              <input type="url" class="mm-input" id="newImage" placeholder="https://images.unsplash.com/...">
-            </div>
-
-            <div class="mm-field">
-              <label class="mm-label">Offre spéciale (optionnel)</label>
-              <div class="mm-special-grid" id="newSpecialGrid"></div>
             </div>
 
             <button class="mm-submit-btn" onclick="createNewItem()">Créer l'article</button>
@@ -231,21 +232,9 @@
               <textarea class="mm-textarea" id="comboDescription" placeholder="Sera pré-rempli automatiquement, modifiable"></textarea>
             </div>
 
-            <div class="mm-row2">
-              <div class="mm-field">
-                <label class="mm-label">Nouveau prix (€) *</label>
-                <input type="number" class="mm-input" id="comboPrice" placeholder="0.00" step="0.50" min="0">
-              </div>
-              <div class="mm-field">
-                <label class="mm-label">Catégorie d'affichage *</label>
-                <select class="mm-select" id="comboCategory" onchange="onCategoryChange('combo')">
-                  <option value="">Choisir…</option>
-                  <option value="__new__">+ Nouvelle catégorie</option>
-                </select>
-                <div class="mm-new-cat-input" id="comboCatInputWrap">
-                  <input type="text" class="mm-input" id="comboCatLabel" placeholder="Nom de la nouvelle catégorie">
-                </div>
-              </div>
+            <div class="mm-field">
+              <label class="mm-label">Nouveau prix (€) *</label>
+              <input type="number" class="mm-input" id="comboPrice" placeholder="0.00" step="0.50" min="0">
             </div>
 
             <div class="mm-field">
@@ -256,7 +245,7 @@
             <div class="mm-field">
               <label class="mm-label">Type d'offre spéciale *</label>
               <div class="mm-special-grid" id="comboSpecialGrid"></div>
-              <div style="font-size:.74rem;color:var(--gray);margin-top:6px">Déclenche automatiquement la popup "Nos offres du moment" sur le site.</div>
+              <div style="font-size:.74rem;color:var(--gray);margin-top:6px">Une offre combinée appartient toujours à sa catégorie spéciale — elle apparaîtra automatiquement sous cet onglet dans le menu, et déclenche la popup "Nos offres du moment" sur le site.</div>
             </div>
 
             <button class="mm-submit-btn" onclick="createComboItem()">Créer l'offre combinée</button>
@@ -289,27 +278,32 @@ function switchMode(mode) {
   document.getElementById('sectionCombo').classList.toggle('active', mode === 'combo');
 }
 
-/* ── Catégories : remplir les selects ────────────────────── */
+/* ── Catégories : remplir le select (mode "Nouvel article" uniquement —
+   le mode combo n'a plus de select, sa catégorie vient toujours de
+   l'offre spéciale obligatoire) ───────────────────────────────── */
 function populateCategorySelects() {
   var customCats = getCustomCategories(allCustomItems);
-  var allCats = APK_MENU.categories.concat(customCats.filter(function(cc) {
-    return !APK_MENU.categories.find(function(c){ return c.id === cc.id; });
-  }));
+  // On exclut les catégories qui correspondent à des types d'offre spéciale :
+  // elles ne doivent être atteintes que via le sélecteur d'offre, jamais choisies à la main.
+  var specialIds = Object.keys(SPECIAL_OFFER_TYPES);
+  var allCats = APK_MENU.categories.concat(
+    customCats.filter(function (cc) {
+      return !APK_MENU.categories.find(function (c) { return c.id === cc.id; })
+          && specialIds.indexOf(cc.id) < 0;
+    })
+  );
 
-  ['newCategory', 'comboCategory'].forEach(function(selId) {
-    var sel = document.getElementById(selId);
-    var current = sel.value;
-    var optionsHtml = '<option value="">Choisir…</option>' +
-      allCats.map(function(c){ return '<option value="' + c.id + '">' + c.label + '</option>'; }).join('') +
-      '<option value="__new__">+ Nouvelle catégorie</option>';
-    sel.innerHTML = optionsHtml;
-    if (current) sel.value = current;
-  });
+  var sel = document.getElementById('newCategory');
+  var current = sel.value;
+  sel.innerHTML = '<option value="">Choisir…</option>' +
+    allCats.map(function (c) { return '<option value="' + c.id + '">' + c.label + '</option>'; }).join('') +
+    '<option value="__new__">+ Nouvelle catégorie</option>';
+  if (current) sel.value = current;
 }
 
 function onCategoryChange(mode) {
-  var sel = document.getElementById(mode === 'new' ? 'newCategory' : 'comboCategory');
-  var wrap = document.getElementById(mode === 'new' ? 'newCatInputWrap' : 'comboCatInputWrap');
+  var sel  = document.getElementById('newCategory');
+  var wrap = document.getElementById('newCatInputWrap');
   wrap.classList.toggle('show', sel.value === '__new__');
 }
 
@@ -326,11 +320,37 @@ function buildSpecialGrid(gridId, mode) {
   grid.querySelectorAll('.mm-special-card')[0].classList.add('selected');
 }
 
+// Quand une offre spéciale est sélectionnée, elle DEVIENT la catégorie de
+// l'article — le champ "Catégorie" classique est alors verrouillé car
+// les deux sont mutuellement exclusifs (logique demandée : un article ne
+// peut pas être à la fois dans "Pizzas" ET dans "Pizza du Jour").
 function selectSpecialType(mode, type, el) {
   if (mode === 'new') newSpecialType = type;
   else comboSpecialType = type;
+
   el.parentElement.querySelectorAll('.mm-special-card').forEach(function(c){ c.classList.remove('selected'); });
   el.classList.add('selected');
+
+  if (mode === 'new') {
+    var catField  = document.getElementById('newCategoryField');
+    var catSelect = document.getElementById('newCategory');
+    var hint      = document.getElementById('newSpecialHint');
+
+    if (type) {
+      var info = SPECIAL_OFFER_TYPES[type];
+      catSelect.value = '';
+      catSelect.disabled = true;
+      document.getElementById('newCatInputWrap').classList.remove('show');
+      catField.style.opacity = '.4';
+      catField.style.pointerEvents = 'none';
+      hint.innerHTML = '✓ Catégorie automatique : <strong style="color:#c084fc">' + info.icon + ' ' + info.label + '</strong>';
+    } else {
+      catSelect.disabled = false;
+      catField.style.opacity = '1';
+      catField.style.pointerEvents = 'auto';
+      hint.innerHTML = '';
+    }
+  }
 }
 
 /* ── Mode combo : liste des articles existants ───────────── */
@@ -384,22 +404,31 @@ function updateComboSummary() {
 async function createNewItem() {
   var name = document.getElementById('newName').value.trim();
   var price = parseFloat(document.getElementById('newPrice').value);
-  var categorySelect = document.getElementById('newCategory').value;
 
   if (!name) { showToast('Veuillez entrer un nom', 'error'); return; }
   if (isNaN(price) || price < 0) { showToast('Prix invalide', 'error'); return; }
-  if (!categorySelect) { showToast('Veuillez choisir une catégorie', 'error'); return; }
 
-  var isNewCategory = categorySelect === '__new__';
-  var categoryId, categoryLabel;
-  if (isNewCategory) {
-    categoryLabel = document.getElementById('newCatLabel').value.trim();
-    if (!categoryLabel) { showToast('Veuillez nommer la nouvelle catégorie', 'error'); return; }
-    categoryId = categoryLabel.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  var categoryId, categoryLabel, isNewCategory;
+
+  if (newSpecialType) {
+    // L'offre spéciale EST la catégorie — le select classique est ignoré.
+    var t = SPECIAL_OFFER_TYPES[newSpecialType];
+    categoryId = newSpecialType;
+    categoryLabel = t.label;
+    isNewCategory = true;
   } else {
-    categoryId = categorySelect;
-    var found = APK_MENU.categories.find(function(c){ return c.id === categoryId; });
-    categoryLabel = found ? found.label : categoryId;
+    var categorySelect = document.getElementById('newCategory').value;
+    if (!categorySelect) { showToast('Veuillez choisir une catégorie', 'error'); return; }
+    isNewCategory = categorySelect === '__new__';
+    if (isNewCategory) {
+      categoryLabel = document.getElementById('newCatLabel').value.trim();
+      if (!categoryLabel) { showToast('Veuillez nommer la nouvelle catégorie', 'error'); return; }
+      categoryId = categoryLabel.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    } else {
+      categoryId = categorySelect;
+      var found = APK_MENU.categories.find(function(c){ return c.id === categoryId; });
+      categoryLabel = found ? found.label : categoryId;
+    }
   }
 
   var data = {
@@ -430,8 +459,12 @@ function resetNewForm() {
   document.getElementById('newDescription').value = '';
   document.getElementById('newPrice').value = '';
   document.getElementById('newCategory').value = '';
+  document.getElementById('newCategory').disabled = false;
+  document.getElementById('newCategoryField').style.opacity = '1';
+  document.getElementById('newCategoryField').style.pointerEvents = 'auto';
   document.getElementById('newCatLabel').value = '';
   document.getElementById('newCatInputWrap').classList.remove('show');
+  document.getElementById('newSpecialHint').innerHTML = '';
   document.getElementById('newImage').value = '';
   newSpecialType = null;
   buildSpecialGrid('newSpecialGrid', 'new');
@@ -441,25 +474,16 @@ function resetNewForm() {
 async function createComboItem() {
   var name = document.getElementById('comboName').value.trim();
   var price = parseFloat(document.getElementById('comboPrice').value);
-  var categorySelect = document.getElementById('comboCategory').value;
 
   if (!comboSelectedIds.length) { showToast('Sélectionnez au moins un article', 'error'); return; }
   if (!name) { showToast('Veuillez entrer un nom', 'error'); return; }
   if (isNaN(price) || price < 0) { showToast('Prix invalide', 'error'); return; }
-  if (!categorySelect) { showToast('Veuillez choisir une catégorie', 'error'); return; }
   if (!comboSpecialType) { showToast("Veuillez choisir un type d'offre spéciale", 'error'); return; }
 
-  var isNewCategory = categorySelect === '__new__';
-  var categoryId, categoryLabel;
-  if (isNewCategory) {
-    categoryLabel = document.getElementById('comboCatLabel').value.trim();
-    if (!categoryLabel) { showToast('Veuillez nommer la nouvelle catégorie', 'error'); return; }
-    categoryId = categoryLabel.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-  } else {
-    categoryId = categorySelect;
-    var found = APK_MENU.categories.find(function(c){ return c.id === categoryId; });
-    categoryLabel = found ? found.label : categoryId;
-  }
+  // Un combo appartient TOUJOURS à sa catégorie d'offre spéciale.
+  var t = SPECIAL_OFFER_TYPES[comboSpecialType];
+  var categoryId = comboSpecialType;
+  var categoryLabel = t.label;
 
   var selectedItems = comboSelectedIds.map(function(id){ return getItemById(id); }).filter(Boolean);
   var image = document.getElementById('comboImage').value.trim() || (selectedItems[0] ? selectedItems[0].image : '');
@@ -471,7 +495,7 @@ async function createComboItem() {
     image: image,
     category: categoryId,
     categoryLabel: categoryLabel,
-    isNewCategory: isNewCategory,
+    isNewCategory: true,
     specialType: comboSpecialType,
     combinedFrom: comboSelectedIds.slice(),
     options: []
@@ -492,9 +516,6 @@ function resetComboForm() {
   document.getElementById('comboName').value = '';
   document.getElementById('comboDescription').value = '';
   document.getElementById('comboPrice').value = '';
-  document.getElementById('comboCategory').value = '';
-  document.getElementById('comboCatLabel').value = '';
-  document.getElementById('comboCatInputWrap').classList.remove('show');
   document.getElementById('comboImage').value = '';
   comboSpecialType = null;
   buildSpecialGrid('comboSpecialGrid', 'combo');
