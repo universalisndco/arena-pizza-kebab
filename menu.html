@@ -6,6 +6,11 @@
   <title>Menu — Arena Pizza Kebab</title>
   <link rel="stylesheet" href="css/style.css">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍕</text></svg>">
+
+  <!-- Firebase (articles personnalisés créés depuis l'admin) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
   <style>
     /* ── Filtres pizza ───────────────────────────────── */
     .pizza-filters-wrap { display:none; flex-direction:column; gap:8px; margin-bottom:24px; }
@@ -207,7 +212,7 @@ function renderMenu() {
     /* ── Afficher avec sections quand "Toutes" ── */
     if (currentSerie === 'all') {
       var groups = {};
-      items.forEach(function(i){ if (!groups[i.serie]) groups[i.serie] = []; groups[i.serie].push(i); });
+      items.forEach(function(i){ var key = i.serie || '_autres'; if (!groups[key]) groups[key] = []; groups[key].push(i); });
       var html = '';
       ['favoris','premium','mealLover','signature'].forEach(function(sid) {
         var grp = groups[sid];
@@ -221,6 +226,13 @@ function renderMenu() {
               + '<div class="menu-grid-inner">' + grp.map(renderCard).join('') + '</div>'
               + '</div>';
       });
+      /* Articles custom ajoutés dans "pizzas" sans série assignée */
+      if (groups['_autres'] && groups['_autres'].length) {
+        html += '<div class="pizza-serie-section">'
+              + '<div class="pizza-serie-header"><div class="pizza-serie-title">Autres Pizzas</div></div>'
+              + '<div class="menu-grid-inner">' + groups['_autres'].map(renderCard).join('') + '</div>'
+              + '</div>';
+      }
       grid.innerHTML = html || '<div style="padding:40px;text-align:center;color:var(--gray)">Aucun article.</div>';
     } else {
       /* ── Série filtrée : grille simple ── */
