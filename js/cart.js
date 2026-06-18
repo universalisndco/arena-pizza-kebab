@@ -141,7 +141,7 @@ function openItemModal(itemId) {
 
   item.options.forEach((opt, idx) => {
     stepCount++;
-    const stepLabel = `<span class="opt-step">Étape ${stepCount}</span>`;
+    const stepLabel = `<span style="font-size:.7rem;color:var(--gray2);font-weight:700;margin-right:6px;white-space:nowrap">Étape ${stepCount}</span><span class="opt-step">${stepCount}</span>`;
 
     html += `<div class="option-group" data-type="${opt.type}">
       <label class="option-label">${stepLabel} ${opt.label}${opt.required ? ' <span class="req">*</span>' : ''}</label>`;
