@@ -3,12 +3,40 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Toutes les Commandes — Admin APK</title>
+  <title>Commandes — Admin APK</title>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-<script src="../js/firebase-config.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qz-tray/2.2.4/qz-tray.min.js"></script>
+  <script src="../js/firebase-config.js"></script>
   <link rel="stylesheet" href="css/admin.css">
+  <style>
+    .order-row { display:grid; grid-template-columns:90px 1fr 90px 110px 110px 100px 80px; gap:10px; padding:14px 20px; border-bottom:1px solid rgba(255,255,255,.05); align-items:center; transition:background .2s; }
+    .order-row:hover { background:rgba(255,255,255,.02); }
+    .order-row.new-order { background:rgba(212,43,43,.08); border-left:3px solid var(--red); animation:pulseNew 2s ease-in-out 3; }
+    @keyframes pulseNew { 0%,100%{background:rgba(212,43,43,.08)} 50%{background:rgba(212,43,43,.18)} }
+    .order-id { font-weight:900; font-size:.85rem; color:var(--gold); }
+    .order-client { font-weight:800; font-size:.85rem; color:#fff; }
+    .order-phone { font-size:.75rem; color:var(--gray); }
+    .order-total { font-weight:900; color:#fff; }
+    .badge-mode { font-size:.68rem; font-weight:900; padding:3px 8px; border-radius:20px; }
+    .badge-delivery { background:rgba(34,197,94,.15); color:#22c55e; }
+    .badge-pickup { background:rgba(245,166,35,.15); color:var(--gold); }
+    .badge-status { font-size:.68rem; font-weight:900; padding:3px 8px; border-radius:20px; white-space:nowrap; }
+    .s-pending { background:rgba(239,68,68,.15); color:#ef4444; }
+    .s-accepted { background:rgba(59,130,246,.15); color:#60a5fa; }
+    .s-preparing { background:rgba(245,166,35,.15); color:var(--gold); }
+    .s-ready { background:rgba(168,85,247,.15); color:#c084fc; }
+    .s-delivering { background:rgba(6,182,212,.15); color:#22d3ee; }
+    .s-done { background:rgba(34,197,94,.15); color:#22c55e; }
+    .s-cancelled { background:rgba(107,114,128,.15); color:#9ca3af; }
+    .btn-voir { padding:5px 12px; background:var(--dark3); border:1px solid rgba(255,255,255,.1); border-radius:6px; color:#fff; font-size:.75rem; font-weight:800; cursor:pointer; }
+    .btn-print { padding:5px 10px; background:rgba(245,166,35,.12); border:1px solid rgba(245,166,35,.3); border-radius:6px; color:var(--gold); font-size:.75rem; cursor:pointer; }
+    .printer-status { display:flex; align-items:center; gap:8px; font-size:.8rem; }
+    .printer-dot { width:9px; height:9px; border-radius:50%; background:#ef4444; }
+    .printer-dot.connected { background:#22c55e; }
+    #newOrderBanner { display:none; position:fixed; top:80px; right:20px; background:var(--red); color:#fff; padding:14px 20px; border-radius:12px; font-weight:900; font-size:.9rem; z-index:999; box-shadow:0 8px 30px rgba(212,43,43,.5); animation:slideIn .3s ease-out; }
+    @keyframes slideIn { from{transform:translateX(120%)} to{transform:translateX(0)} }
+  </style>
 </head>
 <body>
 <div class="admin-layout">
@@ -24,12 +52,17 @@
         Tableau de bord
       </a>
       <a href="orders.html" class="nav-item active">
-        <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
-        Toutes les commandes
+        <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg>
+        Commandes
       </a>
-      <a href="reservations.html" class="nav-item">
-        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        Réservations
+      <div class="nav-section-title">Gestion</div>
+      <a href="statut.html" class="nav-item">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Statut du restaurant
+      </a>
+      <a href="menu-manager.html" class="nav-item">
+        <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/></svg>
+        Gestion du Menu
       </a>
       <div class="nav-section-title">Paramètres</div>
       <a href="../index.html" class="nav-item">
@@ -48,38 +81,43 @@
 
   <div class="admin-main">
     <div class="topbar">
-      <div class="topbar-title">TOUTES LES COMMANDES</div>
-      <div class="topbar-actions">
-        <input type="text" id="searchInput" placeholder="Rechercher (nom, N°...)" style="padding:8px 14px;background:var(--dark3);border:1px solid rgba(255,255,255,.08);border-radius:8px;color:#fff;font-size:.85rem;width:220px" oninput="filterOrders()">
-        <button class="topbar-btn" onclick="location.reload()">
-          <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
-          Actualiser
-        </button>
+      <div class="topbar-title">COMMANDES EN TEMPS RÉEL</div>
+      <div style="display:flex;align-items:center;gap:16px">
+        <div class="printer-status">
+          <div class="printer-dot" id="printerDot"></div>
+          <span id="printerLabel" style="color:var(--gray)">Imprimante…</span>
+        </div>
+        <input type="text" id="searchInput" placeholder="Rechercher…" style="padding:8px 14px;background:var(--dark3);border:1px solid rgba(255,255,255,.08);border-radius:8px;color:#fff;font-size:.85rem;width:180px" oninput="renderOrders()">
       </div>
     </div>
 
     <div class="page-content">
       <div class="card">
         <div class="card-header">
-          <div class="card-title">Historique des commandes</div>
+          <div class="card-title">Commandes <span id="orderCount" style="color:var(--gray);font-size:.8rem"></span></div>
           <div style="display:flex;gap:8px;flex-wrap:wrap">
             <button class="filter-btn active" data-filter="all">Toutes</button>
             <button class="filter-btn" data-filter="today">Aujourd'hui</button>
             <button class="filter-btn" data-filter="pending">En attente</button>
-            <button class="filter-btn" data-filter="active">En cours</button>
             <button class="filter-btn" data-filter="done">Terminées</button>
           </div>
         </div>
-        <div id="ordersTableFull"></div>
+        <div style="display:grid;grid-template-columns:90px 1fr 90px 110px 110px 100px 80px;gap:10px;padding:10px 20px;font-size:.7rem;font-weight:900;letter-spacing:1px;text-transform:uppercase;color:var(--gray2);border-bottom:1px solid rgba(255,255,255,.05)">
+          <div>N°</div><div>Client</div><div>Total</div><div>Mode</div><div>Statut</div><div>Date</div><div>Actions</div>
+        </div>
+        <div id="ordersList"><div style="padding:40px;text-align:center;color:var(--gray)">Chargement…</div></div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Detail Modal -->
+<!-- Bannière nouvelle commande -->
+<div id="newOrderBanner">🔔 Nouvelle commande !</div>
+
+<!-- Modal détail -->
 <div id="orderModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:2000;align-items:center;justify-content:center">
-  <div style="background:var(--dark2);border-radius:16px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;padding:28px;position:relative;border:1px solid rgba(255,255,255,.08)">
-    <button onclick="closeModal()" style="position:absolute;top:16px;right:16px;width:32px;height:32px;border-radius:50%;background:var(--dark3);color:#fff;font-size:1.1rem;display:flex;align-items:center;justify-content:center">✕</button>
+  <div style="background:var(--dark2);border-radius:16px;width:100%;max-width:540px;max-height:90vh;overflow-y:auto;padding:28px;position:relative;border:1px solid rgba(255,255,255,.08)">
+    <button onclick="closeModal()" style="position:absolute;top:16px;right:16px;width:32px;height:32px;border-radius:50%;background:var(--dark3);color:#fff;font-size:1.1rem;cursor:pointer;border:none">✕</button>
     <div id="modalContent"></div>
   </div>
 </div>
@@ -88,136 +126,356 @@
 <script src="js/admin.js"></script>
 <script>
 checkAuth();
-initDemoData();
 
-let currentFilter = 'all';
-let searchQuery = '';
+// ═══════════════════════════════════════════════════════
+// ÉTAT
+// ═══════════════════════════════════════════════════════
+var allOrders    = [];
+var currentFilter = 'all';
+var knownIds      = new Set();
+var isFirstLoad   = true;
+var printerName   = null;
 
-function filterOrders() {
-  searchQuery = document.getElementById('searchInput').value.toLowerCase();
-  buildTable();
+// Son alarme (bip généré en JS, pas besoin de fichier audio)
+function playAlarm() {
+  try {
+    var ctx = new (window.AudioContext || window.webkitAudioContext)();
+    [0, 0.25, 0.5].forEach(function(t) {
+      var osc = ctx.createOscillator();
+      var gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.frequency.value = 880;
+      gain.gain.setValueAtTime(0.4, ctx.currentTime + t);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + t + 0.2);
+      osc.start(ctx.currentTime + t);
+      osc.stop(ctx.currentTime + t + 0.2);
+    });
+  } catch(e) {}
 }
 
-function buildTable() {
-  let orders = getOrders();
-  const today = new Date().toDateString();
+// ═══════════════════════════════════════════════════════
+// FIREBASE LISTENER TEMPS RÉEL
+// ═══════════════════════════════════════════════════════
+db.collection('orders')
+  .orderBy('createdAt', 'desc')
+  .limit(100)
+  .onSnapshot(function(snap) {
+    var newOrders = [];
+    snap.forEach(function(doc) {
+      newOrders.push(Object.assign({ _id: doc.id }, doc.data()));
+    });
 
-  if (currentFilter === 'today')   orders = orders.filter(o => new Date(o.timestamp).toDateString() === today);
-  if (currentFilter === 'pending') orders = orders.filter(o => o.status === 'pending');
-  if (currentFilter === 'active')  orders = orders.filter(o => ['accepted','preparing','ready','delivering'].includes(o.status));
-  if (currentFilter === 'done')    orders = orders.filter(o => o.status === 'done');
+    // Détecter les nouvelles commandes
+    if (!isFirstLoad) {
+      newOrders.forEach(function(o) {
+        if (!knownIds.has(o._id)) {
+          onNewOrder(o);
+        }
+      });
+    }
 
-  if (searchQuery) {
-    orders = orders.filter(o =>
-      (o.orderNumber||'').toLowerCase().includes(searchQuery) ||
-      (o.firstName+' '+o.lastName).toLowerCase().includes(searchQuery) ||
-      (o.phone||'').includes(searchQuery)
-    );
+    newOrders.forEach(function(o) { knownIds.add(o._id); });
+    allOrders = newOrders;
+    isFirstLoad = false;
+    renderOrders();
+  }, function(err) {
+    console.error('Firebase error:', err);
+    document.getElementById('ordersList').innerHTML =
+      '<div style="padding:40px;text-align:center;color:#ef4444">Erreur Firebase : ' + err.message + '</div>';
+  });
+
+// ═══════════════════════════════════════════════════════
+// NOUVELLE COMMANDE → ALARME + IMPRESSION AUTO
+// ═══════════════════════════════════════════════════════
+function onNewOrder(order) {
+  // 1. Alarme sonore
+  playAlarm();
+
+  // 2. Bannière visuelle
+  var banner = document.getElementById('newOrderBanner');
+  banner.textContent = '🔔 Nouvelle commande — ' + order.orderNumber + ' !';
+  banner.style.display = 'block';
+  setTimeout(function() { banner.style.display = 'none'; }, 5000);
+
+  // 3. Impression automatique si pas encore imprimée
+  if (!order.printed) {
+    autoPrint(order);
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// QZ TRAY — IMPRESSION AUTOMATIQUE
+// ═══════════════════════════════════════════════════════
+function connectQZ() {
+  if (typeof qz === 'undefined') return;
+  qz.websocket.connect()
+    .then(function() { return qz.printers.getDefault(); })
+    .then(function(p) {
+      printerName = p;
+      document.getElementById('printerDot').classList.add('connected');
+      document.getElementById('printerLabel').textContent = p || 'Imprimante connectée';
+    })
+    .catch(function(e) {
+      document.getElementById('printerLabel').textContent = 'QZ Tray non connecté';
+      console.warn('QZ:', e);
+    });
+}
+
+function autoPrint(order) {
+  if (typeof qz === 'undefined' || !printerName) {
+    console.warn('Imprimante non disponible — impression manuelle nécessaire');
+    return;
+  }
+  var cfg = qz.configs.create(printerName);
+  var data = buildEscPosTicket(order);
+  qz.print(cfg, data)
+    .then(function() {
+      // Marquer comme imprimée dans Firebase
+      db.collection('orders').doc(order._id).update({ printed: true });
+    })
+    .catch(function(e) { console.error('Erreur impression:', e); });
+}
+
+// ═══════════════════════════════════════════════════════
+// GÉNÉRATION TICKET ESC/POS AVEC GRAS
+// ═══════════════════════════════════════════════════════
+function buildEscPosTicket(o) {
+  var ESC = '\x1B', GS = '\x1D';
+  var INIT       = ESC + '@';           // Reset imprimante
+  var CENTER     = ESC + 'a\x01';      // Centrer
+  var LEFT       = ESC + 'a\x00';      // Aligner gauche
+  var BOLD_ON    = ESC + 'E\x01';      // Gras ON
+  var BOLD_OFF   = ESC + 'E\x00';      // Gras OFF
+  var BIG_ON     = ESC + '!\x30';      // Double hauteur + largeur
+  var BIG_OFF    = ESC + '!\x00';      // Taille normale
+  var SEP        = '================================================\n';
+  var SEP2       = '------------------------------------------------\n';
+  var CUT        = GS + 'V\x42\x00';  // Couper le papier
+  var LF         = '\n';
+
+  function pad(l, r, w) {
+    w = w || 48;
+    l = String(l); r = String(r);
+    if (l.length + r.length + 1 > w) l = l.substring(0, w - r.length - 2);
+    return l + ' '.repeat(Math.max(1, w - l.length - r.length)) + r;
+  }
+  function center(s, w) {
+    w = w || 48; s = String(s).substring(0, w);
+    return ' '.repeat(Math.max(0, Math.floor((w - s.length) / 2))) + s + LF;
   }
 
-  const el = document.getElementById('ordersTableFull');
-  if (!el) return;
+  var now = new Date();
+  var date = now.toLocaleDateString('fr-FR') + '  ' +
+             now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
 
-  if (orders.length === 0) {
-    el.innerHTML = '<div style="padding:40px;text-align:center;color:var(--gray);font-size:.88rem">Aucune commande trouvée.</div>';
+  var t = INIT;
+  t += CENTER;
+
+  // ── EN-TÊTE ──────────────────────────────────
+  t += SEP;
+  t += BOLD_ON + BIG_ON;
+  t += center('ARENA PIZZA KEBAB', 48);
+  t += BOLD_OFF + BIG_OFF;
+  t += center('[ APK ]');
+  t += center('88 Rue Lesage — 51100 REIMS');
+  t += center('09 83 39 82 20 | 07 84 65 23 58');
+  t += SEP;
+  t += LF;
+
+  // ── N° COMMANDE ───────────────────────────────
+  t += LEFT;
+  t += pad('COMMANDE N°', BOLD_ON + o.orderNumber + BOLD_OFF) + LF;
+  t += pad('DATE', date) + LF;
+  t += LF;
+
+  // ── CLIENT ────────────────────────────────────
+  t += SEP2;
+  t += CENTER + BOLD_ON + '          CLIENT\n' + BOLD_OFF + LEFT;
+  t += SEP2;
+  t += ' Nom  : ' + BOLD_ON + ((o.firstName||'') + ' ' + (o.lastName||'')) + BOLD_OFF + LF;
+  t += ' Tel  : ' + (o.phone || '—') + LF;
+  t += ' Mode : ' + BOLD_ON + (o.mode === 'delivery' ? 'LIVRAISON' : 'A EMPORTER') + BOLD_OFF + LF;
+  if (o.mode === 'delivery' && o.address) {
+    if (o.address.street) t += ' Adrs : ' + o.address.street + LF;
+    if (o.address.city)   t += '         ' + (o.address.zip||'') + ' ' + o.address.city + LF;
+    if (o.address.notes)  t += ' Info : ' + o.address.notes + LF;
+  }
+  t += ' Heure: ' + (o.time === 'ASAP' ? 'Des que possible' : (o.time||'ASAP')) + LF;
+  t += LF;
+
+  // ── ARTICLES ──────────────────────────────────
+  t += SEP;
+  t += CENTER + BOLD_ON + '       DETAIL COMMANDE\n' + BOLD_OFF + LEFT;
+  t += SEP;
+
+  (o.items || []).forEach(function(item) {
+    var qty   = parseInt(item.qty) || 1;
+    var price = ((parseFloat(item.totalPrice) || 0) * qty).toFixed(2) + ' E';
+    // NOM EN GRAS + GRAND
+    t += BOLD_ON + BIG_ON;
+    t += pad(' ' + qty + 'x ' + item.name, price, 48) + LF;
+    t += BOLD_OFF + BIG_OFF;
+    // Options en normal
+    if (item.selectedOptions) {
+      Object.entries(item.selectedOptions).forEach(function(e) {
+        if (e[1]) t += '    -> ' + e[0] + ': ' + e[1] + LF;
+      });
+    }
+  });
+
+  t += SEP2;
+
+  // Note client
+  if (o.notes) {
+    t += LF;
+    t += BOLD_ON + ' !! NOTE CLIENT !!\n' + BOLD_OFF;
+    t += ' ' + o.notes + LF;
+    t += SEP2;
+  }
+
+  // ── TOTAL ─────────────────────────────────────
+  t += LF;
+  t += pad(' SOUS-TOTAL', (parseFloat(o.total)||0).toFixed(2) + ' E') + LF;
+  if (o.deliveryFee && parseFloat(o.deliveryFee) > 0) {
+    t += pad(' LIVRAISON', parseFloat(o.deliveryFee).toFixed(2) + ' E') + LF;
+  }
+  t += SEP;
+  t += BOLD_ON + BIG_ON;
+  t += pad(' TOTAL TTC', (parseFloat(o.total)||0).toFixed(2) + ' E') + LF;
+  t += BOLD_OFF + BIG_OFF;
+  t += SEP;
+  t += LF;
+  t += pad(' PAIEMENT', o.payment === 'card' ? 'CARTE BANCAIRE' : 'ESPECES') + LF;
+  t += LF;
+
+  // ── PIED DE PAGE ──────────────────────────────
+  t += CENTER;
+  t += SEP;
+  t += BOLD_ON + center('Merci pour votre commande !') + BOLD_OFF;
+  t += center('Bon appetit ! :)');
+  t += SEP;
+  t += LF + LF + LF + LF;
+  t += CUT;
+
+  return [{ type: 'raw', format: 'plain', data: t, options: { language: 'ESCPOS', dotDensity: 'double' } }];
+}
+
+// ═══════════════════════════════════════════════════════
+// RENDU DE LA LISTE
+// ═══════════════════════════════════════════════════════
+var STATUS_LABELS = {
+  pending: 'En attente', accepted: 'Acceptée', preparing: 'En préparation',
+  ready: 'Prête', delivering: 'En livraison', done: 'Terminée', cancelled: 'Annulée'
+};
+
+function renderOrders() {
+  var orders = allOrders.slice();
+  var today  = new Date().toDateString();
+  var q      = (document.getElementById('searchInput').value || '').toLowerCase();
+
+  if (currentFilter === 'today')   orders = orders.filter(function(o) { return o.createdAt && new Date(o.createdAt.seconds ? o.createdAt.seconds * 1000 : o.createdAt).toDateString() === today; });
+  if (currentFilter === 'pending') orders = orders.filter(function(o) { return o.status === 'pending'; });
+  if (currentFilter === 'done')    orders = orders.filter(function(o) { return o.status === 'done'; });
+
+  if (q) orders = orders.filter(function(o) {
+    return (o.orderNumber||'').toLowerCase().includes(q) ||
+           ((o.firstName||'') + ' ' + (o.lastName||'')).toLowerCase().includes(q) ||
+           (o.phone||'').includes(q);
+  });
+
+  document.getElementById('orderCount').textContent = '(' + orders.length + ')';
+
+  var el = document.getElementById('ordersList');
+  if (!orders.length) {
+    el.innerHTML = '<div style="padding:40px;text-align:center;color:var(--gray)">Aucune commande.</div>';
     return;
   }
 
-  el.innerHTML = `
-    <div style="display:grid;grid-template-columns:90px 1fr 100px 120px 110px 110px 90px;gap:10px;padding:10px 20px;font-size:.7rem;font-weight:900;letter-spacing:1px;text-transform:uppercase;color:var(--gray2);border-bottom:1px solid rgba(255,255,255,.05)">
-      <div>N°</div><div>Client</div><div>Total</div><div>Mode</div><div>Statut</div><div>Date</div><div>Actions</div>
-    </div>
-    ${orders.map(o => `
-      <div class="order-row${o.status==='pending'?' new':''}">
-        <div class="order-id" style="font-size:.85rem">${o.orderNumber}</div>
-        <div>
-          <div class="order-client">${o.firstName} ${o.lastName}</div>
-          <div class="order-client-phone">${o.phone}</div>
-        </div>
-        <div class="order-total">${formatPrice(o.total)}</div>
-        <div><span class="order-mode mode-${o.mode==='delivery'?'delivery':'pickup'}">${o.mode==='delivery'?'Livraison':'À emporter'}</span></div>
-        <div>${statusBadge(o.status)}</div>
-        <div class="order-time" style="font-size:.75rem">${formatDate(o.timestamp)}</div>
-        <div style="display:flex;gap:6px">
-          <button onclick="openModal('${o.orderNumber}')" style="padding:5px 10px;background:var(--dark3);border:1px solid rgba(255,255,255,.1);border-radius:6px;color:#fff;font-size:.75rem;font-weight:800;cursor:pointer">Voir</button>
-        </div>
-      </div>
-    `).join('')}
-  `;
+  el.innerHTML = orders.map(function(o) {
+    var ts = o.createdAt ? (o.createdAt.seconds ? new Date(o.createdAt.seconds * 1000) : new Date(o.createdAt)) : new Date();
+    var dateStr = ts.toLocaleDateString('fr-FR') + ' ' + ts.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    var isNew = o.status === 'pending';
+    return '<div class="order-row' + (isNew ? ' new-order' : '') + '">' +
+      '<div class="order-id">' + (o.orderNumber||'—') + '</div>' +
+      '<div><div class="order-client">' + (o.firstName||'') + ' ' + (o.lastName||'') + '</div><div class="order-phone">' + (o.phone||'') + '</div></div>' +
+      '<div class="order-total">' + formatPrice(o.total||0) + '</div>' +
+      '<div><span class="badge-mode ' + (o.mode === 'delivery' ? 'badge-delivery' : 'badge-pickup') + '">' + (o.mode === 'delivery' ? '🚚 Livraison' : '🏪 Emporter') + '</span></div>' +
+      '<div><span class="badge-status s-' + (o.status||'pending') + '">' + (STATUS_LABELS[o.status] || o.status) + '</span></div>' +
+      '<div style="font-size:.75rem;color:var(--gray)">' + dateStr + '</div>' +
+      '<div style="display:flex;gap:5px">' +
+        '<button class="btn-voir" onclick="openModal(\'' + o._id + '\')">Voir</button>' +
+        '<button class="btn-print" onclick="manualPrint(\'' + o._id + '\')" title="Réimprimer">🖨</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
 }
 
-function openModal(orderNum) {
-  const order = getOrders().find(o => o.orderNumber === orderNum);
-  if (!order) return;
-  const addrHtml = order.mode === 'delivery' && order.address
-    ? `<div class="detail-row"><label>Adresse</label><span>${order.address.street}, ${order.address.city}</span></div>${order.address.notes?`<div class="detail-row"><label>Notes</label><span>${order.address.notes}</span></div>`:''}`
-    : '';
-  const itemsHtml = (order.items||[]).map(i=>`
-    <div class="detail-item">
-      <span class="detail-item-price">${formatPrice(i.totalPrice*i.qty)}</span>
-      <div class="detail-item-name">${i.qty}× ${i.name}</div>
-      ${Object.keys(i.selectedOptions||{}).length?`<div class="detail-item-opts">${Object.values(i.selectedOptions).join(' · ')}</div>`:''}
-    </div>
-  `).join('');
-  document.getElementById('modalContent').innerHTML = `
-    <div style="margin-bottom:20px">
-      <div style="font-family:var(--font-h);font-size:1.6rem;color:var(--gold)">${order.orderNumber}</div>
-      <div style="font-size:.8rem;color:var(--gray)">${formatDate(order.timestamp)}</div>
-    </div>
-    <div class="detail-section">
-      <div class="detail-section-title">Client</div>
-      <div class="detail-row"><label>Nom</label><span>${order.firstName} ${order.lastName}</span></div>
-      <div class="detail-row"><label>Tél</label><span><a href="tel:${order.phone}" style="color:var(--gold)">${order.phone}</a></span></div>
-      <div class="detail-row"><label>Mode</label><span>${order.mode==='delivery'?'Livraison':'À emporter'}</span></div>
-      ${addrHtml}
-    </div>
-    <div class="detail-section">
-      <div class="detail-section-title">Articles</div>
-      ${itemsHtml}
-      <div style="display:flex;justify-content:space-between;padding:10px 0;border-top:1px solid rgba(255,255,255,.08);font-weight:900">
-        <span>Total</span><span style="color:var(--gold)">${formatPrice(order.total)}</span>
-      </div>
-    </div>
-    <div class="detail-section">
-      <div class="detail-section-title">Statut</div>
-      <select id="modalStatus" class="status-select">
-        ${['pending','accepted','preparing','ready','delivering','done','cancelled'].map(s=>`<option value="${s}"${order.status===s?' selected':''}>${STATUS_LABELS[s]}</option>`).join('')}
-      </select>
-      <button class="btn-update-status" onclick="updateStatusFromModal('${order.orderNumber}')">Mettre à jour</button>
-    </div>
-  `;
-  const modal = document.getElementById('orderModal');
-  modal.style.display = 'flex';
+// ═══════════════════════════════════════════════════════
+// MODAL DÉTAIL
+// ═══════════════════════════════════════════════════════
+function openModal(id) {
+  var o = allOrders.find(function(x) { return x._id === id; });
+  if (!o) return;
+
+  var itemsHtml = (o.items||[]).map(function(i) {
+    var opts = Object.entries(i.selectedOptions||{}).filter(function(e){ return e[1]; }).map(function(e){ return e[0] + ': ' + e[1]; }).join(' · ');
+    return '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)">' +
+      '<div><div style="font-weight:800">' + (i.qty||1) + '× ' + i.name + '</div>' + (opts ? '<div style="font-size:.78rem;color:var(--gray)">' + opts + '</div>' : '') + '</div>' +
+      '<div style="font-weight:900;color:var(--gold)">' + formatPrice((parseFloat(i.totalPrice)||0) * (parseInt(i.qty)||1)) + '</div>' +
+    '</div>';
+  }).join('');
+
+  document.getElementById('modalContent').innerHTML =
+    '<div style="font-family:var(--font-h);font-size:1.5rem;color:var(--gold);margin-bottom:4px">' + o.orderNumber + '</div>' +
+    '<div style="font-size:.8rem;color:var(--gray);margin-bottom:20px">' + (STATUS_LABELS[o.status]||o.status) + '</div>' +
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;font-size:.85rem">' +
+      '<div><label style="color:var(--gray);font-size:.7rem;font-weight:900">CLIENT</label><div style="font-weight:800;margin-top:3px">' + (o.firstName||'') + ' ' + (o.lastName||'') + '</div></div>' +
+      '<div><label style="color:var(--gray);font-size:.7rem;font-weight:900">TÉLÉPHONE</label><div style="margin-top:3px"><a href="tel:' + o.phone + '" style="color:var(--gold);font-weight:800">' + (o.phone||'—') + '</a></div></div>' +
+      '<div><label style="color:var(--gray);font-size:.7rem;font-weight:900">MODE</label><div style="margin-top:3px">' + (o.mode === 'delivery' ? '🚚 Livraison' : '🏪 À emporter') + '</div></div>' +
+      '<div><label style="color:var(--gray);font-size:.7rem;font-weight:900">PAIEMENT</label><div style="margin-top:3px">' + (o.payment === 'card' ? '💳 Carte' : '💵 Espèces') + '</div></div>' +
+    '</div>' +
+    (o.mode === 'delivery' && o.address ? '<div style="background:var(--dark3);border-radius:10px;padding:10px 14px;margin-bottom:16px;font-size:.84rem"><strong>Adresse :</strong> ' + (o.address.street||'') + ', ' + (o.address.zip||'') + ' ' + (o.address.city||'') + (o.address.notes ? '<br><em>' + o.address.notes + '</em>' : '') + '</div>' : '') +
+    (o.notes ? '<div style="background:rgba(212,43,43,.1);border:1px solid rgba(212,43,43,.3);border-radius:10px;padding:10px 14px;margin-bottom:16px;font-size:.84rem"><strong>⚠️ Note :</strong> ' + o.notes + '</div>' : '') +
+    '<div style="margin-bottom:16px">' + itemsHtml + '</div>' +
+    '<div style="display:flex;justify-content:space-between;font-size:1rem;font-weight:900;padding:10px 0;border-top:1px solid rgba(255,255,255,.1);margin-bottom:16px"><span>Total</span><span style="color:var(--gold)">' + formatPrice(o.total||0) + '</span></div>' +
+    '<div style="display:flex;gap:10px">' +
+      '<select id="modalStatus" style="flex:1;padding:10px;background:var(--dark3);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:#fff">' +
+        ['pending','accepted','preparing','ready','delivering','done','cancelled'].map(function(s){ return '<option value="' + s + '"' + (o.status===s?' selected':'') + '>' + STATUS_LABELS[s] + '</option>'; }).join('') +
+      '</select>' +
+      '<button onclick="updateStatus(\'' + o._id + '\')" style="padding:10px 18px;background:var(--red);color:#fff;border:none;border-radius:8px;font-weight:900;cursor:pointer">Mettre à jour</button>' +
+    '</div>';
+
+  document.getElementById('orderModal').style.display = 'flex';
 }
 
-function updateStatusFromModal(orderNum) {
-  const newStatus = document.getElementById('modalStatus').value;
-  let orders = getOrders();
-  const idx = orders.findIndex(o => o.orderNumber === orderNum);
-  if (idx >= 0) { orders[idx].status = newStatus; saveOrders(orders); }
-  showToast('Statut mis à jour');
-  closeModal();
-  buildTable();
+function updateStatus(id) {
+  var newStatus = document.getElementById('modalStatus').value;
+  db.collection('orders').doc(id).update({ status: newStatus })
+    .then(function() { showToast('Statut mis à jour ✓'); closeModal(); })
+    .catch(function(e) { showToast('Erreur : ' + e.message, 'error'); });
 }
 
-function closeModal() {
-  document.getElementById('orderModal').style.display = 'none';
+function closeModal() { document.getElementById('orderModal').style.display = 'none'; }
+document.getElementById('orderModal').addEventListener('click', function(e) { if (e.target.id === 'orderModal') closeModal(); });
+
+// Impression manuelle (bouton 🖨)
+function manualPrint(id) {
+  var o = allOrders.find(function(x) { return x._id === id; });
+  if (o) autoPrint(o);
 }
 
-document.getElementById('orderModal').addEventListener('click', e => {
-  if (e.target === document.getElementById('orderModal')) closeModal();
-});
-
-document.querySelectorAll('.filter-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+// Filtres
+document.querySelectorAll('.filter-btn').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
     btn.classList.add('active');
     currentFilter = btn.dataset.filter;
-    buildTable();
+    renderOrders();
   });
 });
 
-buildTable();
+// Connexion QZ Tray au chargement
+connectQZ();
 </script>
 </body>
 </html>
