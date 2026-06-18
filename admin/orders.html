@@ -315,11 +315,15 @@ function buildEscPosTicket(o) {
     t += BOLD_ON + BIG_ON;
     t += pad(' ' + qty + 'x ' + item.name, price, 48) + LF;
     t += BOLD_OFF + BIG_OFF;
-    // Options en normal
+    // Options choisies (base, taille, viande...)
     if (item.selectedOptions) {
       Object.entries(item.selectedOptions).forEach(function(e) {
         if (e[1]) t += '    -> ' + e[0] + ': ' + e[1] + LF;
       });
+    }
+    // ⚠️ Demande spéciale (sans oignons, bien cuit...) EN GRAS
+    if (item.specialRequest && item.specialRequest.trim()) {
+      t += BOLD_ON + '    !! ' + item.specialRequest.trim() + ' !!' + BOLD_OFF + LF;
     }
   });
 
