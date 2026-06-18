@@ -1282,11 +1282,11 @@ ul { list-style: none; }
 /* ── Étape numérotée ──────────────────────────────────────── */
 .opt-step {
   display: inline-flex; align-items: center; justify-content: center;
-  width: 22px; height: 22px; border-radius: 50%;
-  background: var(--red); color: #fff; font-size: .65rem; font-weight: 900;
-  margin-right: 6px; vertical-align: middle; flex-shrink: 0;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: var(--red); color: #fff; font-size: .7rem; font-weight: 900;
+  flex-shrink: 0;
 }
-.option-label { display: flex; align-items: center; font-weight: 800; font-size: .9rem; margin-bottom: 12px; }
+.option-label { display: flex; align-items: center; gap: 4px; font-weight: 800; font-size: .9rem; margin-bottom: 12px; flex-wrap: nowrap; }
 
 /* ── Demandes spéciales ────────────────────────────────────── */
 .form-textarea {
