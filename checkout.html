@@ -189,10 +189,16 @@
                    Remplacer ce bloc par l'intégration Stripe
                    quand le compte est prêt
               ═══════════════════════════════════════════════ -->
-              <div id="stripe-placeholder" style="border:2px dashed rgba(255,255,255,.12);border-radius:8px;padding:24px;text-align:center;color:var(--gray)">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin:0 auto 10px;display:block;opacity:.4"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-                <div style="font-weight:800;font-size:.9rem;margin-bottom:4px">Paiement en ligne</div>
-                <div style="font-size:.78rem">Disponible prochainement</div>
+              <div id="stripe-placeholder" style="border-radius:8px;padding:20px;text-align:center;color:var(--gray)">
+                <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="rgba(99,179,237,.6)" stroke-width="1.5" style="margin:0 auto 12px;display:block"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                <div style="font-weight:800;font-size:.92rem;color:#fff;margin-bottom:6px">Paiement sécurisé par carte</div>
+                <div style="font-size:.78rem;margin-bottom:14px">Visa, Mastercard, CB — Crypté SSL</div>
+                <button id="btnStripeCheckout" type="button" onclick="launchStripeCheckout()"
+                  style="background:linear-gradient(135deg,#635bff,#4f46e5);color:#fff;border:none;padding:13px 28px;border-radius:10px;font-weight:900;font-size:.92rem;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:center;gap:8px">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                  Payer par carte
+                </button>
+                <div style="font-size:.7rem;color:rgba(255,255,255,.3);margin-top:8px">🔒 Paiement géré par Stripe — vos données sont sécurisées</div>
               </div>
             </div>
 
@@ -418,7 +424,76 @@ function generateTicketText(o) {
   return t;
 }
 
-/* ── Soumettre la commande ───────────────────────────────── */
+/* ── Stripe Checkout ────────────────────────────────────── */
+async function launchStripeCheckout() {
+  var status = getOrderingStatus();
+  if (status === 'closed') { alert('⏰ Nous sommes fermés.'); return; }
+  if (status === 'call')   { alert('📞 Appelez-nous : ' + APK_MENU.info.phone1); return; }
+
+  var firstName = document.getElementById('firstName').value.trim();
+  var lastName  = document.getElementById('lastName').value.trim();
+  var phone     = document.getElementById('phone').value.trim();
+  if (!firstName || !lastName) { alert('Veuillez renseigner votre prénom et nom.'); return; }
+  if (!phone)                  { alert('Le numéro de téléphone est obligatoire.'); return; }
+  if (!Cart.items || Cart.items.length === 0) { alert('Votre panier est vide.'); return; }
+
+  var btn = document.getElementById('btnStripeCheckout');
+  if (btn) { btn.disabled = true; btn.textContent = 'Redirection…'; }
+
+  // Générer le numéro de commande
+  var today = new Date().toDateString();
+  var stored = JSON.parse(localStorage.getItem('apk_counter') || '{}');
+  if (stored.date !== today) stored = { date: today, count: 0 };
+  stored.count += 1;
+  localStorage.setItem('apk_counter', JSON.stringify(stored));
+  var orderNumber = 'APK-' + String(stored.count).padStart(3, '0');
+
+  // Sauvegarder la commande dans Firebase AVANT le paiement
+  var orderData = {
+    orderNumber:  orderNumber,
+    firstName:    firstName,
+    lastName:     lastName,
+    phone:        phone,
+    email:        (document.getElementById('email') ? document.getElementById('email').value.trim() : ''),
+    mode:         orderMode,
+    payment:      'card',
+    status:       'pending_payment',
+    items:        Cart.items,
+    total:        Cart.getTotal(),
+    notes:        (document.getElementById('notes') ? document.getElementById('notes').value.trim() : ''),
+    createdAt:    new Date().toISOString()
+  };
+
+  try {
+    var docRef = await db.collection('orders').add(orderData);
+    localStorage.setItem('apk_pending_order', JSON.stringify(Object.assign({ _id: docRef.id }, orderData)));
+  } catch(e) { console.warn('Firebase pre-save error:', e); }
+
+  // Appeler la serverless function Stripe
+  try {
+    var resp = await fetch('/api/create-checkout-session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        items: Cart.items,
+        orderNumber: orderNumber,
+        customerName: firstName + ' ' + lastName,
+        mode: orderMode
+      })
+    });
+    var data = await resp.json();
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      throw new Error(data.error || 'Erreur Stripe');
+    }
+  } catch(e) {
+    alert('Erreur paiement : ' + e.message);
+    if (btn) { btn.disabled = false; btn.textContent = 'Payer par carte'; }
+  }
+}
+
+/* ── Soumettre la commande (espèces) ─────────────────────── */
 document.getElementById('btnConfirm').addEventListener('click', submitOrder);
 
 async function submitOrder() {
