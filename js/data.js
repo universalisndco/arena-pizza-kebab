@@ -640,7 +640,13 @@ const APK_MENU = {
 };
 
 function getItemsByCategory(c){ return APK_MENU.items.filter(i=>i.category===c); }
-function getItemById(id){ return APK_MENU.items.find(i=>i.id===id); }
+function getItemById(id){
+  var found = APK_MENU.items.find(function(i){ return i.id === id; });
+  if (found) return found;
+  // Fallback : articles personnalisés créés depuis l'admin (custom-menu.js)
+  if (typeof getCustomItemByIdSync === 'function') return getCustomItemByIdSync(id);
+  return undefined;
+}
 function formatPrice(p){ return (parseFloat(p)||0).toFixed(2).replace('.',',')+'€'; }
 
 // ── Vérification des horaires de commande ─────────────────────
