@@ -3,12 +3,97 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-<script src="../js/firebase-config.js"></script>
   <title>Gestion du Menu — Admin APK</title>
   <link rel="stylesheet" href="css/admin.css">
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script src="../js/firebase-config.js"></script>
+
+  <style>
+    .mm-mode-tabs { display:flex; gap:10px; margin-bottom:20px; }
+    .mm-mode-tab {
+      flex:1; padding:14px; border-radius:12px; background:var(--dark3);
+      border:2px solid rgba(255,255,255,.06); color:var(--gray); cursor:pointer;
+      font-weight:800; font-size:.88rem; text-align:center; transition:all .2s;
+      font-family:var(--font-b);
+    }
+    .mm-mode-tab.active { border-color:var(--gold); color:#fff; background:rgba(245,166,35,.08); }
+    .mm-mode-tab svg { width:22px; height:22px; display:block; margin:0 auto 6px; }
+
+    .mm-section { display:none; }
+    .mm-section.active { display:block; }
+
+    .mm-field { margin-bottom:16px; }
+    .mm-label { display:block; font-size:.78rem; font-weight:800; color:var(--gray2); margin-bottom:6px; text-transform:uppercase; letter-spacing:.5px; }
+    .mm-input, .mm-select, .mm-textarea {
+      width:100%; padding:10px 14px; background:var(--dark3); border:1px solid rgba(255,255,255,.1);
+      border-radius:8px; color:#fff; font-size:.88rem; font-family:var(--font-b);
+    }
+    .mm-input:focus, .mm-select:focus, .mm-textarea:focus { outline:none; border-color:var(--gold); }
+    .mm-textarea { resize:vertical; min-height:70px; }
+    .mm-row2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+
+    .mm-new-cat-input { display:none; margin-top:8px; }
+    .mm-new-cat-input.show { display:block; }
+
+    .mm-special-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-top:6px; }
+    .mm-special-card {
+      padding:12px; border-radius:10px; background:var(--dark3); border:2px solid transparent;
+      cursor:pointer; text-align:center; font-size:.8rem; font-weight:700; color:var(--gray);
+      transition:all .2s;
+    }
+    .mm-special-card .emoji { font-size:1.4rem; display:block; margin-bottom:4px; }
+    .mm-special-card.selected { border-color:#a855f7; color:#fff; background:rgba(168,85,247,.1); }
+
+    .mm-combo-search {
+      margin-bottom:10px;
+    }
+    .mm-combo-list { max-height:340px; overflow-y:auto; border:1px solid rgba(255,255,255,.08); border-radius:10px; padding:6px; }
+    .mm-combo-item {
+      display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:8px;
+      cursor:pointer; transition:background .15s;
+    }
+    .mm-combo-item:hover { background:var(--dark3); }
+    .mm-combo-item input { accent-color:var(--gold); width:16px; height:16px; flex-shrink:0; }
+    .mm-combo-item img { width:36px; height:36px; border-radius:6px; object-fit:cover; flex-shrink:0; }
+    .mm-combo-item-name { flex:1; font-size:.84rem; color:#fff; }
+    .mm-combo-item-price { font-size:.78rem; color:var(--gold); font-weight:700; }
+
+    .mm-selected-summary {
+      margin-top:12px; padding:12px; background:rgba(245,166,35,.06); border:1px solid rgba(245,166,35,.2);
+      border-radius:10px; font-size:.82rem; color:var(--gray);
+    }
+    .mm-selected-summary strong { color:#fff; }
+
+    .mm-submit-btn {
+      width:100%; padding:14px; background:var(--red); color:#fff; border:none;
+      border-radius:10px; font-weight:900; font-size:.95rem; cursor:pointer; margin-top:8px;
+      font-family:var(--font-b);
+    }
+    .mm-submit-btn:hover { opacity:.9; }
+
+    .mm-existing-list { margin-top:24px; }
+    .mm-existing-item {
+      display:flex; align-items:center; gap:12px; padding:10px 14px; border-radius:10px;
+      background:var(--dark3); margin-bottom:8px; border:1px solid rgba(255,255,255,.05);
+    }
+    .mm-existing-item img { width:42px; height:42px; border-radius:8px; object-fit:cover; flex-shrink:0; }
+    .mm-existing-name { font-weight:800; font-size:.85rem; color:#fff; }
+    .mm-existing-meta { font-size:.72rem; color:var(--gray); margin-top:2px; }
+    .mm-existing-tag {
+      font-size:.66rem; font-weight:900; padding:2px 8px; border-radius:20px;
+      background:rgba(168,85,247,.15); color:#c084fc; white-space:nowrap;
+    }
+    .mm-existing-actions { display:flex; gap:6px; margin-left:auto; }
+    .mm-existing-actions button {
+      width:30px; height:30px; border-radius:8px; border:none; cursor:pointer;
+      display:flex; align-items:center; justify-content:center; background:var(--dark4); color:var(--gray);
+    }
+    .mm-existing-actions button:hover { color:#fff; }
+    .mm-existing-actions button svg { width:15px; height:15px; }
+    .mm-existing-actions .danger:hover { background:rgba(212,43,43,.2); color:#ff8080; }
+  </style>
 </head>
 <body>
 <div class="admin-layout">
@@ -54,112 +139,129 @@
   <div class="admin-main">
     <div class="topbar">
       <div class="topbar-title">GESTION DU MENU</div>
-      <div class="topbar-actions">
-        <input type="text" id="menuSearch" placeholder="Rechercher un plat..." style="padding:8px 14px;background:var(--dark3);border:1px solid rgba(255,255,255,.08);border-radius:8px;color:#fff;font-size:.85rem;width:200px" oninput="buildMenuList()">
-        <button class="topbar-btn primary" onclick="openAddForm()">
-          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Ajouter un plat
-        </button>
-      </div>
     </div>
 
     <div class="page-content">
-      <div class="menu-manager-grid">
-        <!-- Menu list -->
-        <div>
-          <!-- Category tabs -->
-          <div style="display:flex;gap:8px;overflow-x:auto;margin-bottom:16px;padding-bottom:4px;scrollbar-width:none">
-            <button class="filter-btn active" data-cat="all">Tous</button>
-            <button class="filter-btn" data-cat="pizzas">Pizzas</button>
-            <button class="filter-btn" data-cat="tacos">Tacos</button>
-            <button class="filter-btn" data-cat="rolls">Rolls</button>
-            <button class="filter-btn" data-cat="krousty">Krousty</button>
-            <button class="filter-btn" data-cat="panini">Panini</button>
-            <button class="filter-btn" data-cat="salade">Salades</button>
-            <button class="filter-btn" data-cat="kids">Kids</button>
-            <button class="filter-btn" data-cat="desserts">Desserts</button>
-            <button class="filter-btn" data-cat="boissons">Boissons</button>
-          </div>
+      <div class="two-col" style="grid-template-columns:1fr 420px">
 
-          <div class="card">
-            <div class="card-header" style="padding:12px 20px">
-              <div class="card-title" id="listTitle">Tous les articles</div>
-              <div style="font-size:.78rem;color:var(--gray)" id="listCount"></div>
-            </div>
-            <div style="display:grid;grid-template-columns:60px 1fr 80px 80px 110px;gap:10px;padding:8px 20px;font-size:.7rem;font-weight:900;letter-spacing:1px;text-transform:uppercase;color:var(--gray2);border-bottom:1px solid rgba(255,255,255,.05)">
-              <div></div><div>Plat</div><div>Prix</div><div>Actif</div><div>Actions</div>
-            </div>
-            <div id="menuItemsList"></div>
+        <!-- ── Colonne gauche : Liste des articles existants ── -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Articles personnalisés créés</div>
+            <div style="font-size:.78rem;color:var(--gray)" id="existingCount"></div>
           </div>
+          <div class="mm-existing-list" id="existingList" style="padding:14px 20px"></div>
         </div>
 
-        <!-- Add/Edit Form -->
-        <div>
-          <div class="add-form" id="itemForm">
-            <div class="add-form-title" id="formTitle">Ajouter un plat</div>
-            <input type="hidden" id="editId">
-            <div class="form-group">
-              <label class="form-label">Nom du plat *</label>
-              <input type="text" class="form-control" id="fName" placeholder="Ex: Pizza Margherita">
+        <!-- ── Colonne droite : Formulaire de création ── -->
+        <div class="card" style="padding:20px">
+
+          <!-- Choix du mode -->
+          <div class="mm-mode-tabs">
+            <div class="mm-mode-tab active" id="tabNew" onclick="switchMode('new')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Nouvel article
             </div>
-            <div class="form-group">
-              <label class="form-label">Catégorie *</label>
-              <select class="form-control" id="fCategory">
-                <option value="">Choisir</option>
-                <option value="pizzas">Pizzas</option>
-                <option value="tacos">Tacos</option>
-                <option value="rolls">Rolls Arena</option>
-                <option value="krousty">Krousty APK</option>
-                <option value="panini">Panini</option>
-                <option value="salade">Salades</option>
-                <option value="kids">Kids Menu</option>
-                <option value="desserts">Desserts</option>
-                <option value="boissons">Boissons</option>
-              </select>
+            <div class="mm-mode-tab" id="tabCombo" onclick="switchMode('combo')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="9" r="3"/><circle cx="17" cy="9" r="3"/><path d="M3 21v-2a4 4 0 014-4h2"/><path d="M13 21v-2a4 4 0 014-4h2"/></svg>
+              Article combiné
             </div>
-            <div class="form-group">
-              <label class="form-label">Taille / Variante</label>
-              <input type="text" class="form-control" id="fSize" placeholder="Ex: Junior, Senior, Mega (optionnel)">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Prix (€) *</label>
-              <input type="number" class="form-control" id="fPrice" placeholder="0.00" step="0.50" min="0">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Description</label>
-              <textarea class="form-control" id="fDescription" placeholder="Ingrédients, composition..." rows="3"></textarea>
-            </div>
-            <div class="form-group">
-              <label class="form-label">URL Image</label>
-              <input type="url" class="form-control" id="fImage" placeholder="https://images.unsplash.com/...">
-              <div id="imgPreview" style="margin-top:8px;display:none">
-                <img id="imgPreviewEl" style="width:100%;height:120px;object-fit:cover;border-radius:8px" alt="Aperçu">
-              </div>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Badge</label>
-              <select class="form-control" id="fBadge">
-                <option value="">Aucun</option>
-                <option value="Nouveau">Nouveau</option>
-                <option value="Populaire">Populaire</option>
-                <option value="Best-seller">Best-seller</option>
-                <option value="Signature">Signature</option>
-                <option value="Promo">Promo</option>
-              </select>
-            </div>
-            <button class="btn-save" onclick="saveItem()">Enregistrer</button>
-            <button class="btn-cancel" id="cancelBtn" style="display:none" onclick="resetForm()">Annuler</button>
           </div>
 
-          <div style="background:var(--dark2);border-radius:12px;border:1px solid rgba(255,255,255,.06);padding:20px;margin-top:16px">
-            <div style="font-weight:900;font-size:.9rem;margin-bottom:12px;color:var(--gold)">Rappel des promos</div>
-            <div style="font-size:.82rem;color:var(--gray);line-height:1.8">
-              Promo 1 : 2 pizzas achetées = la 3ème à -50% (livraison)<br>
-              Promo 2 : 3 pizzas achetées = la 4ème offerte (livraison)<br>
-              Promo 3 : 2+1 gratuit (emporter/sur place)<br>
-              Promo 4 : 1 pizza = 1 à -50% (emporter/sur place)
+          <!-- ══════════ MODE 1 : NOUVEL ARTICLE ══════════ -->
+          <div class="mm-section active" id="sectionNew">
+
+            <div class="mm-field">
+              <label class="mm-label">Nom de l'article *</label>
+              <input type="text" class="mm-input" id="newName" placeholder="Ex: Pizza Spéciale du Chef">
             </div>
+
+            <div class="mm-field">
+              <label class="mm-label">Description</label>
+              <textarea class="mm-textarea" id="newDescription" placeholder="Ingrédients, composition..."></textarea>
+            </div>
+
+            <div class="mm-row2">
+              <div class="mm-field">
+                <label class="mm-label">Prix (€) *</label>
+                <input type="number" class="mm-input" id="newPrice" placeholder="0.00" step="0.50" min="0">
+              </div>
+              <div class="mm-field">
+                <label class="mm-label">Catégorie *</label>
+                <select class="mm-select" id="newCategory" onchange="onCategoryChange('new')">
+                  <option value="">Choisir…</option>
+                  <option value="__new__">+ Nouvelle catégorie</option>
+                </select>
+                <div class="mm-new-cat-input" id="newCatInputWrap">
+                  <input type="text" class="mm-input" id="newCatLabel" placeholder="Nom de la nouvelle catégorie">
+                </div>
+              </div>
+            </div>
+
+            <div class="mm-field">
+              <label class="mm-label">URL Image</label>
+              <input type="url" class="mm-input" id="newImage" placeholder="https://images.unsplash.com/...">
+            </div>
+
+            <div class="mm-field">
+              <label class="mm-label">Offre spéciale (optionnel)</label>
+              <div class="mm-special-grid" id="newSpecialGrid"></div>
+            </div>
+
+            <button class="mm-submit-btn" onclick="createNewItem()">Créer l'article</button>
           </div>
+
+          <!-- ══════════ MODE 2 : ARTICLE COMBINÉ ══════════ -->
+          <div class="mm-section" id="sectionCombo">
+
+            <div class="mm-field">
+              <label class="mm-label">Sélectionner les articles à combiner</label>
+              <input type="text" class="mm-input mm-combo-search" id="comboSearch" placeholder="Rechercher un article…" oninput="renderComboList()">
+              <div class="mm-combo-list" id="comboList"></div>
+              <div class="mm-selected-summary" id="comboSummary">Aucun article sélectionné</div>
+            </div>
+
+            <div class="mm-field">
+              <label class="mm-label">Nom du nouvel article *</label>
+              <input type="text" class="mm-input" id="comboName" placeholder="Ex: Menu Midi Spécial">
+            </div>
+
+            <div class="mm-field">
+              <label class="mm-label">Description</label>
+              <textarea class="mm-textarea" id="comboDescription" placeholder="Sera pré-rempli automatiquement, modifiable"></textarea>
+            </div>
+
+            <div class="mm-row2">
+              <div class="mm-field">
+                <label class="mm-label">Nouveau prix (€) *</label>
+                <input type="number" class="mm-input" id="comboPrice" placeholder="0.00" step="0.50" min="0">
+              </div>
+              <div class="mm-field">
+                <label class="mm-label">Catégorie d'affichage *</label>
+                <select class="mm-select" id="comboCategory" onchange="onCategoryChange('combo')">
+                  <option value="">Choisir…</option>
+                  <option value="__new__">+ Nouvelle catégorie</option>
+                </select>
+                <div class="mm-new-cat-input" id="comboCatInputWrap">
+                  <input type="text" class="mm-input" id="comboCatLabel" placeholder="Nom de la nouvelle catégorie">
+                </div>
+              </div>
+            </div>
+
+            <div class="mm-field">
+              <label class="mm-label">URL Image (optionnel — sinon image du 1er article choisi)</label>
+              <input type="url" class="mm-input" id="comboImage" placeholder="https://images.unsplash.com/...">
+            </div>
+
+            <div class="mm-field">
+              <label class="mm-label">Type d'offre spéciale *</label>
+              <div class="mm-special-grid" id="comboSpecialGrid"></div>
+              <div style="font-size:.74rem;color:var(--gray);margin-top:6px">Déclenche automatiquement la popup "Nos offres du moment" sur le site.</div>
+            </div>
+
+            <button class="mm-submit-btn" onclick="createComboItem()">Créer l'offre combinée</button>
+          </div>
+
         </div>
       </div>
     </div>
@@ -167,174 +269,308 @@
 </div>
 
 <script src="../js/data.js"></script>
+<script src="../js/custom-menu.js"></script>
 <script src="js/admin.js"></script>
 <script>
 checkAuth();
 
-let currentCat = 'all';
-let editingId = null;
+var currentMode = 'new';
+var comboSelectedIds = [];
+var newSpecialType = null;
+var comboSpecialType = null;
+var allCustomItems = [];
 
-// Image preview
-document.addEventListener('input', e => {
-  if (e.target.id === 'fImage') {
-    const url = e.target.value.trim();
-    const preview = document.getElementById('imgPreview');
-    const img = document.getElementById('imgPreviewEl');
-    if (url) { img.src = url; preview.style.display = 'block'; }
-    else preview.style.display = 'none';
+/* ── Mode switch ──────────────────────────────────────────── */
+function switchMode(mode) {
+  currentMode = mode;
+  document.getElementById('tabNew').classList.toggle('active', mode === 'new');
+  document.getElementById('tabCombo').classList.toggle('active', mode === 'combo');
+  document.getElementById('sectionNew').classList.toggle('active', mode === 'new');
+  document.getElementById('sectionCombo').classList.toggle('active', mode === 'combo');
+}
+
+/* ── Catégories : remplir les selects ────────────────────── */
+function populateCategorySelects() {
+  var customCats = getCustomCategories(allCustomItems);
+  var allCats = APK_MENU.categories.concat(customCats.filter(function(cc) {
+    return !APK_MENU.categories.find(function(c){ return c.id === cc.id; });
+  }));
+
+  ['newCategory', 'comboCategory'].forEach(function(selId) {
+    var sel = document.getElementById(selId);
+    var current = sel.value;
+    var optionsHtml = '<option value="">Choisir…</option>' +
+      allCats.map(function(c){ return '<option value="' + c.id + '">' + c.label + '</option>'; }).join('') +
+      '<option value="__new__">+ Nouvelle catégorie</option>';
+    sel.innerHTML = optionsHtml;
+    if (current) sel.value = current;
+  });
+}
+
+function onCategoryChange(mode) {
+  var sel = document.getElementById(mode === 'new' ? 'newCategory' : 'comboCategory');
+  var wrap = document.getElementById(mode === 'new' ? 'newCatInputWrap' : 'comboCatInputWrap');
+  wrap.classList.toggle('show', sel.value === '__new__');
+}
+
+/* ── Offres spéciales : grille de sélection ──────────────── */
+function buildSpecialGrid(gridId, mode) {
+  var grid = document.getElementById(gridId);
+  var html = '<div class="mm-special-card" data-type="" onclick="selectSpecialType(\'' + mode + '\', null, this)"><span class="emoji">🚫</span>Aucune</div>';
+  Object.keys(SPECIAL_OFFER_TYPES).forEach(function(key) {
+    var t = SPECIAL_OFFER_TYPES[key];
+    html += '<div class="mm-special-card" data-type="' + key + '" onclick="selectSpecialType(\'' + mode + '\', \'' + key + '\', this)">' +
+            '<span class="emoji">' + t.icon + '</span>' + t.label + '</div>';
+  });
+  grid.innerHTML = html;
+  grid.querySelectorAll('.mm-special-card')[0].classList.add('selected');
+}
+
+function selectSpecialType(mode, type, el) {
+  if (mode === 'new') newSpecialType = type;
+  else comboSpecialType = type;
+  el.parentElement.querySelectorAll('.mm-special-card').forEach(function(c){ c.classList.remove('selected'); });
+  el.classList.add('selected');
+}
+
+/* ── Mode combo : liste des articles existants ───────────── */
+function renderComboList() {
+  var search = (document.getElementById('comboSearch').value || '').toLowerCase();
+  var items = APK_MENU.items.filter(function(i) {
+    return !search || i.name.toLowerCase().indexOf(search) >= 0 || (i.description||'').toLowerCase().indexOf(search) >= 0;
+  });
+
+  var list = document.getElementById('comboList');
+  list.innerHTML = items.map(function(item) {
+    var checked = comboSelectedIds.indexOf(item.id) >= 0 ? 'checked' : '';
+    return '<label class="mm-combo-item">' +
+      '<input type="checkbox" ' + checked + ' onchange="toggleComboItem(\'' + item.id + '\', this.checked)">' +
+      '<img src="' + item.image + '" onerror="this.src=\'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=100\'">' +
+      '<span class="mm-combo-item-name">' + item.name + '</span>' +
+      '<span class="mm-combo-item-price">' + formatPrice(item.price) + '</span>' +
+      '</label>';
+  }).join('') || '<div style="padding:20px;text-align:center;color:var(--gray);font-size:.82rem">Aucun résultat.</div>';
+}
+
+function toggleComboItem(id, checked) {
+  if (checked) {
+    if (comboSelectedIds.indexOf(id) < 0) comboSelectedIds.push(id);
+  } else {
+    comboSelectedIds = comboSelectedIds.filter(function(x){ return x !== id; });
   }
-});
+  updateComboSummary();
+}
 
-function buildMenuList() {
-  const search = (document.getElementById('menuSearch').value || '').toLowerCase();
-  let items = getMenuItems().filter(i => !i._deleted);
-  if (currentCat !== 'all') items = items.filter(i => i.category === currentCat);
-  if (search) items = items.filter(i => (i.name||'').toLowerCase().includes(search) || (i.description||'').toLowerCase().includes(search));
+function updateComboSummary() {
+  var summary = document.getElementById('comboSummary');
+  if (!comboSelectedIds.length) {
+    summary.innerHTML = 'Aucun article sélectionné';
+    return;
+  }
+  var selectedItems = comboSelectedIds.map(function(id){ return getItemById(id); }).filter(Boolean);
+  var totalOriginal = selectedItems.reduce(function(s,i){ return s + i.price; }, 0);
+  var names = selectedItems.map(function(i){ return i.name; }).join(', ');
 
-  document.getElementById('listCount').textContent = items.length + ' article(s)';
-  document.getElementById('listTitle').textContent = currentCat === 'all' ? 'Tous les articles' : APK_MENU.categories.find(c=>c.id===currentCat)?.label || '';
+  summary.innerHTML = '<strong>' + selectedItems.length + ' article(s)</strong> sélectionné(s) — Prix cumulé original : <strong>' + formatPrice(totalOriginal) + '</strong><br>' + names;
 
-  const el = document.getElementById('menuItemsList');
-  if (items.length === 0) {
-    el.innerHTML = '<div style="padding:32px;text-align:center;color:var(--gray)">Aucun article trouvé.</div>';
+  // Pré-remplir description + image si vides
+  var descField = document.getElementById('comboDescription');
+  if (!descField.value.trim()) descField.value = names;
+  var imgField = document.getElementById('comboImage');
+  if (!imgField.value.trim() && selectedItems[0]) imgField.placeholder = selectedItems[0].image;
+}
+
+/* ── Créer un nouvel article (mode 1) ────────────────────── */
+async function createNewItem() {
+  var name = document.getElementById('newName').value.trim();
+  var price = parseFloat(document.getElementById('newPrice').value);
+  var categorySelect = document.getElementById('newCategory').value;
+
+  if (!name) { showToast('Veuillez entrer un nom', 'error'); return; }
+  if (isNaN(price) || price < 0) { showToast('Prix invalide', 'error'); return; }
+  if (!categorySelect) { showToast('Veuillez choisir une catégorie', 'error'); return; }
+
+  var isNewCategory = categorySelect === '__new__';
+  var categoryId, categoryLabel;
+  if (isNewCategory) {
+    categoryLabel = document.getElementById('newCatLabel').value.trim();
+    if (!categoryLabel) { showToast('Veuillez nommer la nouvelle catégorie', 'error'); return; }
+    categoryId = categoryLabel.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  } else {
+    categoryId = categorySelect;
+    var found = APK_MENU.categories.find(function(c){ return c.id === categoryId; });
+    categoryLabel = found ? found.label : categoryId;
+  }
+
+  var data = {
+    name: name,
+    description: document.getElementById('newDescription').value.trim(),
+    price: price,
+    image: document.getElementById('newImage').value.trim() || 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600&q=85',
+    category: categoryId,
+    categoryLabel: categoryLabel,
+    isNewCategory: isNewCategory,
+    specialType: newSpecialType || null,
+    combinedFrom: null,
+    options: []
+  };
+
+  try {
+    await saveCustomMenuItem(data);
+    showToast('Article créé avec succès ✓');
+    resetNewForm();
+    loadAndRenderExisting();
+  } catch (e) {
+    showToast('Erreur : ' + e.message, 'error');
+  }
+}
+
+function resetNewForm() {
+  document.getElementById('newName').value = '';
+  document.getElementById('newDescription').value = '';
+  document.getElementById('newPrice').value = '';
+  document.getElementById('newCategory').value = '';
+  document.getElementById('newCatLabel').value = '';
+  document.getElementById('newCatInputWrap').classList.remove('show');
+  document.getElementById('newImage').value = '';
+  newSpecialType = null;
+  buildSpecialGrid('newSpecialGrid', 'new');
+}
+
+/* ── Créer un article combiné (mode 2) ───────────────────── */
+async function createComboItem() {
+  var name = document.getElementById('comboName').value.trim();
+  var price = parseFloat(document.getElementById('comboPrice').value);
+  var categorySelect = document.getElementById('comboCategory').value;
+
+  if (!comboSelectedIds.length) { showToast('Sélectionnez au moins un article', 'error'); return; }
+  if (!name) { showToast('Veuillez entrer un nom', 'error'); return; }
+  if (isNaN(price) || price < 0) { showToast('Prix invalide', 'error'); return; }
+  if (!categorySelect) { showToast('Veuillez choisir une catégorie', 'error'); return; }
+  if (!comboSpecialType) { showToast('Veuillez choisir un type d\\'offre spéciale', 'error'); return; }
+
+  var isNewCategory = categorySelect === '__new__';
+  var categoryId, categoryLabel;
+  if (isNewCategory) {
+    categoryLabel = document.getElementById('comboCatLabel').value.trim();
+    if (!categoryLabel) { showToast('Veuillez nommer la nouvelle catégorie', 'error'); return; }
+    categoryId = categoryLabel.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  } else {
+    categoryId = categorySelect;
+    var found = APK_MENU.categories.find(function(c){ return c.id === categoryId; });
+    categoryLabel = found ? found.label : categoryId;
+  }
+
+  var selectedItems = comboSelectedIds.map(function(id){ return getItemById(id); }).filter(Boolean);
+  var image = document.getElementById('comboImage').value.trim() || (selectedItems[0] ? selectedItems[0].image : '');
+
+  var data = {
+    name: name,
+    description: document.getElementById('comboDescription').value.trim(),
+    price: price,
+    image: image,
+    category: categoryId,
+    categoryLabel: categoryLabel,
+    isNewCategory: isNewCategory,
+    specialType: comboSpecialType,
+    combinedFrom: comboSelectedIds.slice(),
+    options: []
+  };
+
+  try {
+    await saveCustomMenuItem(data);
+    showToast('Offre combinée créée avec succès ✓');
+    resetComboForm();
+    loadAndRenderExisting();
+  } catch (e) {
+    showToast('Erreur : ' + e.message, 'error');
+  }
+}
+
+function resetComboForm() {
+  comboSelectedIds = [];
+  document.getElementById('comboName').value = '';
+  document.getElementById('comboDescription').value = '';
+  document.getElementById('comboPrice').value = '';
+  document.getElementById('comboCategory').value = '';
+  document.getElementById('comboCatLabel').value = '';
+  document.getElementById('comboCatInputWrap').classList.remove('show');
+  document.getElementById('comboImage').value = '';
+  comboSpecialType = null;
+  buildSpecialGrid('comboSpecialGrid', 'combo');
+  renderComboList();
+  updateComboSummary();
+}
+
+/* ── Liste des articles personnalisés déjà créés ─────────── */
+async function loadAndRenderExisting() {
+  allCustomItems = await loadCustomMenuItems(true);
+  populateCategorySelects();
+
+  var list = document.getElementById('existingList');
+  document.getElementById('existingCount').textContent = allCustomItems.length + ' article(s)';
+
+  if (!allCustomItems.length) {
+    list.innerHTML = '<div style="padding:32px;text-align:center;color:var(--gray)">Aucun article personnalisé créé pour le moment.</div>';
     return;
   }
 
-  const overrides = JSON.parse(localStorage.getItem('apk_menu_overrides') || '[]');
+  list.innerHTML = allCustomItems.map(function(item) {
+    var specialBadge = '';
+    if (item.specialType && SPECIAL_OFFER_TYPES[item.specialType]) {
+      var t = SPECIAL_OFFER_TYPES[item.specialType];
+      specialBadge = '<span class="mm-existing-tag">' + t.icon + ' ' + t.label + '</span>';
+    }
+    var comboBadge = item.combinedFrom ? '<span class="mm-existing-tag" style="background:rgba(245,166,35,.15);color:var(--gold)">Combiné</span>' : '';
+    var isActive = item.active !== false;
 
-  el.innerHTML = items.map(item => {
-    const ov = overrides.find(o => o.id === item.id) || {};
-    const isActive = ov.active !== false && item.active !== false;
-    return `
-      <div class="menu-item-row">
-        <img src="${item.image||''}" alt="${item.name}" class="menu-item-thumb" onerror="this.src='https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=100'">
-        <div>
-          <div class="menu-item-name">${item.name}${item.size?' — '+item.size:''}</div>
-          <div class="menu-item-cat">${APK_MENU.categories.find(c=>c.id===item.category)?.label||item.category}</div>
-        </div>
-        <div class="menu-item-price">${formatPrice(item.price)}</div>
-        <div>
-          <label class="toggle-switch">
-            <input type="checkbox" ${isActive?'checked':''} onchange="toggleItem('${item.id}',this.checked)">
-            <span class="toggle-slider"></span>
-          </label>
-        </div>
-        <div class="menu-row-actions">
-          <button class="btn-edit" onclick="editItem('${item.id}')" title="Modifier">
-            <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-          </button>
-          <button class="btn-delete" onclick="confirmDelete('${item.id}','${item.name.replace(/'/g,"\\'")}')" title="Supprimer">
-            <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
-          </button>
-        </div>
-      </div>
-    `;
+    return '<div class="mm-existing-item">' +
+      '<img src="' + (item.image||'') + '" onerror="this.src=\'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=100\'">' +
+      '<div style="flex:1">' +
+        '<div class="mm-existing-name">' + item.name + '</div>' +
+        '<div class="mm-existing-meta">' + (item.categoryLabel||item.category) + ' · ' + formatPrice(item.price) + '</div>' +
+      '</div>' +
+      specialBadge + comboBadge +
+      '<div class="mm-existing-actions">' +
+        '<button onclick="toggleExistingActive(\'' + item.id + '\', ' + !isActive + ')" title="' + (isActive?'Désactiver':'Activer') + '">' +
+          (isActive
+            ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>'
+            : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>') +
+        '</button>' +
+        '<button class="danger" onclick="deleteExisting(\'' + item.id + '\', \'' + item.name.replace(/'/g,"\\'") + '\')" title="Supprimer">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>' +
+        '</button>' +
+      '</div>' +
+    '</div>';
   }).join('');
 }
 
-function toggleItem(id, active) {
-  const overrides = JSON.parse(localStorage.getItem('apk_menu_overrides') || '[]');
-  const idx = overrides.findIndex(o => o.id === id);
-  if (idx >= 0) overrides[idx].active = active;
-  else overrides.push({ id, active });
-  localStorage.setItem('apk_menu_overrides', JSON.stringify(overrides));
-  showToast(active ? 'Plat activé' : 'Plat désactivé');
-}
-
-function editItem(id) {
-  const items = getMenuItems();
-  const item = items.find(i => i.id === id);
-  if (!item) return;
-  editingId = id;
-  document.getElementById('formTitle').textContent = 'Modifier le plat';
-  document.getElementById('editId').value = id;
-  document.getElementById('fName').value = item.name || '';
-  document.getElementById('fCategory').value = item.category || '';
-  document.getElementById('fSize').value = item.size || '';
-  document.getElementById('fPrice').value = item.price || '';
-  document.getElementById('fDescription').value = item.description || '';
-  document.getElementById('fImage').value = item.image || '';
-  document.getElementById('fBadge').value = item.badge || '';
-  document.getElementById('cancelBtn').style.display = 'block';
-  if (item.image) {
-    document.getElementById('imgPreviewEl').src = item.image;
-    document.getElementById('imgPreview').style.display = 'block';
-  }
-  document.getElementById('itemForm').scrollIntoView({ behavior: 'smooth' });
-}
-
-function openAddForm() {
-  resetForm();
-  document.getElementById('itemForm').scrollIntoView({ behavior: 'smooth' });
-}
-
-function resetForm() {
-  editingId = null;
-  document.getElementById('formTitle').textContent = 'Ajouter un plat';
-  document.getElementById('editId').value = '';
-  document.getElementById('fName').value = '';
-  document.getElementById('fCategory').value = '';
-  document.getElementById('fSize').value = '';
-  document.getElementById('fPrice').value = '';
-  document.getElementById('fDescription').value = '';
-  document.getElementById('fImage').value = '';
-  document.getElementById('fBadge').value = '';
-  document.getElementById('cancelBtn').style.display = 'none';
-  document.getElementById('imgPreview').style.display = 'none';
-}
-
-function saveItem() {
-  const name = document.getElementById('fName').value.trim();
-  const category = document.getElementById('fCategory').value;
-  const price = parseFloat(document.getElementById('fPrice').value);
-
-  if (!name) { showToast('Veuillez entrer un nom', 'error'); return; }
-  if (!category) { showToast('Veuillez choisir une catégorie', 'error'); return; }
-  if (isNaN(price) || price < 0) { showToast('Prix invalide', 'error'); return; }
-
-  const itemData = {
-    name,
-    category,
-    size: document.getElementById('fSize').value.trim() || null,
-    price,
-    description: document.getElementById('fDescription').value.trim(),
-    image: document.getElementById('fImage').value.trim() || 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600&q=80',
-    badge: document.getElementById('fBadge').value || null,
-    active: true
-  };
-
-  if (editingId) {
-    itemData.id = editingId;
-    saveMenuOverride(itemData);
-    showToast('Plat modifié avec succès');
-  } else {
-    addMenuItem(itemData);
-    showToast('Plat ajouté avec succès');
-  }
-
-  resetForm();
-  buildMenuList();
-}
-
-function confirmDelete(id, name) {
-  if (confirm(`Supprimer "${name}" du menu ?`)) {
-    deleteMenuItem(id);
-    showToast('Plat supprimé');
-    buildMenuList();
+async function toggleExistingActive(id, newActive) {
+  try {
+    await updateCustomMenuItem(id, { active: newActive });
+    showToast(newActive ? 'Article activé' : 'Article désactivé');
+    loadAndRenderExisting();
+  } catch (e) {
+    showToast('Erreur : ' + e.message, 'error');
   }
 }
 
-// Category filter tabs
-document.querySelectorAll('.filter-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    currentCat = btn.dataset.cat;
-    buildMenuList();
-  });
-});
+async function deleteExisting(id, name) {
+  if (!confirm('Supprimer "' + name + '" définitivement ?')) return;
+  try {
+    await deleteCustomMenuItem(id);
+    showToast('Article supprimé');
+    loadAndRenderExisting();
+  } catch (e) {
+    showToast('Erreur : ' + e.message, 'error');
+  }
+}
 
-buildMenuList();
+/* ── Init ─────────────────────────────────────────────────── */
+buildSpecialGrid('newSpecialGrid', 'new');
+buildSpecialGrid('comboSpecialGrid', 'combo');
+renderComboList();
+loadAndRenderExisting();
 </script>
 </body>
 </html>
