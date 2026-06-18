@@ -13,6 +13,7 @@ var SPECIAL_OFFER_TYPES = {
 };
 
 var _customItemsCache = null;
+var _activeOffersById  = {}; // référence rapide pour goToOffer()
 
 // ── Charger tous les articles personnalisés depuis Firebase ───
 async function loadCustomMenuItems(forceRefresh) {
@@ -21,7 +22,7 @@ async function loadCustomMenuItems(forceRefresh) {
   try {
     var snap = await db.collection('customMenuItems').get();
     var items = [];
-    snap.forEach(function(doc) {
+    snap.forEach(function (doc) {
       items.push(Object.assign({ id: doc.id, isCustom: true }, doc.data()));
     });
     _customItemsCache = items;
@@ -44,6 +45,7 @@ function getActiveSpecialOffers(items) {
 }
 
 // ── Catégories ajoutées dynamiquement par l'admin ─────────────
+// (inclut les nouvelles catégories libres ET les catégories d'offres spéciales)
 function getCustomCategories(items) {
   var seen = {};
   var cats = [];
@@ -61,13 +63,10 @@ function getCustomItemsByCategory(items, categoryId) {
   return getActiveCustomItems(items).filter(function (i) { return i.category === categoryId; });
 }
 
-// ── Sauvegarder un nouvel article personnalisé ────────────────
+// ── CRUD Firebase ──────────────────────────────────────────────
 async function saveCustomMenuItem(data) {
   if (typeof db === 'undefined') throw new Error('Firebase non disponible');
-  var payload = Object.assign({
-    active: true,
-    createdAt: new Date().toISOString()
-  }, data);
+  var payload = Object.assign({ active: true, createdAt: new Date().toISOString() }, data);
   var ref = await db.collection('customMenuItems').add(payload);
   invalidateCustomItemsCache();
   return ref.id;
@@ -86,18 +85,16 @@ async function deleteCustomMenuItem(id) {
 }
 
 // ============================================================
-// POPUP OFFRES SPÉCIALES — affiché sur la page d'accueil
+// POPUP OFFRES SPÉCIALES — page d'accueil
+// S'affiche À CHAQUE chargement de page (pas seulement la 1ère
+// fois) tant qu'il existe au moins une offre active.
 // ============================================================
 async function initSpecialOffersPopup() {
   try {
-    var items  = await loadCustomMenuItems();
+    var items  = await loadCustomMenuItems(true); // toujours frais à l'arrivée sur la page
     var offers = getActiveSpecialOffers(items);
     if (!offers.length) return;
-
-    // Ne pas re-afficher si déjà fermé dans cette session
-    if (sessionStorage.getItem('apk_offers_dismissed')) return;
-
-    setTimeout(function () { showOffersPopup(offers); }, 900);
+    setTimeout(function () { showOffersPopup(offers); }, 700);
   } catch (e) {
     console.warn('initSpecialOffersPopup error:', e);
   }
@@ -106,6 +103,10 @@ async function initSpecialOffersPopup() {
 function showOffersPopup(offers) {
   var existing = document.getElementById('offers-popup-overlay');
   if (existing) existing.remove();
+
+  // Garder une référence pour le clic "En profiter"
+  _activeOffersById = {};
+  offers.forEach(function (o) { _activeOffersById[o.id] = o; });
 
   var cardsHtml = offers.map(function (o) {
     var typeInfo = SPECIAL_OFFER_TYPES[o.specialType] || { label: 'Offre', icon: '⭐' };
@@ -121,7 +122,7 @@ function showOffersPopup(offers) {
           '<div class="offer-popup-desc">' + (o.description || '') + '</div>' +
           '<div class="offer-popup-footer">' +
             '<div class="offer-popup-price">' + formatPrice(o.price) + '</div>' +
-            '<button type="button" class="offer-popup-btn" onclick="goToOffer(\'' + o.category + '\')">En profiter</button>' +
+            '<button type="button" class="offer-popup-btn" onclick="goToOffer(\'' + o.id + '\')">En profiter</button>' +
           '</div>' +
         '</div>' +
       '</div>';
@@ -161,13 +162,29 @@ function showOffersPopup(offers) {
   overlay.addEventListener('click', function (e) { if (e.target === overlay) closeOffersPopup(); });
 }
 
+// Ferme simplement la popup pour CETTE vue de page.
+// Aucune mémorisation persistante : un rechargement de page la
+// réaffichera si des offres actives existent toujours.
 function closeOffersPopup() {
   var el = document.getElementById('offers-popup-overlay');
   if (el) el.remove();
-  sessionStorage.setItem('apk_offers_dismissed', '1');
 }
 
-function goToOffer(category) {
+// Clique "En profiter" → ajoute l'offre au panier puis va direct au checkout
+function goToOffer(offerId) {
+  var offer = _activeOffersById[offerId];
   closeOffersPopup();
-  window.location.href = 'menu.html#' + category;
+
+  if (offer && typeof Cart !== 'undefined') {
+    Cart.add({
+      id: offer.id,
+      name: offer.name,
+      totalPrice: offer.price,
+      selectedOptions: {},
+      specialRequest: '',
+      image: offer.image
+    });
+  }
+
+  window.location.href = 'checkout.html';
 }
