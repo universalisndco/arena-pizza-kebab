@@ -83,6 +83,10 @@
     <div class="topbar">
       <div class="topbar-title">COMMANDES EN TEMPS RÉEL</div>
       <div style="display:flex;align-items:center;gap:16px">
+        <!-- Badge alarme visuelle -->
+        <div id="alarmBadge" onclick="dismissAlarms()" style="display:none;background:var(--red);color:#fff;padding:8px 16px;border-radius:8px;font-weight:900;font-size:.82rem;cursor:pointer;animation:pulseNew 1s ease-in-out infinite">
+          🔔 <span id="alarmText"></span> — Cliquer pour acquitter
+        </div>
         <div class="printer-status">
           <div class="printer-dot" id="printerDot"></div>
           <span id="printerLabel" style="color:var(--gray)">Imprimante…</span>
@@ -136,28 +140,56 @@ var knownIds      = new Set();
 var isFirstLoad   = true;
 var printerName   = null;
 
-// Son alarme (bip généré en JS, pas besoin de fichier audio)
+// Son alarme — débloqué après premier clic utilisateur
+var _audioUnlocked = false;
+var _pendingAlarms = 0;
+
+document.addEventListener('click', function() { _audioUnlocked = true; }, { once: false });
+
 function playAlarm() {
+  // Alarme visuelle toujours visible
+  _pendingAlarms++;
+  updateAlarmBadge();
+
+  // Son uniquement si le navigateur l'autorise
   try {
     var ctx = new (window.AudioContext || window.webkitAudioContext)();
-    [0, 0.25, 0.5].forEach(function(t) {
-      var osc = ctx.createOscillator();
+    if (ctx.state === 'suspended') ctx.resume();
+    [0, 0.3, 0.6].forEach(function(t) {
+      var osc  = ctx.createOscillator();
       var gain = ctx.createGain();
       osc.connect(gain); gain.connect(ctx.destination);
       osc.frequency.value = 880;
-      gain.gain.setValueAtTime(0.4, ctx.currentTime + t);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + t + 0.2);
+      osc.type = 'sine';
+      gain.gain.setValueAtTime(0.5, ctx.currentTime + t);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + t + 0.25);
       osc.start(ctx.currentTime + t);
-      osc.stop(ctx.currentTime + t + 0.2);
+      osc.stop(ctx.currentTime + t + 0.25);
     });
-  } catch(e) {}
+  } catch(e) { console.warn('Audio error:', e); }
+}
+
+function updateAlarmBadge() {
+  var badge = document.getElementById('alarmBadge');
+  var text  = document.getElementById('alarmText');
+  if (!badge) return;
+  if (_pendingAlarms > 0) {
+    if (text) text.textContent = _pendingAlarms + ' nouvelle(s) commande(s) !';
+    badge.style.display = 'flex';
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+function dismissAlarms() {
+  _pendingAlarms = 0;
+  updateAlarmBadge();
 }
 
 // ═══════════════════════════════════════════════════════
 // FIREBASE LISTENER TEMPS RÉEL
 // ═══════════════════════════════════════════════════════
 db.collection('orders')
-  .orderBy('createdAt', 'desc')
   .limit(100)
   .onSnapshot(function(snap) {
     var newOrders = [];
@@ -175,7 +207,12 @@ db.collection('orders')
     }
 
     newOrders.forEach(function(o) { knownIds.add(o._id); });
-    allOrders = newOrders;
+    // Trier par date décroissante côté client
+    allOrders = newOrders.sort(function(a, b) {
+      var ta = a.createdAt ? (a.createdAt.seconds ? a.createdAt.seconds : new Date(a.createdAt).getTime()/1000) : 0;
+      var tb = b.createdAt ? (b.createdAt.seconds ? b.createdAt.seconds : new Date(b.createdAt).getTime()/1000) : 0;
+      return tb - ta;
+    });
     isFirstLoad = false;
     renderOrders();
   }, function(err) {
