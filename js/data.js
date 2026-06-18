@@ -734,3 +734,63 @@ async function loadSiteLogo() {
     }
   } catch(e) { /* silencieux */ }
 }
+
+// ════════════════════════════════════════════════════════════
+// MENU OVERRIDES — Modifications admin des articles de base
+// Firebase collection : menuOverrides/{itemId}
+// Permet : masquer, modifier prix/image/description
+// ════════════════════════════════════════════════════════════
+var _menuOverridesCache = null;
+
+async function loadMenuOverrides(forceRefresh) {
+  if (_menuOverridesCache && !forceRefresh) return _menuOverridesCache;
+  if (typeof db === 'undefined') { _menuOverridesCache = {}; return {}; }
+  try {
+    var snap = await db.collection('menuOverrides').get();
+    var overrides = {};
+    snap.forEach(function(doc) {
+      overrides[doc.id] = doc.data();
+    });
+    _menuOverridesCache = overrides;
+    return overrides;
+  } catch(e) {
+    console.warn('loadMenuOverrides error:', e);
+    _menuOverridesCache = {};
+    return {};
+  }
+}
+
+function invalidateMenuOverridesCache() { _menuOverridesCache = null; }
+
+// Appliquer les overrides sur un article
+function applyOverride(item, overrides) {
+  var ov = overrides[item.id];
+  if (!ov) return item;
+  if (ov.hidden) return null; // article masqué
+  return Object.assign({}, item, {
+    price:       ov.price       !== undefined ? ov.price       : item.price,
+    image:       ov.image       !== undefined ? ov.image       : item.image,
+    description: ov.description !== undefined ? ov.description : item.description,
+    _overridden: true
+  });
+}
+
+// Retourne les items d'une catégorie avec overrides appliqués
+function getItemsByCategoryWithOverrides(cat, overrides) {
+  return APK_MENU.items
+    .filter(function(i) { return i.category === cat; })
+    .map(function(i) { return applyOverride(i, overrides || {}); })
+    .filter(Boolean);
+}
+
+async function saveMenuOverride(itemId, data) {
+  if (typeof db === 'undefined') throw new Error('Firebase non disponible');
+  await db.collection('menuOverrides').doc(itemId).set(data, { merge: true });
+  invalidateMenuOverridesCache();
+}
+
+async function deleteMenuOverride(itemId) {
+  if (typeof db === 'undefined') throw new Error('Firebase non disponible');
+  await db.collection('menuOverrides').doc(itemId).delete();
+  invalidateMenuOverridesCache();
+}
