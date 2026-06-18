@@ -607,7 +607,7 @@ const APK_MENU = {
   { id:"oasis-canette", category:"boissons", name:"Oasis Tropical — Canette 33cl", description:"Boisson fruitée rafraîchissante", price:2.00, image:"https://images.unsplash.com/photo-1621506289937-a8e4df240d0b?w=400&q=85", badge:null, options:[] },
   { id:"lipton-canette", category:"boissons", name:"Lipton Ice Tea Pêche — Canette 33cl", description:"Thé glacé saveur pêche", price:2.00, image:"https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=400&q=85", badge:null, options:[] },
   { id:"orangina-canette", category:"boissons", name:"Orangina — Canette 33cl", description:"Boisson gazeuse à l'orange", price:2.00, image:"https://images.unsplash.com/photo-1622543925917-763c34d1a86e?w=400&q=85", badge:null, options:[] },
-  { id:"eau-bouteille", category:"boissons", name:"Eau Plate — Bouteille 1.5L", description:"Grande bouteille d'eau", price:2.00, image:"https://images.unsplash.com/photo-1553361371-9b09e49e1282?w=400&q=85", badge:null, options:[] }] }
+  { id:"eau-bouteille", category:"boissons", name:"Eau Plate — Bouteille 1.5L", description:"Grande bouteille d'eau", price:2.00, image:"https://images.unsplash.com/photo-1553361371-9b09e49e1282?w=400&q=85", badge:null, options:[] }
   ],
 
   promos: [
