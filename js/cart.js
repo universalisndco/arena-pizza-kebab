@@ -123,6 +123,9 @@ function openItemModal(itemId) {
   const modalBody = document.getElementById('modal-body');
   if (!modal || !modalBody) return;
 
+  // ── Numéroter les étapes (pour l'affichage "Étape X")
+  let stepCount = 0;
+
   let html = `
     <div class="modal-item-header">
       <img src="${item.image}" alt="${item.name}" class="modal-item-img"
@@ -137,18 +140,19 @@ function openItemModal(itemId) {
   `;
 
   item.options.forEach((opt, idx) => {
+    stepCount++;
+    const stepLabel = `<span class="opt-step">Étape ${stepCount}</span>`;
+
     html += `<div class="option-group" data-type="${opt.type}">
-      <label class="option-label">${opt.label}${opt.required ? ' <span class="req">*</span>' : ''}</label>`;
+      <label class="option-label">${stepLabel} ${opt.label}${opt.required ? ' <span class="req">*</span>' : ''}</label>`;
 
     if (opt.type === 'select') {
-      // ── Dropdown
       html += `<select name="opt_${idx}" ${opt.required ? 'required' : ''} class="option-select">`;
       if (!opt.required) html += `<option value="">Aucun</option>`;
       opt.choices.forEach(c => { html += `<option value="${c}">${c}</option>`; });
       html += `</select>`;
 
     } else if (opt.type === 'radio') {
-      // ── Radio buttons (base, garniture, boisson...)
       html += `<div class="radio-group">`;
       opt.choices.forEach((c, ci) => {
         html += `<label class="radio-label">
@@ -159,22 +163,19 @@ function openItemModal(itemId) {
       html += `</div>`;
 
     } else if (opt.type === 'size_radio') {
-      // ── Radio taille avec ajustement de prix
+      // ── Tailles avec VRAIS prix complets (pas "+3€" mais "12,00€")
       html += `<div class="radio-group size-group">`;
       opt.choices.forEach((c, ci) => {
-        const priceLabel = c.priceAdd === 0
-          ? `${formatPrice(item.price)}`
-          : `+${formatPrice(c.priceAdd)}`;
+        const fullPrice = item.price + (c.priceAdd || 0);
         html += `<label class="radio-label size-label ${ci === 0 ? 'selected' : ''}">
           <input type="radio" name="opt_${idx}" value="${c.name}" data-price-add="${c.priceAdd}" ${ci === 0 ? 'checked' : ''} required>
           <span class="size-name">${c.name}</span>
-          <span class="size-price">${priceLabel}</span>
+          <span class="size-price">${formatPrice(fullPrice)}</span>
         </label>`;
       });
       html += `</div>`;
 
     } else if (opt.type === 'multi') {
-      // ── Checkboxes
       opt.choices.forEach((c, ci) => {
         const name  = typeof c === 'string' ? c : c.name;
         const price = typeof c === 'object' ? c.price : 0;
