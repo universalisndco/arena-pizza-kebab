@@ -30,58 +30,58 @@ const APK_MENU = {
   items: [
   { id:"pizza-margherita", category:"pizzas", serie:"favoris", name:"Margherita", description:"Mozzarella, sauce tomate", price:9.00, image:"https://images.unsplash.com/photo-1598023696416-0193a0bcd302?w=600&q=85", badge:null, options:[
     {
+      label: "Base", type: "radio", required: true,
+      choices: ["Base Tomate", "Base Crème Fraîche"]
+    },
+    {
       label: "Taille", type: "size_radio", required: true,
       choices: [
         { name: "Junior · 29cm", priceAdd: 0 },
         { name: "Senior · 33cm", priceAdd: 3 },
         { name: "Méga · 40cm",   priceAdd: 10 }
       ]
-    },
-    {
-      label: "Base", type: "radio", required: true,
-      choices: ["Base Tomate", "Base Crème Fraîche"]
     }
   ] },
   { id:"pizza-4-fromages", category:"pizzas", serie:"favoris", name:"4 Fromages", description:"Mozzarella, mélange de 4 fromages", price:9.00, image:"https://images.unsplash.com/photo-1664309641932-0e03e0771b97?w=600&q=85", badge:"Populaire", options:[
     {
+      label: "Base", type: "radio", required: true,
+      choices: ["Base Tomate", "Base Crème Fraîche"]
+    },
+    {
       label: "Taille", type: "size_radio", required: true,
       choices: [
         { name: "Junior · 29cm", priceAdd: 0 },
         { name: "Senior · 33cm", priceAdd: 3 },
         { name: "Méga · 40cm",   priceAdd: 10 }
       ]
-    },
-    {
-      label: "Base", type: "radio", required: true,
-      choices: ["Base Tomate", "Base Crème Fraîche"]
     }
   ] },
   { id:"pizza-chevre-miel", category:"pizzas", serie:"favoris", name:"Chèvre Miel", description:"Mozzarella, chèvre, miel, olives", price:9.00, image:"https://images.unsplash.com/photo-1595854341625-f33ee10dbf94?w=600&q=85", badge:null, options:[
     {
+      label: "Base", type: "radio", required: true,
+      choices: ["Base Tomate", "Base Crème Fraîche"]
+    },
+    {
       label: "Taille", type: "size_radio", required: true,
       choices: [
         { name: "Junior · 29cm", priceAdd: 0 },
         { name: "Senior · 33cm", priceAdd: 3 },
         { name: "Méga · 40cm",   priceAdd: 10 }
       ]
-    },
-    {
-      label: "Base", type: "radio", required: true,
-      choices: ["Base Tomate", "Base Crème Fraîche"]
     }
   ] },
   { id:"pizza-napolitaine", category:"pizzas", serie:"favoris", name:"Napolitaine", description:"Mozzarella, anchois, câpres, olives, tomate fraîche", price:9.00, image:"https://images.unsplash.com/photo-1598023696416-0193a0bcd302?w=600&q=85", badge:null, options:[
     {
+      label: "Base", type: "radio", required: true,
+      choices: ["Base Tomate", "Base Crème Fraîche"]
+    },
+    {
       label: "Taille", type: "size_radio", required: true,
       choices: [
         { name: "Junior · 29cm", priceAdd: 0 },
         { name: "Senior · 33cm", priceAdd: 3 },
         { name: "Méga · 40cm",   priceAdd: 10 }
       ]
-    },
-    {
-      label: "Base", type: "radio", required: true,
-      choices: ["Base Tomate", "Base Crème Fraîche"]
     }
   ] },
   { id:"pizza-calzone", category:"pizzas", serie:"favoris", name:"Calzone", description:"Mozzarella, jambon ou poulet — pizza pliée", price:9.00, image:"https://images.unsplash.com/photo-1680405620826-83b0f0f61b28?w=600&q=85", badge:null, options:[
@@ -101,464 +101,464 @@ const APK_MENU = {
   ] },
   { id:"pizza-reine", category:"pizzas", serie:"favoris", name:"Reine", description:"Mozzarella, jambon, champignons, olives", price:9.00, image:"https://images.unsplash.com/photo-1598023696416-0193a0bcd302?w=600&q=85", badge:null, options:[
     {
+      label: "Base", type: "radio", required: true,
+      choices: ["Base Tomate", "Base Crème Fraîche"]
+    },
+    {
       label: "Taille", type: "size_radio", required: true,
       choices: [
         { name: "Junior · 29cm", priceAdd: 0 },
         { name: "Senior · 33cm", priceAdd: 3 },
         { name: "Méga · 40cm",   priceAdd: 10 }
       ]
-    },
-    {
-      label: "Base", type: "radio", required: true,
-      choices: ["Base Tomate", "Base Crème Fraîche"]
     }
   ] },
   { id:"pizza-campione", category:"pizzas", serie:"favoris", name:"Campione", description:"Mozzarella, champignons, oeuf, bœuf haché", price:9.00, image:"https://images.unsplash.com/photo-1680405620826-83b0f0f61b28?w=600&q=85", badge:null, options:[
     {
+      label: "Base", type: "radio", required: true,
+      choices: ["Base Tomate", "Base Crème Fraîche"]
+    },
+    {
       label: "Taille", type: "size_radio", required: true,
       choices: [
         { name: "Junior · 29cm", priceAdd: 0 },
         { name: "Senior · 33cm", priceAdd: 3 },
         { name: "Méga · 40cm",   priceAdd: 10 }
       ]
-    },
-    {
-      label: "Base", type: "radio", required: true,
-      choices: ["Base Tomate", "Base Crème Fraîche"]
     }
   ] },
   { id:"pizza-orientale", category:"pizzas", serie:"premium", name:"Orientale", description:"Mozzarella, merguez, oeuf, olives, champignons, poivrons", price:10.00, image:"https://images.unsplash.com/photo-1680405620826-83b0f0f61b28?w=600&q=85", badge:null, options:[
     {
+      label: "Base", type: "radio", required: true,
+      choices: ["Base Tomate", "Base Crème Fraîche"]
+    },
+    {
       label: "Taille", type: "size_radio", required: true,
       choices: [
         { name: "Junior · 29cm", priceAdd: 0 },
         { name: "Senior · 33cm", priceAdd: 3 },
         { name: "Méga · 40cm",   priceAdd: 10 }
       ]
-    },
-    {
-      label: "Base", type: "radio", required: true,
-      choices: ["Base Tomate", "Base Crème Fraîche"]
     }
   ] },
   { id:"pizza-torino", category:"pizzas", serie:"premium", name:"Torino", description:"Mozzarella, fromage à raclette, jambon, pommes de terre", price:10.00, image:"https://images.unsplash.com/photo-1664309641932-0e03e0771b97?w=600&q=85", badge:null, options:[
     {
+      label: "Base", type: "radio", required: true,
+      choices: ["Base Tomate", "Base Crème Fraîche"]
+    },
+    {
       label: "Taille", type: "size_radio", required: true,
       choices: [
         { name: "Junior · 29cm", priceAdd: 0 },
         { name: "Senior · 33cm", priceAdd: 3 },
         { name: "Méga · 40cm",   priceAdd: 10 }
       ]
-    },
-    {
-      label: "Base", type: "radio", required: true,
-      choices: ["Base Tomate", "Base Crème Fraîche"]
     }
   ] },
   { id:"pizza-vegetarienne", category:"pizzas", serie:"premium", name:"Végétarienne", description:"Mozzarella, poivrons, champignons, olives, aubergines", price:10.00, image:"https://images.unsplash.com/photo-1595854341625-f33ee10dbf94?w=600&q=85", badge:null, options:[
     {
+      label: "Base", type: "radio", required: true,
+      choices: ["Base Tomate", "Base Crème Fraîche"]
+    },
+    {
       label: "Taille", type: "size_radio", required: true,
       choices: [
         { name: "Junior · 29cm", priceAdd: 0 },
         { name: "Senior · 33cm", priceAdd: 3 },
         { name: "Méga · 40cm",   priceAdd: 10 }
       ]
-    },
-    {
-      label: "Base", type: "radio", required: true,
-      choices: ["Base Tomate", "Base Crème Fraîche"]
     }
   ] },
   { id:"pizza-paysanne", category:"pizzas", serie:"premium", name:"Paysanne", description:"Mozzarella, bœuf haché, pommes de terre, oignons", price:10.00, image:"https://images.unsplash.com/photo-1680405620826-83b0f0f61b28?w=600&q=85", badge:null, options:[
     {
+      label: "Base", type: "radio", required: true,
+      choices: ["Base Tomate", "Base Crème Fraîche"]
+    },
+    {
       label: "Taille", type: "size_radio", required: true,
       choices: [
         { name: "Junior · 29cm", priceAdd: 0 },
         { name: "Senior · 33cm", priceAdd: 3 },
         { name: "Méga · 40cm",   priceAdd: 10 }
       ]
-    },
-    {
-      label: "Base", type: "radio", required: true,
-      choices: ["Base Tomate", "Base Crème Fraîche"]
     }
   ] },
   { id:"pizza-raclette", category:"pizzas", serie:"premium", name:"Raclette", description:"Mozzarella, lardons, pommes de terre, fromage à raclette", price:10.00, image:"https://images.unsplash.com/photo-1664309641932-0e03e0771b97?w=600&q=85", badge:null, options:[
     {
+      label: "Base", type: "radio", required: true,
+      choices: ["Base Tomate", "Base Crème Fraîche"]
+    },
+    {
       label: "Taille", type: "size_radio", required: true,
       choices: [
         { name: "Junior · 29cm", priceAdd: 0 },
         { name: "Senior · 33cm", priceAdd: 3 },
         { name: "Méga · 40cm",   priceAdd: 10 }
       ]
-    },
-    {
-      label: "Base", type: "radio", required: true,
-      choices: ["Base Tomate", "Base Crème Fraîche"]
     }
   ] },
   { id:"pizza-thon", category:"pizzas", serie:"premium", name:"Thon", description:"Mozzarella, thon, oeuf, olives, oignons", price:10.00, image:"https://images.unsplash.com/photo-1579751626657-72bc17010498?w=600&q=85", badge:null, options:[
     {
+      label: "Base", type: "radio", required: true,
+      choices: ["Base Tomate", "Base Crème Fraîche"]
+    },
+    {
       label: "Taille", type: "size_radio", required: true,
       choices: [
         { name: "Junior · 29cm", priceAdd: 0 },
         { name: "Senior · 33cm", priceAdd: 3 },
         { name: "Méga · 40cm",   priceAdd: 10 }
       ]
-    },
-    {
-      label: "Base", type: "radio", required: true,
-      choices: ["Base Tomate", "Base Crème Fraîche"]
     }
   ] },
   { id:"pizza-tartiflette", category:"pizzas", serie:"premium", name:"Tartiflette", description:"Mozzarella, lardons, reblochon, pommes de terre", price:10.00, image:"https://images.unsplash.com/photo-1664309641932-0e03e0771b97?w=600&q=85", badge:null, options:[
     {
+      label: "Base", type: "radio", required: true,
+      choices: ["Base Tomate", "Base Crème Fraîche"]
+    },
+    {
       label: "Taille", type: "size_radio", required: true,
       choices: [
         { name: "Junior · 29cm", priceAdd: 0 },
         { name: "Senior · 33cm", priceAdd: 3 },
         { name: "Méga · 40cm",   priceAdd: 10 }
       ]
-    },
-    {
-      label: "Base", type: "radio", required: true,
-      choices: ["Base Tomate", "Base Crème Fraîche"]
     }
   ] },
   { id:"pizza-kebab-piz", category:"pizzas", serie:"premium", name:"Pizza Kebab", description:"Mozzarella, viande kebab, tomates fraîches, oignons", price:10.00, image:"https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600&q=85", badge:"Best-seller", options:[
     {
+      label: "Base", type: "radio", required: true,
+      choices: ["Base Tomate", "Base Crème Fraîche"]
+    },
+    {
       label: "Taille", type: "size_radio", required: true,
       choices: [
         { name: "Junior · 29cm", priceAdd: 0 },
         { name: "Senior · 33cm", priceAdd: 3 },
         { name: "Méga · 40cm",   priceAdd: 10 }
       ]
-    },
-    {
-      label: "Base", type: "radio", required: true,
-      choices: ["Base Tomate", "Base Crème Fraîche"]
     }
   ] },
   { id:"pizza-americaine", category:"pizzas", serie:"premium", name:"Américaine", description:"Mozzarella, poulet, bœuf haché, oignons, cheddar", price:10.00, image:"https://images.unsplash.com/photo-1680405620826-83b0f0f61b28?w=600&q=85", badge:null, options:[
     {
+      label: "Base", type: "radio", required: true,
+      choices: ["Base Tomate", "Base Crème Fraîche"]
+    },
+    {
       label: "Taille", type: "size_radio", required: true,
       choices: [
         { name: "Junior · 29cm", priceAdd: 0 },
         { name: "Senior · 33cm", priceAdd: 3 },
         { name: "Méga · 40cm",   priceAdd: 10 }
       ]
-    },
-    {
-      label: "Base", type: "radio", required: true,
-      choices: ["Base Tomate", "Base Crème Fraîche"]
     }
   ] },
   { id:"pizza-norvegienne", category:"pizzas", serie:"premium", name:"Norvégienne", description:"Mozzarella, saumon, pomme de terre", price:10.00, image:"https://images.unsplash.com/photo-1579751626657-72bc17010498?w=600&q=85", badge:null, options:[
     {
+      label: "Base", type: "radio", required: true,
+      choices: ["Base Tomate", "Base Crème Fraîche"]
+    },
+    {
       label: "Taille", type: "size_radio", required: true,
       choices: [
         { name: "Junior · 29cm", priceAdd: 0 },
         { name: "Senior · 33cm", priceAdd: 3 },
         { name: "Méga · 40cm",   priceAdd: 10 }
       ]
-    },
-    {
-      label: "Base", type: "radio", required: true,
-      choices: ["Base Tomate", "Base Crème Fraîche"]
     }
   ] },
   { id:"pizza-4-saisons", category:"pizzas", serie:"premium", name:"4 Saisons", description:"Mozzarella, jambon, champignons, olives, poivrons, aubergines grillées, tomates", price:10.00, image:"https://images.unsplash.com/photo-1595854341625-f33ee10dbf94?w=600&q=85", badge:null, options:[
     {
+      label: "Base", type: "radio", required: true,
+      choices: ["Base Tomate", "Base Crème Fraîche"]
+    },
+    {
       label: "Taille", type: "size_radio", required: true,
       choices: [
         { name: "Junior · 29cm", priceAdd: 0 },
         { name: "Senior · 33cm", priceAdd: 3 },
         { name: "Méga · 40cm",   priceAdd: 10 }
       ]
-    },
-    {
-      label: "Base", type: "radio", required: true,
-      choices: ["Base Tomate", "Base Crème Fraîche"]
     }
   ] },
   { id:"pizza-chicken", category:"pizzas", serie:"premium", name:"Chicken", description:"Mozzarella, poulet, champignons, poivrons, oignons, oeuf", price:10.00, image:"https://images.unsplash.com/photo-1604068549290-dea0e4a305ca?w=600&q=85", badge:null, options:[
     {
+      label: "Base", type: "radio", required: true,
+      choices: ["Base Tomate", "Base Crème Fraîche"]
+    },
+    {
       label: "Taille", type: "size_radio", required: true,
       choices: [
         { name: "Junior · 29cm", priceAdd: 0 },
         { name: "Senior · 33cm", priceAdd: 3 },
         { name: "Méga · 40cm",   priceAdd: 10 }
       ]
-    },
-    {
-      label: "Base", type: "radio", required: true,
-      choices: ["Base Tomate", "Base Crème Fraîche"]
     }
   ] },
   { id:"pizza-mexicaine", category:"pizzas", serie:"mealLover", name:"Mexicaine", description:"Mozzarella, chorizo, bœuf haché, olives, poivrons", price:11.00, image:"https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600&q=85", badge:null, options:[
     {
+      label: "Base", type: "radio", required: true,
+      choices: ["Base Tomate", "Base Crème Fraîche"]
+    },
+    {
       label: "Taille", type: "size_radio", required: true,
       choices: [
         { name: "Junior · 29cm", priceAdd: 0 },
         { name: "Senior · 33cm", priceAdd: 3 },
         { name: "Méga · 40cm",   priceAdd: 10 }
       ]
-    },
-    {
-      label: "Base", type: "radio", required: true,
-      choices: ["Base Tomate", "Base Crème Fraîche"]
     }
   ] },
   { id:"pizza-savoyarde", category:"pizzas", serie:"mealLover", name:"Savoyarde", description:"Mozzarella, chèvre, pommes de terre, jambon", price:11.00, image:"https://images.unsplash.com/photo-1664309641932-0e03e0771b97?w=600&q=85", badge:null, options:[
     {
+      label: "Base", type: "radio", required: true,
+      choices: ["Base Tomate", "Base Crème Fraîche"]
+    },
+    {
       label: "Taille", type: "size_radio", required: true,
       choices: [
         { name: "Junior · 29cm", priceAdd: 0 },
         { name: "Senior · 33cm", priceAdd: 3 },
         { name: "Méga · 40cm",   priceAdd: 10 }
       ]
-    },
-    {
-      label: "Base", type: "radio", required: true,
-      choices: ["Base Tomate", "Base Crème Fraîche"]
     }
   ] },
   { id:"pizza-pecheur", category:"pizzas", serie:"mealLover", name:"Pêcheur", description:"Mozzarella, fruits de mer", price:11.00, image:"https://images.unsplash.com/photo-1579751626657-72bc17010498?w=600&q=85", badge:null, options:[
     {
+      label: "Base", type: "radio", required: true,
+      choices: ["Base Tomate", "Base Crème Fraîche"]
+    },
+    {
       label: "Taille", type: "size_radio", required: true,
       choices: [
         { name: "Junior · 29cm", priceAdd: 0 },
         { name: "Senior · 33cm", priceAdd: 3 },
         { name: "Méga · 40cm",   priceAdd: 10 }
       ]
-    },
-    {
-      label: "Base", type: "radio", required: true,
-      choices: ["Base Tomate", "Base Crème Fraîche"]
     }
   ] },
   { id:"pizza-gourmande", category:"pizzas", serie:"mealLover", name:"Gourmande", description:"Mozzarella, poulet, bœuf haché, kebab", price:11.00, image:"https://images.unsplash.com/photo-1680405620826-83b0f0f61b28?w=600&q=85", badge:null, options:[
     {
+      label: "Base", type: "radio", required: true,
+      choices: ["Base Tomate", "Base Crème Fraîche"]
+    },
+    {
       label: "Taille", type: "size_radio", required: true,
       choices: [
         { name: "Junior · 29cm", priceAdd: 0 },
         { name: "Senior · 33cm", priceAdd: 3 },
         { name: "Méga · 40cm",   priceAdd: 10 }
       ]
-    },
-    {
-      label: "Base", type: "radio", required: true,
-      choices: ["Base Tomate", "Base Crème Fraîche"]
     }
   ] },
   { id:"pizza-royale", category:"pizzas", serie:"mealLover", name:"Royale", description:"Mozzarella, pommes de terre, merguez, poulet, olives", price:11.00, image:"https://images.unsplash.com/photo-1680405620826-83b0f0f61b28?w=600&q=85", badge:null, options:[
     {
+      label: "Base", type: "radio", required: true,
+      choices: ["Base Tomate", "Base Crème Fraîche"]
+    },
+    {
       label: "Taille", type: "size_radio", required: true,
       choices: [
         { name: "Junior · 29cm", priceAdd: 0 },
         { name: "Senior · 33cm", priceAdd: 3 },
         { name: "Méga · 40cm",   priceAdd: 10 }
       ]
-    },
-    {
-      label: "Base", type: "radio", required: true,
-      choices: ["Base Tomate", "Base Crème Fraîche"]
     }
   ] },
   { id:"pizza-campagnarde", category:"pizzas", serie:"mealLover", name:"Campagnarde", description:"Mozzarella, lardons, jambon, oeuf, poivrons, champignons", price:11.00, image:"https://images.unsplash.com/photo-1680405620826-83b0f0f61b28?w=600&q=85", badge:null, options:[
     {
+      label: "Base", type: "radio", required: true,
+      choices: ["Base Tomate", "Base Crème Fraîche"]
+    },
+    {
       label: "Taille", type: "size_radio", required: true,
       choices: [
         { name: "Junior · 29cm", priceAdd: 0 },
         { name: "Senior · 33cm", priceAdd: 3 },
         { name: "Méga · 40cm",   priceAdd: 10 }
       ]
-    },
-    {
-      label: "Base", type: "radio", required: true,
-      choices: ["Base Tomate", "Base Crème Fraîche"]
     }
   ] },
   { id:"pizza-cannibale", category:"pizzas", serie:"mealLover", name:"Cannibale", description:"Mozzarella, bœuf haché, merguez, poulet", price:11.00, image:"https://images.unsplash.com/photo-1680405620826-83b0f0f61b28?w=600&q=85", badge:null, options:[
     {
+      label: "Base", type: "radio", required: true,
+      choices: ["Base Tomate", "Base Crème Fraîche"]
+    },
+    {
       label: "Taille", type: "size_radio", required: true,
       choices: [
         { name: "Junior · 29cm", priceAdd: 0 },
         { name: "Senior · 33cm", priceAdd: 3 },
         { name: "Méga · 40cm",   priceAdd: 10 }
       ]
-    },
-    {
-      label: "Base", type: "radio", required: true,
-      choices: ["Base Tomate", "Base Crème Fraîche"]
     }
   ] },
   { id:"pizza-indienne", category:"pizzas", serie:"mealLover", name:"Indienne", description:"Mozzarella, oignon, poulet curry, poivron, poulet tandoori", price:11.00, image:"https://images.unsplash.com/photo-1604068549290-dea0e4a305ca?w=600&q=85", badge:null, options:[
     {
+      label: "Base", type: "radio", required: true,
+      choices: ["Base Tomate", "Base Crème Fraîche"]
+    },
+    {
       label: "Taille", type: "size_radio", required: true,
       choices: [
         { name: "Junior · 29cm", priceAdd: 0 },
         { name: "Senior · 33cm", priceAdd: 3 },
         { name: "Méga · 40cm",   priceAdd: 10 }
       ]
-    },
-    {
-      label: "Base", type: "radio", required: true,
-      choices: ["Base Tomate", "Base Crème Fraîche"]
     }
   ] },
   { id:"pizza-buffalo", category:"pizzas", serie:"mealLover", name:"Buffalo Boursin", description:"Mozzarella, oignon, bœuf haché, boursin, chorizo", price:11.00, image:"https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600&q=85", badge:null, options:[
     {
+      label: "Base", type: "radio", required: true,
+      choices: ["Base Tomate", "Base Crème Fraîche"]
+    },
+    {
       label: "Taille", type: "size_radio", required: true,
       choices: [
         { name: "Junior · 29cm", priceAdd: 0 },
         { name: "Senior · 33cm", priceAdd: 3 },
         { name: "Méga · 40cm",   priceAdd: 10 }
       ]
-    },
-    {
-      label: "Base", type: "radio", required: true,
-      choices: ["Base Tomate", "Base Crème Fraîche"]
     }
   ] },
   { id:"pizza-western", category:"pizzas", serie:"mealLover", name:"Western", description:"Mozzarella, lardons, poulet, pommes de terre", price:11.00, image:"https://images.unsplash.com/photo-1604068549290-dea0e4a305ca?w=600&q=85", badge:null, options:[
     {
+      label: "Base", type: "radio", required: true,
+      choices: ["Base Tomate", "Base Crème Fraîche"]
+    },
+    {
       label: "Taille", type: "size_radio", required: true,
       choices: [
         { name: "Junior · 29cm", priceAdd: 0 },
         { name: "Senior · 33cm", priceAdd: 3 },
         { name: "Méga · 40cm",   priceAdd: 10 }
       ]
-    },
-    {
-      label: "Base", type: "radio", required: true,
-      choices: ["Base Tomate", "Base Crème Fraîche"]
     }
   ] },
   { id:"pizza-chicago", category:"pizzas", serie:"mealLover", name:"Chicago", description:"Mozzarella, poulet, boursin, jambon, pommes de terre", price:11.00, image:"https://images.unsplash.com/photo-1604068549290-dea0e4a305ca?w=600&q=85", badge:null, options:[
     {
+      label: "Base", type: "radio", required: true,
+      choices: ["Base Tomate", "Base Crème Fraîche"]
+    },
+    {
       label: "Taille", type: "size_radio", required: true,
       choices: [
         { name: "Junior · 29cm", priceAdd: 0 },
         { name: "Senior · 33cm", priceAdd: 3 },
         { name: "Méga · 40cm",   priceAdd: 10 }
       ]
-    },
-    {
-      label: "Base", type: "radio", required: true,
-      choices: ["Base Tomate", "Base Crème Fraîche"]
     }
   ] },
   { id:"pizza-4-jambons", category:"pizzas", serie:"signature", name:"4 Jambons", description:"Mozzarella, jambon, chorizo, lardons, merguez", price:12.00, image:"https://images.unsplash.com/photo-1680405620826-83b0f0f61b28?w=600&q=85", badge:"Signature", options:[
     {
+      label: "Base", type: "radio", required: true,
+      choices: ["Base Tomate", "Base Crème Fraîche"]
+    },
+    {
       label: "Taille", type: "size_radio", required: true,
       choices: [
         { name: "Junior · 29cm", priceAdd: 0 },
         { name: "Senior · 33cm", priceAdd: 3 },
         { name: "Méga · 40cm",   priceAdd: 10 }
       ]
-    },
-    {
-      label: "Base", type: "radio", required: true,
-      choices: ["Base Tomate", "Base Crème Fraîche"]
     }
   ] },
   { id:"pizza-fermiere", category:"pizzas", serie:"signature", name:"Fermière", description:"Mozzarella, jambon, poulet curry, pomme de terre, chèvre", price:12.00, image:"https://images.unsplash.com/photo-1604068549290-dea0e4a305ca?w=600&q=85", badge:"Signature", options:[
     {
+      label: "Base", type: "radio", required: true,
+      choices: ["Base Tomate", "Base Crème Fraîche"]
+    },
+    {
       label: "Taille", type: "size_radio", required: true,
       choices: [
         { name: "Junior · 29cm", priceAdd: 0 },
         { name: "Senior · 33cm", priceAdd: 3 },
         { name: "Méga · 40cm",   priceAdd: 10 }
       ]
-    },
-    {
-      label: "Base", type: "radio", required: true,
-      choices: ["Base Tomate", "Base Crème Fraîche"]
     }
   ] },
   { id:"pizza-diva", category:"pizzas", serie:"signature", name:"Diva", description:"Mozzarella, champignons, bœuf haché, chorizo, gorgonzola", price:12.00, image:"https://images.unsplash.com/photo-1680405620826-83b0f0f61b28?w=600&q=85", badge:"Signature", options:[
     {
+      label: "Base", type: "radio", required: true,
+      choices: ["Base Tomate", "Base Crème Fraîche"]
+    },
+    {
       label: "Taille", type: "size_radio", required: true,
       choices: [
         { name: "Junior · 29cm", priceAdd: 0 },
         { name: "Senior · 33cm", priceAdd: 3 },
         { name: "Méga · 40cm",   priceAdd: 10 }
       ]
-    },
-    {
-      label: "Base", type: "radio", required: true,
-      choices: ["Base Tomate", "Base Crème Fraîche"]
     }
   ] },
   { id:"pizza-arena-deal", category:"pizzas", serie:"signature", name:"Arena Deal", description:"Mozzarella, chorizo, jambon, oeuf, chèvre", price:12.00, image:"https://images.unsplash.com/photo-1702716059239-385baacdabdc?w=600&q=85", badge:"Signature", options:[
     {
+      label: "Base", type: "radio", required: true,
+      choices: ["Base Tomate", "Base Crème Fraîche"]
+    },
+    {
       label: "Taille", type: "size_radio", required: true,
       choices: [
         { name: "Junior · 29cm", priceAdd: 0 },
         { name: "Senior · 33cm", priceAdd: 3 },
         { name: "Méga · 40cm",   priceAdd: 10 }
       ]
-    },
-    {
-      label: "Base", type: "radio", required: true,
-      choices: ["Base Tomate", "Base Crème Fraîche"]
     }
   ] },
   { id:"pizza-exotique", category:"pizzas", serie:"signature", name:"Exotique", description:"Mozzarella, chèvre, poulet curry, ananas, miel", price:12.00, image:"https://images.unsplash.com/photo-1604068549290-dea0e4a305ca?w=600&q=85", badge:"Signature", options:[
     {
+      label: "Base", type: "radio", required: true,
+      choices: ["Base Tomate", "Base Crème Fraîche"]
+    },
+    {
       label: "Taille", type: "size_radio", required: true,
       choices: [
         { name: "Junior · 29cm", priceAdd: 0 },
         { name: "Senior · 33cm", priceAdd: 3 },
         { name: "Méga · 40cm",   priceAdd: 10 }
       ]
-    },
-    {
-      label: "Base", type: "radio", required: true,
-      choices: ["Base Tomate", "Base Crème Fraîche"]
     }
   ] },
   { id:"pizza-milano", category:"pizzas", serie:"signature", name:"Milano", description:"Mozzarella, bœuf haché, champignons, mélange de 4 fromages", price:12.00, image:"https://images.unsplash.com/photo-1680405620826-83b0f0f61b28?w=600&q=85", badge:"Signature", options:[
     {
+      label: "Base", type: "radio", required: true,
+      choices: ["Base Tomate", "Base Crème Fraîche"]
+    },
+    {
       label: "Taille", type: "size_radio", required: true,
       choices: [
         { name: "Junior · 29cm", priceAdd: 0 },
         { name: "Senior · 33cm", priceAdd: 3 },
         { name: "Méga · 40cm",   priceAdd: 10 }
       ]
-    },
-    {
-      label: "Base", type: "radio", required: true,
-      choices: ["Base Tomate", "Base Crème Fraîche"]
     }
   ] },
   { id:"pizza-capri", category:"pizzas", serie:"signature", name:"Capri", description:"Mozzarella, pommes de terre, gorgonzola, bœuf haché", price:12.00, image:"https://images.unsplash.com/photo-1702716059239-385baacdabdc?w=600&q=85", badge:"Signature", options:[
     {
+      label: "Base", type: "radio", required: true,
+      choices: ["Base Tomate", "Base Crème Fraîche"]
+    },
+    {
       label: "Taille", type: "size_radio", required: true,
       choices: [
         { name: "Junior · 29cm", priceAdd: 0 },
         { name: "Senior · 33cm", priceAdd: 3 },
         { name: "Méga · 40cm",   priceAdd: 10 }
       ]
-    },
-    {
-      label: "Base", type: "radio", required: true,
-      choices: ["Base Tomate", "Base Crème Fraîche"]
     }
   ] },
   { id:"pizza-boursalino", category:"pizzas", serie:"signature", name:"Boursalino", description:"Mozzarella, oignons, bœuf haché, boursin, pommes de terre, cheddar", price:12.00, image:"https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600&q=85", badge:"Signature", options:[
     {
+      label: "Base", type: "radio", required: true,
+      choices: ["Base Tomate", "Base Crème Fraîche"]
+    },
+    {
       label: "Taille", type: "size_radio", required: true,
       choices: [
         { name: "Junior · 29cm", priceAdd: 0 },
         { name: "Senior · 33cm", priceAdd: 3 },
         { name: "Méga · 40cm",   priceAdd: 10 }
       ]
-    },
-    {
-      label: "Base", type: "radio", required: true,
-      choices: ["Base Tomate", "Base Crème Fraîche"]
     }
   ] },
   { id:"tacos-1viande", category:"tacos", name:"Tacos 1 Viande", description:"Frite +1€ · Boisson +1€", price:8.00, image:"https://images.unsplash.com/photo-1613514785940-daed07835ca3?w=600&q=85", badge:null, options:[{ label:"Viande", type:"radio", required:true, choices:["Steak Haché","Poulet","Tenders","Merguez","Chorizo","Nugett","Cordon Bleu","Kebab","Omelette","Poulet Tandoori","Poulet Curry"] }, { label:"Suppléments", type:"multi", required:false, choices:[{ name:"Frite", price:1.00 },{ name:"Boisson", price:1.00 },{ name:"Viande supplémentaire", price:2.00 }] }] },
