@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Statut Restaurant — Admin APK</title>
+  <link rel="stylesheet" href="css/admin.css">
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script src="../js/firebase-config.js"></script>
+  <style>
+    .status-page { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:calc(100vh - 80px); padding:32px 20px; }
+
+    /* ── Grande carte de statut ── */
+    .status-card {
+      background:var(--dark2); border:1px solid rgba(255,255,255,.08);
+      border-radius:24px; padding:40px; width:100%; max-width:560px;
+      text-align:center; transition:border-color .3s, box-shadow .3s;
+    }
+    .status-card.open   { border-color:rgba(34,197,94,.4);  box-shadow:0 0 40px rgba(34,197,94,.08); }
+    .status-card.closed { border-color:rgba(239,68,68,.4);  box-shadow:0 0 40px rgba(239,68,68,.08); }
+    .status-card.auto   { border-color:rgba(245,166,35,.25); }
+
+    .status-icon { font-size:4rem; margin-bottom:16px; line-height:1; transition:all .3s; }
+    .status-label {
+      font-size:2rem; font-weight:900; letter-spacing:1px; margin-bottom:8px;
+      transition:color .3s;
+    }
+    .status-card.open   .status-label { color:#22c55e; }
+    .status-card.closed .status-label { color:#ef4444; }
+    .status-card.auto   .status-label { color:var(--gold); }
+
+    .status-detail { font-size:.88rem; color:var(--gray); margin-bottom:32px; line-height:1.6; }
+
+    /* ── 3 boutons de mode ── */
+    .mode-buttons { display:flex; gap:12px; flex-wrap:wrap; justify-content:center; margin-bottom:28px; }
+    .mode-btn {
+      flex:1; min-width:140px; max-width:160px; padding:16px 10px;
+      border-radius:14px; border:2px solid rgba(255,255,255,.1);
+      background:var(--dark3); cursor:pointer; transition:all .2s;
+      font-family:var(--font-b); font-weight:800; font-size:.82rem; color:var(--gray);
+      display:flex; flex-direction:column; align-items:center; gap:6px;
+    }
+    .mode-btn .mode-icon { font-size:1.6rem; }
+    .mode-btn:hover { border-color:rgba(255,255,255,.25); color:#fff; transform:translateY(-2px); }
+    .mode-btn.active[data-mode="auto"]        { border-color:var(--gold);  color:#fff; background:rgba(245,166,35,.12); }
+    .mode-btn.active[data-mode="forceOpen"]   { border-color:#22c55e;      color:#fff; background:rgba(34,197,94,.14); }
+    .mode-btn.active[data-mode="forceClosed"] { border-color:#ef4444;      color:#fff; background:rgba(239,68,68,.12); }
+
+    /* ── Horaires du jour ── */
+    .schedule-box {
+      background:var(--dark3); border-radius:14px; padding:18px 20px;
+      border:1px solid rgba(255,255,255,.06); text-align:left;
+    }
+    .schedule-box-title { font-size:.7rem; font-weight:900; letter-spacing:1.5px; text-transform:uppercase; color:var(--gray2); margin-bottom:12px; }
+    .schedule-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+    .schedule-row:last-child { margin-bottom:0; }
+    .schedule-label { font-size:.83rem; color:var(--gray); }
+    .schedule-time  { font-size:.83rem; font-weight:800; color:#fff; }
+    .schedule-badge {
+      font-size:.65rem; font-weight:900; padding:3px 8px; border-radius:20px;
+      display:inline-block;
+    }
+    .schedule-badge.now-open   { background:rgba(34,197,94,.18);  color:#22c55e; }
+    .schedule-badge.now-closed { background:rgba(239,68,68,.15);  color:#ef4444; }
+    .schedule-badge.now-call   { background:rgba(245,166,35,.15); color:var(--gold); }
+
+    /* ── Mini horloge ── */
+    .live-clock { font-size:1.1rem; font-weight:900; color:var(--gray2); margin-bottom:28px; letter-spacing:2px; }
+  </style>
+</head>
+<body>
+<div class="admin-layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-name">ARENA <span>PIZZA</span> KEBAB</div>
+      <div class="sidebar-logo-sub">Administration</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">Principal</div>
+      <a href="index.html" class="nav-item">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Tableau de bord
+      </a>
+      <a href="orders.html" class="nav-item">
+        <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg>
+        Commandes
+      </a>
+      <div class="nav-section-title">Gestion</div>
+      <a href="statut.html" class="nav-item active">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Statut du restaurant
+      </a>
+      <a href="menu-manager.html" class="nav-item">
+        <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        Gestion du Menu
+      </a>
+      <div class="nav-section-title">Paramètres</div>
+      <a href="../index.html" class="nav-item">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+        Voir le site
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user-avatar">A</div>
+      <div><div class="sidebar-user-name">Admin APK</div><div class="sidebar-user-role">Administrateur</div></div>
+      <button class="btn-logout" onclick="logout()">
+        <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+    </div>
+  </aside>
+
+  <div class="admin-main">
+    <div class="topbar">
+      <div class="topbar-title">STATUT DU RESTAURANT</div>
+    </div>
+
+    <div class="page-content">
+      <div class="status-page">
+
+        <!-- Horloge live -->
+        <div class="live-clock" id="liveClock">--:--:--</div>
+
+        <!-- Grande carte de statut -->
+        <div class="status-card" id="statusCard">
+          <div class="status-icon" id="statusIcon">⏳</div>
+          <div class="status-label" id="statusLabel">Chargement…</div>
+          <div class="status-detail" id="statusDetail">Lecture des paramètres en cours…</div>
+
+          <!-- 3 boutons de mode -->
+          <div class="mode-buttons">
+            <button class="mode-btn" data-mode="auto" onclick="applyMode('auto')">
+              <span class="mode-icon">🕐</span>
+              <span>Automatique</span>
+              <span style="font-size:.68rem;font-weight:400;opacity:.6">Suit les horaires</span>
+            </button>
+            <button class="mode-btn" data-mode="forceOpen" onclick="applyMode('forceOpen')">
+              <span class="mode-icon">🟢</span>
+              <span>Forcer Ouvert</span>
+              <span style="font-size:.68rem;font-weight:400;opacity:.6">Hors horaires aussi</span>
+            </button>
+            <button class="mode-btn" data-mode="forceClosed" onclick="applyMode('forceClosed')">
+              <span class="mode-icon">🔴</span>
+              <span>Forcer Fermé</span>
+              <span style="font-size:.68rem;font-weight:400;opacity:.6">Même si ouvert</span>
+            </button>
+          </div>
+
+          <!-- Horaires du jour -->
+          <div class="schedule-box">
+            <div class="schedule-box-title">Horaires normaux — Lun. au Dim.</div>
+            <div class="schedule-row">
+              <span class="schedule-label">Service midi</span>
+              <span class="schedule-time">11h00 → 13h15</span>
+            </div>
+            <div class="schedule-row">
+              <span class="schedule-label">Appel uniquement</span>
+              <span class="schedule-time">13h15 → 13h30</span>
+            </div>
+            <div class="schedule-row">
+              <span class="schedule-label">Service soir</span>
+              <span class="schedule-time">18h00 → 22h15</span>
+            </div>
+            <div class="schedule-row">
+              <span class="schedule-label">Appel uniquement</span>
+              <span class="schedule-time">22h15 → 22h30</span>
+            </div>
+            <div style="margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between">
+              <span class="schedule-label">Statut actuel des horaires</span>
+              <span class="schedule-badge" id="clockBadge">—</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="../js/data.js"></script>
+<script src="js/admin.js"></script>
+<script>
+checkAuth();
+
+var currentMode = 'auto';
+
+/* ── Horloge live ── */
+function updateClock() {
+  var now = new Date();
+  document.getElementById('liveClock').textContent =
+    now.toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+
+  // Badge statut horloge
+  var s = getOrderingStatus();
+  var badge = document.getElementById('clockBadge');
+  badge.className = 'schedule-badge now-' + s;
+  badge.textContent = s === 'open' ? '🟢 Ouvert' : (s === 'call' ? '📞 Appel seulement' : '🔴 Fermé');
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+/* ── Charger le mode depuis Firebase et afficher ── */
+async function loadAndRender() {
+  await loadOrderingOverride(true);
+  currentMode = _orderingOverride || 'auto';
+  renderCard();
+}
+
+function renderCard() {
+  var card   = document.getElementById('statusCard');
+  var icon   = document.getElementById('statusIcon');
+  var label  = document.getElementById('statusLabel');
+  var detail = document.getElementById('statusDetail');
+
+  // Boutons actifs
+  document.querySelectorAll('.mode-btn').forEach(function(b) {
+    b.classList.toggle('active', b.dataset.mode === currentMode);
+  });
+
+  if (currentMode === 'forceOpen') {
+    card.className  = 'status-card open';
+    icon.textContent  = '🟢';
+    label.textContent = 'OUVERT';
+    detail.innerHTML  = 'Les commandes sont <strong>forcées ouvertes</strong>.<br>Les clients peuvent commander à n\'importe quelle heure,<br>même en dehors des horaires normaux.';
+  } else if (currentMode === 'forceClosed') {
+    card.className  = 'status-card closed';
+    icon.textContent  = '🔴';
+    label.textContent = 'FERMÉ';
+    detail.innerHTML  = 'Les commandes sont <strong>forcées fermées</strong>.<br>Aucun client ne peut passer commande,<br>même si vous êtes dans vos horaires habituels.';
+  } else {
+    var live = getOrderingStatus();
+    card.className = 'status-card auto ' + (live === 'open' ? 'open' : live === 'closed' ? 'closed' : '');
+    if (live === 'open') {
+      icon.textContent  = '🕐';
+      label.textContent = 'MODE AUTO — OUVERT';
+      detail.innerHTML  = 'Le restaurant suit ses <strong>horaires normaux</strong>.<br>Actuellement dans une plage d\'ouverture.';
+    } else if (live === 'call') {
+      icon.textContent  = '📞';
+      label.textContent = 'MODE AUTO — APPEL';
+      detail.innerHTML  = 'Le restaurant suit ses <strong>horaires normaux</strong>.<br>Actuellement en zone "appel uniquement" — commandes en ligne fermées.';
+    } else {
+      icon.textContent  = '🕐';
+      label.textContent = 'MODE AUTO — FERMÉ';
+      detail.innerHTML  = 'Le restaurant suit ses <strong>horaires normaux</strong>.<br>Actuellement en dehors des horaires d\'ouverture.';
+    }
+  }
+}
+
+/* ── Appliquer un nouveau mode ── */
+async function applyMode(mode) {
+  if (mode === currentMode) return;
+  try {
+    await setOrderingOverride(mode);
+    currentMode = mode;
+    renderCard();
+    var toastMsg = {
+      auto: '🕐 Mode automatique activé',
+      forceOpen: '🟢 Restaurant forcé OUVERT',
+      forceClosed: '🔴 Restaurant forcé FERMÉ'
+    }[mode];
+    showToast(toastMsg);
+  } catch(e) {
+    showToast('Erreur : ' + e.message, 'error');
+  }
+}
+
+// Rafraîchir l'affichage toutes les 30s (si le mode auto change de plage)
+setInterval(function() { if (currentMode === 'auto') renderCard(); }, 30000);
+
+loadAndRender();
+</script>
+</body>
+</html>
