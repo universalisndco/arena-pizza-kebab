@@ -43,6 +43,7 @@
       grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
       gap:20px;
     }
+  @keyframes fadeInUp { from { opacity:0; transform:translateX(-50%) translateY(12px); } to { opacity:1; transform:translateX(-50%) translateY(0); } }
   </style>
 </head>
 <body>
@@ -50,7 +51,7 @@
 <nav class="navbar" id="navbar">
   <div class="container">
     <a href="index.html" class="nav-logo">
-      <img src="https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=100&q=80" alt="APK" class="nav-logo-img">
+      <img src="img/logo.png" alt="APK" class="nav-logo-img" id="siteLogo">
       <span>ARENA <span class="text-red">PIZZA</span> KEBAB</span>
     </a>
     <ul class="nav-links">
@@ -262,15 +263,53 @@ function renderMenu() {
   grid.querySelectorAll('.menu-card').forEach(function(card) {
     card.addEventListener('click', function(e) {
       if (e.target.closest('.btn-add')) return;
-      openItemModal(card.dataset.id);
+      var itemId = card.dataset.id;
+      if (isStudentOfferBlocked(itemId)) return;
+      openItemModal(itemId);
     });
   });
   grid.querySelectorAll('.btn-add').forEach(function(btn) {
     btn.addEventListener('click', function(e) {
       e.stopPropagation();
-      openItemModal(btn.dataset.id);
+      var itemId = btn.dataset.id;
+      if (isStudentOfferBlocked(itemId)) return;
+      openItemModal(itemId);
     });
   });
+}
+
+/* ── Restriction Offre Étudiante (midi uniquement) ───────── */
+function isStudentOfferBlocked(itemId) {
+  var item = getItemById(itemId);
+  if (!item) return false;
+
+  // Catégories soumises à la restriction midi
+  var midiOnly = ['pizza-etudiante'];
+  if (midiOnly.indexOf(item.category) < 0 && midiOnly.indexOf(item.specialType) < 0) return false;
+
+  if (typeof isMidiService === 'function' && !isMidiService()) {
+    showMidiOnlyMessage();
+    return true;
+  }
+  return false;
+}
+
+function showMidiOnlyMessage() {
+  var existing = document.getElementById('midi-toast');
+  if (existing) return;
+  var el = document.createElement('div');
+  el.id = 'midi-toast';
+  el.style.cssText = [
+    'position:fixed', 'bottom:90px', 'left:50%', 'transform:translateX(-50%)',
+    'background:#1c1c22', 'border:1px solid rgba(245,166,35,.4)',
+    'color:#fff', 'padding:14px 22px', 'border-radius:12px',
+    'font-size:.85rem', 'font-weight:700', 'z-index:9999',
+    'box-shadow:0 8px 30px rgba(0,0,0,.6)', 'text-align:center',
+    'max-width:320px', 'animation:fadeInUp .25s ease-out'
+  ].join(';');
+  el.innerHTML = '🎓 <strong>Offre Étudiante</strong><br>Disponible uniquement au déjeuner<br><span style="color:var(--gold);font-size:.8rem">11h00 — 13h30</span>';
+  document.body.appendChild(el);
+  setTimeout(function() { if (el.parentNode) el.parentNode.removeChild(el); }, 3500);
 }
 
 /* ── Onglets catégories (statiques + nouvelles catégories admin) ── */
@@ -377,6 +416,8 @@ function initFromHash() {
 var allCustomMenuItems = [];
 
 async function initMenuPage() {
+  await loadOrderingOverride();
+  await loadSiteLogo();
   initFromHash();
   allCustomMenuItems = await loadCustomMenuItems();
   buildPromos();
