@@ -3,87 +3,84 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Commande Confirmée — Arena Pizza Kebab</title>
+  <title>Commande confirmée — Arena Pizza Kebab</title>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
   <link rel="stylesheet" href="css/style.css">
+  <style>
+    .confirm-page { min-height:100vh; display:flex; align-items:center; justify-content:center; padding:40px 20px; }
+    .confirm-card { background:var(--dark2); border:1px solid rgba(255,255,255,.08); border-radius:24px; padding:48px 36px; max-width:480px; width:100%; text-align:center; }
+    .confirm-icon { width:80px; height:80px; border-radius:50%; background:rgba(34,197,94,.15); border:2px solid #22c55e; display:flex; align-items:center; justify-content:center; margin:0 auto 24px; }
+    .confirm-icon svg { width:40px; height:40px; }
+    .confirm-title { font-family:var(--font-h); font-size:2rem; margin-bottom:8px; color:#fff; }
+    .confirm-subtitle { color:var(--gray); font-size:.9rem; margin-bottom:28px; line-height:1.6; }
+    .confirm-order { background:var(--dark3); border-radius:12px; padding:16px 20px; margin-bottom:28px; }
+    .confirm-order-num { font-size:1.6rem; font-weight:900; color:var(--gold); }
+    .confirm-order-label { font-size:.75rem; color:var(--gray); text-transform:uppercase; letter-spacing:1px; margin-bottom:4px; }
+    .confirm-btn { display:inline-block; padding:14px 32px; background:var(--red); color:#fff; border-radius:12px; font-weight:900; text-decoration:none; font-size:.9rem; }
+  </style>
 </head>
 <body>
 <nav class="navbar" id="navbar">
-  <div class="container">
+  <div class="nav-container">
     <a href="index.html" class="nav-logo">
-      <img src="https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=100&q=80" alt="APK" class="nav-logo-img">
-      <span>ARENA <span class="text-red">PIZZA</span> KEBAB</span>
+      <img src="img/logo.png" alt="APK" class="nav-logo-img">
+      <span class="nav-logo-name">ARENA <span class="red">PIZZA</span> KEBAB</span>
     </a>
   </div>
 </nav>
 
-<main class="confirm-page">
-  <div class="container">
-    <div class="confirm-icon">
-      <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-    </div>
-    <h1 class="section-title">COMMANDE <span class="text-red">CONFIRMÉE</span></h1>
-    <div class="confirm-order-num" id="confirmOrderNum">APK-000000</div>
-    <p class="confirm-message">
-      Merci pour votre commande ! Nous l'avons bien reçue et nous la préparons avec soin. 
-      Un email de confirmation vous sera envoyé.
-    </p>
-
-    <div class="time-badge" id="timeBadge">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-      Temps estimé : 25-35 minutes
-    </div>
-
-    <div class="confirm-details" id="confirmDetails"></div>
-
-    <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap">
-      <a href="index.html" class="btn btn-primary">Retour à l'accueil</a>
-      <a href="menu.html" class="btn btn-secondary">Commander à nouveau</a>
-    </div>
+<div class="confirm-page">
+  <div class="confirm-card" id="confirmCard">
+    <div style="text-align:center;color:var(--gray);padding:40px">Vérification du paiement…</div>
   </div>
-</main>
+</div>
 
 <script src="js/data.js"></script>
 <script src="js/cart.js"></script>
 <script>
-const order = JSON.parse(localStorage.getItem('apk_last_order') || '{}');
+(async function() {
+  var params  = new URLSearchParams(window.location.search);
+  var sessionId   = params.get('session_id');
+  var orderNum    = params.get('order');
+  var card = document.getElementById('confirmCard');
 
-if (order.orderNumber) {
-  document.getElementById('confirmOrderNum').textContent = order.orderNumber;
+  // Récupérer la commande en attente depuis localStorage
+  var pending = null;
+  try { pending = JSON.parse(localStorage.getItem('apk_pending_order') || 'null'); } catch(e) {}
 
-  const modeLabel = order.mode === 'delivery' ? 'Livraison' : 'À emporter';
-  const timeLabel = order.time === 'ASAP' ? 'Dès que possible' : order.time;
-  const payLabel = { card: 'Carte bancaire', paypal: 'PayPal', cash: 'À la livraison' }[order.payment] || '';
-
-  let addrLine = '';
-  if (order.mode === 'delivery' && order.address) {
-    addrLine = `<div class="confirm-detail-row"><label>Adresse</label><span>${order.address.street}, ${order.address.city}</span></div>`;
+  // Mettre à jour le statut dans Firebase
+  if (pending && pending._id) {
+    try {
+      await db.collection('orders').doc(pending._id).update({
+        status: 'pending',
+        payment: 'card',
+        stripeSessionId: sessionId || '',
+        paidAt: new Date().toISOString()
+      });
+    } catch(e) { console.warn('Firebase update error:', e); }
   }
 
-  let itemsHtml = (order.items || []).map(i =>
-    `<div class="confirm-detail-row"><label>${i.qty}x ${i.name}</label><span>${formatPrice(i.totalPrice * i.qty)}</span></div>`
-  ).join('');
+  // Vider le panier
+  Cart.clear();
+  localStorage.removeItem('apk_pending_order');
 
-  document.getElementById('confirmDetails').innerHTML = `
-    <div class="confirm-detail-row"><label>Nom</label><span>${order.firstName} ${order.lastName}</span></div>
-    <div class="confirm-detail-row"><label>Téléphone</label><span>${order.phone}</span></div>
-    <div class="confirm-detail-row"><label>Mode</label><span>${modeLabel}</span></div>
-    ${addrLine}
-    <div class="confirm-detail-row"><label>Heure</label><span>${timeLabel}</span></div>
-    <div class="confirm-detail-row"><label>Paiement</label><span>${payLabel}</span></div>
-    <div style="margin:12px 0;border-top:1px solid rgba(255,255,255,.1)"></div>
-    ${itemsHtml}
-    <div class="confirm-detail-row" style="font-weight:900"><label>Total</label><span style="color:var(--gold);font-family:var(--font-h);font-size:1.3rem">${formatPrice(order.total || 0)}</span></div>
-  `;
-
-  if (order.mode === 'takeaway') {
-    document.getElementById('timeBadge').innerHTML = `
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-      Prêt dans : 15-20 minutes
-    `;
-  }
-}
-
-Cart.load();
+  // Afficher la confirmation
+  var num = orderNum || (pending && pending.orderNumber) || '—';
+  card.innerHTML =
+    '<div class="confirm-icon">' +
+      '<svg viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>' +
+    '</div>' +
+    '<div class="confirm-title">Commande confirmée !</div>' +
+    '<div class="confirm-subtitle">Votre paiement a bien été reçu.<br>Nous préparons votre commande dès maintenant.</div>' +
+    '<div class="confirm-order">' +
+      '<div class="confirm-order-label">Votre numéro de commande</div>' +
+      '<div class="confirm-order-num">' + num + '</div>' +
+    '</div>' +
+    '<div style="font-size:.82rem;color:var(--gray);margin-bottom:24px">Gardez ce numéro, il vous sera demandé à la livraison ou au retrait.</div>' +
+    '<a href="index.html" class="confirm-btn">Retour à l\'accueil</a>';
+})();
 </script>
 </body>
 </html>
