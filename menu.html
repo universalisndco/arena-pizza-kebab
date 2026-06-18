@@ -200,9 +200,10 @@ function renderMenu() {
   var grid = document.getElementById('menuGrid');
   if (!grid) return;
 
-  var items = getItemsByCategory(currentCategory).concat(
-    getCustomItemsByCategory(allCustomMenuItems, currentCategory)
-  );
+  var items = getItemsByCategory(currentCategory)
+    .map(function(i) { return applyOverride(i, allMenuOverrides); })
+    .filter(Boolean)
+    .concat(getCustomItemsByCategory(allCustomMenuItems, currentCategory));
 
   if (currentCategory === 'pizzas') {
     /* ── Filtrer par série si filtre actif ── */
@@ -414,12 +415,16 @@ function initFromHash() {
 })();
 
 var allCustomMenuItems = [];
+var allMenuOverrides   = {};
 
 async function initMenuPage() {
   await loadOrderingOverride();
   await loadSiteLogo();
   initFromHash();
-  allCustomMenuItems = await loadCustomMenuItems();
+  // Charger articles custom ET overrides en parallèle
+  var results = await Promise.all([loadCustomMenuItems(), loadMenuOverrides()]);
+  allCustomMenuItems = results[0];
+  allMenuOverrides   = results[1];
   buildPromos();
   buildTabs();
   buildFilters();
