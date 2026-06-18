@@ -29,7 +29,7 @@
 <nav class="navbar" id="navbar">
   <div class="container">
     <a href="index.html" class="nav-logo">
-      <img src="https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=100&q=80" alt="APK" class="nav-logo-img">
+      <img src="img/logo.png" alt="APK" class="nav-logo-img" id="siteLogo">
       <span>ARENA <span class="text-red">PIZZA</span> KEBAB</span>
     </a>
     <ul class="nav-links">
@@ -324,55 +324,97 @@ function renderSummary() {
   document.getElementById('oTotal').textContent    = formatPrice(total);
 }
 
-/* ── Générer le texte du ticket ──────────────────────────── */
+/* ── Générer le ticket de caisse (48 col, imprimante thermique) ─ */
 function generateTicketText(o) {
-  var W  = '================================';
-  var S  = '--------------------------------';
-  var NL = '\n';
-  var row = function(l, r, w) {
-    w = w || 32;
-    var ls = String(l).substring(0, w - String(r).length - 1);
-    return ls + ' '.repeat(Math.max(1, w - ls.length - String(r).length)) + String(r);
-  };
-  var now  = new Date();
-  var date = now.toLocaleDateString('fr-FR') + ' ' +
-             now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-  var t = '';
-  t += W + NL;
-  t += '    ARENA PIZZA KEBAB [APK]' + NL;
-  t += '      88 Rue Lesage - REIMS' + NL;
-  t += '        09 83 39 82 20' + NL;
-  t += W + NL;
-  t += ' N : ' + o.orderNumber + NL;
-  t += ' ' + date + NL;
-  t += S + NL;
-  t += ' CLIENT :' + NL;
-  t += ' ' + (o.firstName||'') + ' ' + (o.lastName||'') + NL;
-  t += ' Tel : ' + (o.phone||'') + NL + NL;
-  t += ' MODE : ' + (o.mode === 'delivery' ? 'LIVRAISON' : 'A EMPORTER') + NL;
-  if (o.mode === 'delivery' && o.address) {
-    if (o.address.street) t += ' ' + o.address.street + NL;
-    if (o.address.city)   t += ' ' + o.address.city + ' ' + (o.address.zip||'') + NL;
-    if (o.address.notes)  t += ' Info : ' + o.address.notes + NL;
+  var W  = 48;
+  var LN = '\n';
+
+  // Centrer un texte sur W colonnes
+  function center(s) {
+    s = String(s).substring(0, W);
+    var pad = Math.floor((W - s.length) / 2);
+    return ' '.repeat(pad) + s;
   }
-  t += ' Heure : ' + (o.time === 'ASAP' ? 'Des que possible' : (o.time||'ASAP')) + NL;
-  t += S + NL;
-  t += ' COMMANDE :' + NL;
+  // Ligne gauche | droite alignée
+  function row(l, r) {
+    l = String(l); r = String(r);
+    if (l.length + r.length + 1 > W) l = l.substring(0, W - r.length - 2) + '.';
+    return l + ' '.repeat(W - l.length - r.length) + r;
+  }
+  function sep(c) { return (c || '-').repeat(W); }
+
+  var now  = new Date();
+  var date = now.toLocaleDateString('fr-FR') + '  ' +
+             now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+
+  var paiement = o.payment === 'card' ? 'CARTE BANCAIRE' : 'ESPECES / SUR PLACE';
+
+  var t = '';
+  t += sep('=') + LN;
+  t += center('ARENA PIZZA KEBAB') + LN;
+  t += center('[ APK ]') + LN;
+  t += center('88 Rue Lesage — 51100 REIMS') + LN;
+  t += center('09 83 39 82 20') + LN;
+  t += center('07 84 65 23 58') + LN;
+  t += sep('=') + LN;
+  t += LN;
+  t += row('COMMANDE N°', o.orderNumber) + LN;
+  t += row('DATE', date) + LN;
+  t += LN;
+  t += sep('-') + LN;
+  t += center('CLIENT') + LN;
+  t += sep('-') + LN;
+  t += ' Nom  : ' + ((o.firstName||'') + ' ' + (o.lastName||'')).trim() + LN;
+  t += ' Tel  : ' + (o.phone || '—') + LN;
+  t += ' Mode : ' + (o.mode === 'delivery' ? '🚚 LIVRAISON' : '🏪 A EMPORTER') + LN;
+  if (o.mode === 'delivery' && o.address) {
+    if (o.address.street) t += ' Adrs : ' + o.address.street + LN;
+    if (o.address.city)   t += '         ' + (o.address.zip||'') + ' ' + o.address.city + LN;
+    if (o.address.notes)  t += ' Info : ' + o.address.notes + LN;
+  }
+  t += ' Heure: ' + (o.time === 'ASAP' ? 'Des que possible' : (o.time||'ASAP')) + LN;
+  t += LN;
+  t += sep('=') + LN;
+  t += center('DETAIL COMMANDE') + LN;
+  t += sep('=') + LN;
+
   (o.items||[]).forEach(function(item) {
-    var lt = ((parseFloat(item.totalPrice)||0)*(parseInt(item.qty)||1)).toFixed(2) + 'E';
-    t += row(' ' + (item.qty||1) + 'x ' + item.name, lt) + NL;
+    var qty   = parseInt(item.qty) || 1;
+    var price = (parseFloat(item.totalPrice)||0) * qty;
+    t += row(' ' + qty + 'x ' + item.name, price.toFixed(2) + ' E') + LN;
     if (item.selectedOptions) {
-      Object.entries(item.selectedOptions).filter(function(e){ return e[1]; })
-        .forEach(function(e){ t += '   > ' + e[0] + ': ' + e[1] + NL; });
+      Object.entries(item.selectedOptions).forEach(function(e) {
+        if (e[1]) t += '    → ' + e[0] + ': ' + e[1] + LN;
+      });
     }
   });
-  t += S + NL;
-  if (o.notes) t += ' NOTE : ' + o.notes + NL + S + NL;
-  t += row(' TOTAL :', (parseFloat(o.total)||0).toFixed(2) + 'E') + NL;
-  t += ' PAIEMENT : Sur place' + NL;
-  t += W + NL;
-  t += '    Merci et bon appetit !' + NL;
-  t += W + NL + NL + NL + NL;
+
+  t += sep('-') + LN;
+
+  if (o.notes) {
+    t += LN;
+    t += ' NOTE CLIENT :' + LN;
+    t += ' ' + o.notes + LN;
+    t += sep('-') + LN;
+  }
+
+  t += LN;
+  t += row(' SOUS-TOTAL', (parseFloat(o.subtotal)||parseFloat(o.total)||0).toFixed(2) + ' E') + LN;
+  if (o.deliveryFee && parseFloat(o.deliveryFee) > 0) {
+    t += row(' LIVRAISON',  parseFloat(o.deliveryFee).toFixed(2) + ' E') + LN;
+  }
+  t += sep('=') + LN;
+  t += row(' TOTAL TTC', (parseFloat(o.total)||0).toFixed(2) + ' E') + LN;
+  t += sep('=') + LN;
+  t += LN;
+  t += row(' PAIEMENT', paiement) + LN;
+  t += LN;
+  t += sep('=') + LN;
+  t += center('Merci pour votre commande !') + LN;
+  t += center('Bon appétit ! :)') + LN;
+  t += sep('=') + LN;
+  t += LN + LN + LN + LN; // avance papier
+
   return t;
 }
 
@@ -519,10 +561,15 @@ document.querySelectorAll('.pay-btn').forEach(function(btn) {
 });
 
 /* Init */
-Cart.load();
-renderSummary();
-setMode('delivery');
-checkCardAvailability();
+async function initCheckoutPage() {
+  await loadOrderingOverride();
+  await loadSiteLogo();
+  Cart.load();
+  renderSummary();
+  setMode('delivery');
+  checkCardAvailability();
+}
+initCheckoutPage();
 </script>
 </body>
 </html>
