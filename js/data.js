@@ -14,9 +14,10 @@ const APK_MENU = {
     { id:"burgers",       label:"Burgers" },
     { id:"assiettes",     label:"Assiettes" },
     { id:"salade",        label:"Salades" },
-    { id:"kids",          label:"Kids Menu" },
-    { id:"desserts",      label:"Desserts" },
-    { id:"boissons",      label:"Boissons" }
+    { id:"kids",              label:"Kids Menu" },
+    { id:"pizza-etudiante",   label:"🎓 Pizza Étudiante" },
+    { id:"desserts",          label:"Desserts" },
+    { id:"boissons",          label:"Boissons" }
   ],
 
   pizzaSeries: [
@@ -591,6 +592,23 @@ const APK_MENU = {
   { id:"burger-bc", category:"burgers", name:"B&C", description:"1 steak 90g, 1 Crispy, oignon, 2 cheddar, salade, tomate", price:10.00, image:"https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&q=85", badge:null, options:[{ label:"Suppléments", type:"multi", required:false, choices:[{ name:"Boisson 33cl", price:1.00 },{ name:"Frites", price:1.00 },{ name:"Raclette", price:1.60 },{ name:"Reblochon", price:1.60 },{ name:"Cheddar", price:1.60 },{ name:"Chèvre", price:1.60 },{ name:"Miel", price:1.60 },{ name:"Oeuf", price:1.60 },{ name:"Steak 45g", price:1.60 },{ name:"Steak 90g", price:2.00 }] }] },
   { id:"burger-king", category:"burgers", name:"King Arena Max", description:"3 steaks, 1 omelette, 3 cheddar, raclette", price:13.00, image:"https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&q=85", badge:"King", options:[{ label:"Suppléments", type:"multi", required:false, choices:[{ name:"Boisson 33cl", price:1.00 },{ name:"Frites", price:1.00 },{ name:"Raclette", price:1.60 },{ name:"Reblochon", price:1.60 },{ name:"Cheddar", price:1.60 },{ name:"Chèvre", price:1.60 },{ name:"Miel", price:1.60 },{ name:"Oeuf", price:1.60 },{ name:"Steak 45g", price:1.60 },{ name:"Steak 90g", price:2.00 }] }] },
   { id:"kids-menu", category:"kids", name:"Kids Menu", description:"5 Nuggets + 1 Jus", price:6.00, image:"https://images.unsplash.com/photo-1562802378-063ec186a863?w=600&q=85", badge:null, options:[] },
+
+  // ── Offre Étudiante ──────────────────────────────────────────────────────────
+  { id:"offre-etudiante", category:"pizza-etudiante", serie:null,
+    name:"Offre Étudiante 🎓", price:8.00,
+    description:"Tacos 2 Viandes + Frite + Boisson OU Pizza Junior au choix — 8€",
+    image:"https://images.unsplash.com/photo-1613514785940-daed07835ca3?w=600&q=85",
+    badge:"8€", isNewCategory:true, categoryLabel:"Pizza Étudiante", specialType:"pizza-etudiante",
+    options:[
+      { label:"Formule", type:"radio", required:true, choices:[
+        "Tacos 2 Viandes + Frite + Boisson",
+        "Pizza Junior au choix"
+      ]},
+      { label:"Viande 1 (si Tacos)", type:"radio", required:false, choices:["Steak Haché","Poulet","Tenders","Merguez","Chorizo","Nugett","Cordon Bleu","Kebab","Poulet Curry","Poulet Tandoori"] },
+      { label:"Viande 2 (si Tacos)", type:"radio", required:false, choices:["Steak Haché","Poulet","Tenders","Merguez","Chorizo","Nugett","Cordon Bleu","Kebab","Poulet Curry","Poulet Tandoori"] },
+      { label:"Pizza (si Pizza Junior)", type:"radio", required:false, choices:["Margherita","4 Fromages","Chèvre Miel","Napolitaine","Reine","Campione","Orientale","Végétarienne","Thon","Chicken","Kebab","Américaine","Au choix du chef"] }
+    ]
+  },
   { id:"tiramisu", category:"desserts", name:"Tiramisu", description:"Tiramisu maison", price:4.00, image:"https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=600&q=85", badge:null, options:[] },
   { id:"tarte-daim", category:"desserts", name:"Tarte au Daim", description:"Tarte croustillante au caramel Daim", price:3.50, image:"https://images.unsplash.com/photo-1606313564200-e75d5e394746?w=600&q=85", badge:null, options:[] },
   { id:"hagen-100", category:"desserts", name:"Häagen-Dazs 100ml", description:"Mini pot glace premium individuel", price:4.50, image:"https://images.unsplash.com/photo-1463947628408-f8581a2f4aca?w=600&q=85", badge:null, options:[{ label:"Parfum", type:"radio", required:true, choices:["Vanille","Fraise","Chocolat","Caramel","Cookie"] }] },
@@ -649,11 +667,70 @@ function getItemById(id){
 }
 function formatPrice(p){ return (parseFloat(p)||0).toFixed(2).replace('.',',')+'€'; }
 
+// ════════════════════════════════════════════════════════════
+// FORÇAGE MANUEL DES COMMANDES (admin)
+// Permet à l'admin de forcer l'ouverture ou la fermeture des
+// commandes, indépendamment des horaires automatiques.
+// Stocké dans Firebase : collection "settings", doc "ordering".
+// mode: 'auto' (par défaut) | 'forceOpen' | 'forceClosed'
+// ════════════════════════════════════════════════════════════
+var _orderingOverride = 'auto';
+var _orderingOverrideLoaded = false;
+
+async function loadOrderingOverride(forceRefresh) {
+  if (_orderingOverrideLoaded && !forceRefresh) return _orderingOverride;
+  if (typeof db === 'undefined') { _orderingOverrideLoaded = true; return _orderingOverride; }
+  try {
+    var doc = await db.collection('settings').doc('ordering').get();
+    _orderingOverride = (doc.exists && doc.data().mode) || 'auto';
+  } catch (e) {
+    console.warn('loadOrderingOverride error:', e);
+  }
+  _orderingOverrideLoaded = true;
+  return _orderingOverride;
+}
+
+async function setOrderingOverride(mode) {
+  if (typeof db === 'undefined') throw new Error('Firebase non disponible');
+  await db.collection('settings').doc('ordering').set({
+    mode: mode,
+    updatedAt: new Date().toISOString()
+  });
+  _orderingOverride = mode;
+  _orderingOverrideLoaded = true;
+}
+
 // ── Vérification des horaires de commande ─────────────────────
+// Le forçage manuel admin a TOUJOURS priorité sur l'horloge.
 function getOrderingStatus() {
+  if (_orderingOverride === 'forceOpen')   return 'open';
+  if (_orderingOverride === 'forceClosed') return 'closed';
+
   var now  = new Date();
   var mins = now.getHours() * 60 + now.getMinutes();
   if ((mins >= 660 && mins < 795) || (mins >= 1080 && mins < 1335)) return 'open';
   if ((mins >= 795 && mins < 810) || (mins >= 1335 && mins < 1350)) return 'call';
   return 'closed';
+}
+
+// Vérifie si on est dans le service du midi (11h00–13h30)
+// Utilisé pour restreindre l'Offre Étudiante au déjeuner uniquement.
+// Le forçage admin "forceOpen" lève aussi cette restriction.
+function isMidiService() {
+  if (_orderingOverride === 'forceOpen') return true;
+  var now  = new Date();
+  var mins = now.getHours() * 60 + now.getMinutes();
+  return mins >= 660 && mins < 810; // 11h00–13h30
+}
+
+// ── Logo dynamique (stocké dans Firebase settings/restaurant) ──
+async function loadSiteLogo() {
+  if (typeof db === 'undefined') return;
+  try {
+    var doc = await db.collection('settings').doc('restaurant').get();
+    if (doc.exists && doc.data().logoUrl) {
+      var img = document.getElementById('siteLogo');
+      if (img) img.src = doc.data().logoUrl;
+    }
+  } catch(e) { /* silencieux */ }
 }
