@@ -86,6 +86,12 @@ function showInfo(msg) {
 
 function loginSuccess() {
   localStorage.setItem('apk_admin_auth', '1');
+  // Débloquer l'audio au moment du clic login (user gesture)
+  try {
+    var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    audioCtx.resume();
+    sessionStorage.setItem('apk_audio_unlocked', '1');
+  } catch(e) {}
   btnLogin.textContent = '✓ Connecté !';
   window.location.replace('index.html');
 }
