@@ -234,7 +234,13 @@
       <!-- ─── DROITE : Récapitulatif ─── -->
       <div>
         <div class="cart-summary">
-          <div class="summary-title">RÉCAPITULATIF</div>
+          <div class="summary-title" style="display:flex;align-items:center;justify-content:space-between">
+            RÉCAPITULATIF
+            <a href="menu.html" style="font-size:.74rem;color:var(--gold);font-weight:700;text-decoration:none;display:flex;align-items:center;gap:4px">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Ajouter un article
+            </a>
+          </div>
           <div id="orderItemsList"></div>
           <div class="summary-row" style="margin-top:12px;border-top:1px solid rgba(255,255,255,.08);padding-top:12px">
             <span>Sous-total</span>
