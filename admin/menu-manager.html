@@ -209,6 +209,28 @@
               </div>
             </div>
 
+            <!-- Sous-champs Pizza : visibles uniquement si Catégorie = Pizzas -->
+            <div class="mm-row2" id="newPizzaSubfields" style="display:none">
+              <div class="mm-field">
+                <label class="mm-label">Sous-catégorie (Série) *</label>
+                <select class="mm-select" id="newPizzaSerie">
+                  <option value="">Choisir…</option>
+                  <option value="favoris">Nos Pizzas Favoris</option>
+                  <option value="premium">Nos Pizzas Premium</option>
+                  <option value="mealLover">The Meal Lover</option>
+                  <option value="signature">Signature du Chef</option>
+                </select>
+              </div>
+              <div class="mm-field">
+                <label class="mm-label">Base *</label>
+                <select class="mm-select" id="newPizzaBase">
+                  <option value="">Choisir…</option>
+                  <option value="Base Tomate">Base Tomate</option>
+                  <option value="Base Crème Fraîche">Base Crème Fraîche</option>
+                </select>
+              </div>
+            </div>
+
             <button class="mm-submit-btn" onclick="createNewItem()">Créer l'article</button>
           </div>
 
@@ -305,6 +327,16 @@ function onCategoryChange(mode) {
   var sel  = document.getElementById('newCategory');
   var wrap = document.getElementById('newCatInputWrap');
   wrap.classList.toggle('show', sel.value === '__new__');
+  togglePizzaSubfields(sel.value === 'pizzas');
+}
+
+function togglePizzaSubfields(show) {
+  var box = document.getElementById('newPizzaSubfields');
+  box.style.display = show ? 'grid' : 'none';
+  if (!show) {
+    document.getElementById('newPizzaSerie').value = '';
+    document.getElementById('newPizzaBase').value = '';
+  }
 }
 
 /* ── Offres spéciales : grille de sélection ──────────────── */
@@ -344,6 +376,7 @@ function selectSpecialType(mode, type, el) {
       catField.style.opacity = '.4';
       catField.style.pointerEvents = 'none';
       hint.innerHTML = '✓ Catégorie automatique : <strong style="color:#c084fc">' + info.icon + ' ' + info.label + '</strong>';
+      togglePizzaSubfields(false);
     } else {
       catSelect.disabled = false;
       catField.style.opacity = '1';
@@ -409,6 +442,8 @@ async function createNewItem() {
   if (isNaN(price) || price < 0) { showToast('Prix invalide', 'error'); return; }
 
   var categoryId, categoryLabel, isNewCategory;
+  var serie = null;
+  var options = [];
 
   if (newSpecialType) {
     // L'offre spéciale EST la catégorie — le select classique est ignoré.
@@ -429,6 +464,15 @@ async function createNewItem() {
       var found = APK_MENU.categories.find(function(c){ return c.id === categoryId; });
       categoryLabel = found ? found.label : categoryId;
     }
+
+    // Catégorie "Pizzas" → Série + Base obligatoires
+    if (categoryId === 'pizzas') {
+      serie = document.getElementById('newPizzaSerie').value;
+      var base = document.getElementById('newPizzaBase').value;
+      if (!serie) { showToast('Veuillez choisir la série de la pizza', 'error'); return; }
+      if (!base)  { showToast('Veuillez choisir la base de la pizza', 'error'); return; }
+      options = [{ label: 'Base', type: 'radio', required: true, choices: [base] }];
+    }
   }
 
   var data = {
@@ -440,8 +484,9 @@ async function createNewItem() {
     categoryLabel: categoryLabel,
     isNewCategory: isNewCategory,
     specialType: newSpecialType || null,
+    serie: serie,
     combinedFrom: null,
-    options: []
+    options: options
   };
 
   try {
@@ -468,6 +513,7 @@ function resetNewForm() {
   document.getElementById('newImage').value = '';
   newSpecialType = null;
   buildSpecialGrid('newSpecialGrid', 'new');
+  togglePizzaSubfields(false);
 }
 
 /* ── Créer un article combiné (mode 2) ───────────────────── */
