@@ -184,27 +184,26 @@ function closeOffersPopup() {
 function goToOffer(offerId) {
   var offer = _activeOffersById[offerId];
 
+  // Vérification horaires généraux
   var status = (typeof getOrderingStatus === 'function') ? getOrderingStatus() : 'open';
   if (status !== 'open') {
     closeOffersPopup();
-    if (typeof showHoursMessage === 'function') {
-      showHoursMessage(status === 'call' ? 'call' : 'closed');
-    }
+    if (typeof showHoursMessage === 'function') showHoursMessage(status === 'call' ? 'call' : 'closed');
     return;
   }
 
-  closeOffersPopup();
-
-  if (offer && typeof Cart !== 'undefined') {
-    Cart.add({
-      id: offer.id,
-      name: offer.name,
-      totalPrice: offer.price,
-      selectedOptions: {},
-      specialRequest: '',
-      image: offer.image
-    });
+  // Vérification restriction midi pour offre étudiante
+  if (offer && offer.specialType === 'pizza-etudiante') {
+    if (typeof isMidiService === 'function' && !isMidiService()) {
+      closeOffersPopup();
+      alert('🎓 L\'Offre Étudiante est disponible uniquement au déjeuner (11h00–13h30).');
+      return;
+    }
   }
 
+  closeOffersPopup();
+  if (offer && typeof Cart !== 'undefined') {
+    Cart.add({ id:offer.id, name:offer.name, totalPrice:offer.price, selectedOptions:{}, specialRequest:'', image:offer.image });
+  }
   window.location.href = 'checkout.html';
 }
