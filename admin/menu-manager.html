@@ -447,7 +447,7 @@ async function createComboItem() {
   if (!name) { showToast('Veuillez entrer un nom', 'error'); return; }
   if (isNaN(price) || price < 0) { showToast('Prix invalide', 'error'); return; }
   if (!categorySelect) { showToast('Veuillez choisir une catégorie', 'error'); return; }
-  if (!comboSpecialType) { showToast('Veuillez choisir un type d\\'offre spéciale', 'error'); return; }
+  if (!comboSpecialType) { showToast("Veuillez choisir un type d'offre spéciale", 'error'); return; }
 
   var isNewCategory = categorySelect === '__new__';
   var categoryId, categoryLabel;
