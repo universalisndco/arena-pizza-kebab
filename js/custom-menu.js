@@ -63,6 +63,14 @@ function getCustomItemsByCategory(items, categoryId) {
   return getActiveCustomItems(items).filter(function (i) { return i.category === categoryId; });
 }
 
+// Recherche synchrone dans le cache déjà chargé — utilisée comme fallback
+// par getItemById() (data.js) pour que les articles créés depuis l'admin
+// soient cliquables/ajoutables au panier exactement comme les articles
+// statiques (même modal, même bouton "+", mêmes règles d'horaires).
+function getCustomItemByIdSync(id) {
+  return (_customItemsCache || []).find(function (i) { return i.id === id; });
+}
+
 // ── CRUD Firebase ──────────────────────────────────────────────
 async function saveCustomMenuItem(data) {
   if (typeof db === 'undefined') throw new Error('Firebase non disponible');
@@ -170,9 +178,21 @@ function closeOffersPopup() {
   if (el) el.remove();
 }
 
-// Clique "En profiter" → ajoute l'offre au panier puis va direct au checkout
+// Clique "En profiter" → vérifie d'abord les horaires (même règle que
+// pour tout le reste du menu), puis ajoute l'offre au panier et va
+// directement au checkout.
 function goToOffer(offerId) {
   var offer = _activeOffersById[offerId];
+
+  var status = (typeof getOrderingStatus === 'function') ? getOrderingStatus() : 'open';
+  if (status !== 'open') {
+    closeOffersPopup();
+    if (typeof showHoursMessage === 'function') {
+      showHoursMessage(status === 'call' ? 'call' : 'closed');
+    }
+    return;
+  }
+
   closeOffersPopup();
 
   if (offer && typeof Cart !== 'undefined') {
