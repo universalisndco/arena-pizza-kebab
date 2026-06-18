@@ -11,6 +11,11 @@
   <link rel="canonical" href="https://arenapizzakebab.fr/">
   <link rel="stylesheet" href="css/style.css">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍕</text></svg>">
+
+  <!-- Firebase (offres spéciales personnalisées) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
 </head>
 <body>
 
@@ -182,16 +187,12 @@
           <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
           Horaires d'ouverture
         </div>
-        <div class="hours-row"><span class="day">Lundi — Dimanche</span><span class="time" style="color:var(--gold)">11h00 — 14h00</span></div>
-        <div class="hours-row"><span class="day">Lundi — Dimanche</span><span class="time" style="color:var(--gold)">18h00 — 23h00</span></div>
+        <div class="hours-row"><span class="day">Lundi — Dimanche</span><span class="time" style="color:var(--gold)">11h00 — 13h15</span></div>
+        <div class="hours-row"><span class="day">Lundi — Dimanche</span><span class="time" style="color:var(--gold)">18h00 — 22h15</span></div>
+        <div style="font-size:.78rem;color:var(--gray);margin-top:8px;padding:10px;background:var(--dark3);border-radius:8px">📞 Entre 13h15-13h30 et 22h15-22h30, commandez par téléphone uniquement.</div>
         <div style="margin-top:20px;padding:14px;background:rgba(212,43,43,.1);border-radius:10px;border:1px solid rgba(212,43,43,.3)">
           <div style="font-weight:800;font-size:.9rem;color:var(--red);margin-bottom:4px">Livraison</div>
-          <div style="font-size:.85rem;color:var(--gray)">Minimum de commande 15€ — Livraison gratuite Zone 1</div>
-          <div class="zone-badges">
-            <div class="zone-badge">Zone 1 <span>min. 15€</span></div>
-            <div class="zone-badge">Zone 2 <span>min. 20€</span></div>
-            <div class="zone-badge">Zone 3 <span>min. 25€</span></div>
-          </div>
+          <div style="font-size:.85rem;color:var(--gray)">Minimum de commande 15€ — Livraison partout à Reims</div>
         </div>
       </div>
       <div class="info-card">
@@ -293,9 +294,10 @@
   Voir le panier
 </a>
 
-<script src="js/data.js?v=20260607"></script>
-<script src="js/cart.js?v=20260607"></script>
-<script src="js/main.js?v=20260607"></script>
+<script src="js/data.js"></script>
+<script src="js/custom-menu.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/main.js"></script>
 <script>
 // ─── Promos Banner
 function buildPromos() {
@@ -451,6 +453,7 @@ buildPizzaDeals();
 buildGallery();
 buildReviews();
 Cart.load();
+initSpecialOffersPopup();
 </script>
 </body>
 </html>
