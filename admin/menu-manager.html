@@ -206,6 +206,10 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="9" r="3"/><circle cx="17" cy="9" r="3"/><path d="M3 21v-2a4 4 0 014-4h2"/><path d="M13 21v-2a4 4 0 014-4h2"/></svg>
               Article combiné
             </div>
+            <div class="mm-mode-tab" id="tabExisting" onclick="switchMode('existing')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+              Menu existant
+            </div>
           </div>
 
           <!-- ══════════ MODE 1 : NOUVEL ARTICLE ══════════ -->
@@ -313,6 +317,24 @@
             <button class="mm-submit-btn" onclick="createComboItem()">Créer l'offre combinée</button>
           </div>
 
+          <!-- ══════════ MODE 3 : MENU EXISTANT ══════════ -->
+          <div class="mm-section" id="sectionExisting">
+
+            <!-- Barre de recherche + filtre catégorie -->
+            <div class="mm-row2" style="margin-bottom:14px">
+              <div class="mm-field" style="margin-bottom:0">
+                <input type="text" class="mm-input" id="existingSearch" placeholder="Rechercher un article…" oninput="renderExistingMenu()">
+              </div>
+              <div class="mm-field" style="margin-bottom:0">
+                <select class="mm-select" id="existingCatFilter" onchange="renderExistingMenu()">
+                  <option value="">Toutes les catégories</option>
+                </select>
+              </div>
+            </div>
+
+            <div id="existingMenuList" style="max-height:520px;overflow-y:auto"></div>
+          </div>
+
         </div>
       </div>
     </div>
@@ -336,8 +358,11 @@ function switchMode(mode) {
   currentMode = mode;
   document.getElementById('tabNew').classList.toggle('active', mode === 'new');
   document.getElementById('tabCombo').classList.toggle('active', mode === 'combo');
+  document.getElementById('tabExisting').classList.toggle('active', mode === 'existing');
   document.getElementById('sectionNew').classList.toggle('active', mode === 'new');
   document.getElementById('sectionCombo').classList.toggle('active', mode === 'combo');
+  document.getElementById('sectionExisting').classList.toggle('active', mode === 'existing');
+  if (mode === 'existing') renderExistingMenu();
 }
 
 /* ── Catégories : remplir le select (mode "Nouvel article" uniquement —
@@ -797,12 +822,160 @@ async function saveSettings() {
   }
 }
 
+/* ── Menu existant — gestion des articles de base ─────────── */
+var allMenuOverridesAdmin = {};
+
+async function loadOverridesForAdmin() {
+  if (typeof db === 'undefined') return;
+  try {
+    var snap = await db.collection('menuOverrides').get();
+    allMenuOverridesAdmin = {};
+    snap.forEach(function(doc) { allMenuOverridesAdmin[doc.id] = doc.data(); });
+  } catch(e) { console.warn('loadOverridesForAdmin error:', e); }
+}
+
+function populateExistingCatFilter() {
+  var sel = document.getElementById('existingCatFilter');
+  sel.innerHTML = '<option value="">Toutes les catégories</option>' +
+    APK_MENU.categories.map(function(c) {
+      return '<option value="' + c.id + '">' + c.label + '</option>';
+    }).join('');
+}
+
+function renderExistingMenu() {
+  var search = (document.getElementById('existingSearch').value || '').toLowerCase();
+  var catFilter = document.getElementById('existingCatFilter').value;
+  var list = document.getElementById('existingMenuList');
+
+  var items = APK_MENU.items.filter(function(i) {
+    var matchCat  = !catFilter || i.category === catFilter;
+    var matchSrch = !search || i.name.toLowerCase().includes(search) || (i.description||'').toLowerCase().includes(search);
+    return matchCat && matchSrch;
+  });
+
+  if (!items.length) {
+    list.innerHTML = '<div style="padding:30px;text-align:center;color:var(--gray)">Aucun article trouvé.</div>';
+    return;
+  }
+
+  // Grouper par catégorie
+  var grouped = {};
+  items.forEach(function(i) {
+    if (!grouped[i.category]) grouped[i.category] = [];
+    grouped[i.category].push(i);
+  });
+
+  list.innerHTML = Object.entries(grouped).map(function(entry) {
+    var catId = entry[0];
+    var catItems = entry[1];
+    var catLabel = (APK_MENU.categories.find(function(c){ return c.id === catId; }) || {}).label || catId;
+
+    return '<div style="margin-bottom:16px">' +
+      '<div style="font-size:.7rem;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;color:var(--gray2);padding:8px 0 6px;border-bottom:1px solid rgba(255,255,255,.06)">' + catLabel + '</div>' +
+      catItems.map(function(item) {
+        var ov = allMenuOverridesAdmin[item.id] || {};
+        var isHidden = ov.hidden === true;
+        var hasOverride = ov.price !== undefined || ov.image !== undefined || ov.description !== undefined;
+        var displayPrice = ov.price !== undefined ? ov.price : item.price;
+        var displayImg   = ov.image !== undefined ? ov.image : item.image;
+
+        return '<div class="mm-existing-item" style="' + (isHidden ? 'opacity:.4' : '') + '">' +
+          '<img src="' + displayImg + '" onerror="this.src=\'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=100\'" style="' + (isHidden ? 'filter:grayscale(1)' : '') + '">' +
+          '<div style="flex:1">' +
+            '<div class="mm-existing-name">' + item.name + (isHidden ? ' <span style="color:#ef4444;font-size:.7rem">● Masqué</span>' : '') + (hasOverride ? ' <span style="color:var(--gold);font-size:.7rem">● Modifié</span>' : '') + '</div>' +
+            '<div class="mm-existing-meta">' + (item.serie ? item.serie + ' · ' : '') + formatPrice(displayPrice) + '</div>' +
+          '</div>' +
+          '<div class="mm-existing-actions">' +
+            '<button onclick="openExistingEditModal(\'' + item.id + '\')" title="Modifier" style="color:var(--gold)">' +
+              '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>' +
+            '</button>' +
+            '<button onclick="toggleExistingHidden(\'' + item.id + '\', ' + !isHidden + ')" title="' + (isHidden ? 'Afficher' : 'Masquer') + '">' +
+              (isHidden
+                ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>'
+                : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>') +
+            '</button>' +
+            (hasOverride || isHidden
+              ? '<button class="danger" onclick="resetExistingItem(\'' + item.id + '\')" title="Réinitialiser">' +
+                  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>' +
+                '</button>'
+              : '') +
+          '</div>' +
+        '</div>';
+      }).join('') +
+    '</div>';
+  }).join('');
+}
+
+/* ── Modale édition article existant ─────────────────────── */
+var _editingExistingId = null;
+
+function openExistingEditModal(itemId) {
+  var item = APK_MENU.items.find(function(i){ return i.id === itemId; });
+  if (!item) return;
+  _editingExistingId = itemId;
+  var ov = allMenuOverridesAdmin[itemId] || {};
+
+  document.getElementById('editName').value        = item.name; // non modifiable (info)
+  document.getElementById('editDescription').value = ov.description !== undefined ? ov.description : (item.description || '');
+  document.getElementById('editPrice').value       = ov.price       !== undefined ? ov.price       : item.price;
+  document.getElementById('editImage').value       = ov.image       !== undefined ? ov.image       : (item.image || '');
+  var prev = document.getElementById('editImagePreview');
+  prev.src = document.getElementById('editImage').value;
+  prev.style.display = document.getElementById('editImage').value ? 'block' : 'none';
+  document.getElementById('editModal').style.display = 'flex';
+}
+
+async function saveEditModal() {
+  if (!_editingExistingId) return;
+  var price = parseFloat(document.getElementById('editPrice').value);
+  if (isNaN(price) || price < 0) { showToast('Prix invalide', 'error'); return; }
+
+  try {
+    await db.collection('menuOverrides').doc(_editingExistingId).set({
+      description: document.getElementById('editDescription').value.trim(),
+      price:       price,
+      image:       document.getElementById('editImage').value.trim()
+    }, { merge: true });
+    showToast('Article modifié ✓');
+    closeEditModal();
+    await loadOverridesForAdmin();
+    renderExistingMenu();
+  } catch(e) {
+    showToast('Erreur : ' + e.message, 'error');
+  }
+}
+
+async function toggleExistingHidden(itemId, hide) {
+  try {
+    await db.collection('menuOverrides').doc(itemId).set({ hidden: hide }, { merge: true });
+    showToast(hide ? 'Article masqué du menu' : 'Article réaffiché');
+    await loadOverridesForAdmin();
+    renderExistingMenu();
+  } catch(e) {
+    showToast('Erreur : ' + e.message, 'error');
+  }
+}
+
+async function resetExistingItem(itemId) {
+  if (!confirm('Réinitialiser cet article ? Toutes les modifications seront perdues.')) return;
+  try {
+    await db.collection('menuOverrides').doc(itemId).delete();
+    showToast('Article réinitialisé');
+    delete allMenuOverridesAdmin[itemId];
+    renderExistingMenu();
+  } catch(e) {
+    showToast('Erreur : ' + e.message, 'error');
+  }
+}
+
 /* ── Init ─────────────────────────────────────────────────── */
 buildSpecialGrid('newSpecialGrid', 'new');
 buildSpecialGrid('comboSpecialGrid', 'combo');
 renderComboList();
 loadAndRenderExisting();
 renderOverrideBanner();
+populateExistingCatFilter();
+loadOverridesForAdmin();
 </script>
 <!-- ══ MODALE PARAMÈTRES RESTAURANT ═════════════════════ -->
 <div id="settingsModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9999;align-items:center;justify-content:center;padding:20px">
