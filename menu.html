@@ -38,17 +38,6 @@
       grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
       gap:20px;
     }
-
-    /* ── Promos ──────────────────────────────────────────────── */
-    .promo-cards-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:20px; padding:8px 0; }
-    .promo-deal-card { background:var(--dark2); border-radius:14px; padding:24px; display:flex; flex-direction:column; gap:12px; border-top:3px solid transparent; transition:transform .2s, box-shadow .2s; }
-    .promo-deal-card:hover { transform:translateY(-3px); box-shadow:0 8px 30px rgba(0,0,0,.4); }
-    .promo-deal-header { font-family:var(--font-h); font-size:1rem; letter-spacing:2px; font-weight:900; }
-    .promo-deal-desc { font-size:1.05rem; font-weight:700; color:#fff; line-height:1.4; }
-    .promo-deal-note { font-size:.8rem; color:var(--gray); }
-    .promo-deal-card .btn-promo { margin-top:auto; padding:10px 0; background:var(--red); border:none; border-radius:8px; color:#fff; font-weight:800; font-size:.9rem; cursor:pointer; width:100%; font-family:var(--font-b); letter-spacing:.5px; transition:opacity .2s; }
-    .promo-deal-card .btn-promo:hover { opacity:.85; }
-    .promo-deal-img { width:100%; height:160px; object-fit:cover; border-radius:8px; }
   </style>
 </head>
 <body>
@@ -140,13 +129,6 @@
   </div>
 </div>
 
-<div class="item-modal" id="promo-modal">
-  <div class="modal-inner">
-    <button class="modal-close" onclick="closePromoModal()">&#x2715;</button>
-    <div id="promo-modal-body"></div>
-  </div>
-</div>
-
 <a href="cart.html" id="sticky-cart">
   <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
   <span class="cart-count">0</span>
@@ -164,31 +146,13 @@
 </footer>
 
 <script src="js/data.js"></script>
+<script src="js/custom-menu.js"></script>
 <script src="js/cart.js"></script>
 <script src="js/main.js"></script>
 <script>
 var currentCategory = 'pizzas';
 var currentSerie    = 'all';
 var currentBase     = 'all';
-
-/* ── Slots promos ─────────────────────────────────────────── */
-var SIZE_ALL = [
-  { name:'Junior · 29cm', priceAdd:0  },
-  { name:'Senior · 33cm', priceAdd:3  },
-  { name:'Méga · 40cm',   priceAdd:10 }
-];
-var SIZE_SR = [
-  { name:'Senior · 33cm', priceAdd:3  },
-  { name:'Méga · 40cm',   priceAdd:10 }
-];
-
-/* Logique centralisée : count = nb pizzas requises, discount = type de réduction sur la moins chère */
-var PROMO_CONFIG = {
-  promo1: { count:3, discount:'half', sizes:SIZE_ALL },
-  promo2: { count:4, discount:'free', sizes:SIZE_ALL },
-  promo3: { count:3, discount:'free', sizes:SIZE_SR  },
-  promo4: { count:2, discount:'half', sizes:SIZE_SR  }
-};
 
 /* ── Infos sections pizzas ───────────────────────────────── */
 var SERIE_INFO = {
@@ -230,7 +194,9 @@ function renderMenu() {
   var grid = document.getElementById('menuGrid');
   if (!grid) return;
 
-  var items = getItemsByCategory(currentCategory);
+  var items = getItemsByCategory(currentCategory).concat(
+    getCustomItemsByCategory(allCustomMenuItems, currentCategory)
+  );
 
   if (currentCategory === 'pizzas') {
     /* ── Filtrer par série si filtre actif ── */
@@ -271,10 +237,6 @@ function renderMenu() {
           + '</div>';
       }
     }
-  } else if (currentCategory === 'promos') {
-    /* ── Promos ── */
-    renderPromos();
-    return;
   } else {
     /* ── Autres catégories ── */
     if (!items.length) {
@@ -299,224 +261,17 @@ function renderMenu() {
   });
 }
 
-/* ── Rendu promos ────────────────────────────────────────── */
-function renderPromos() {
-  var grid = document.getElementById('menuGrid');
-  if (!grid) return;
-  var html = '<div class="promo-cards-grid">';
-  APK_MENU.promos.forEach(function(p) {
-    html += '<div class="promo-deal-card" style="border-top-color:' + p.color + '">'
-      + (p.image ? '<img src="' + p.image + '" alt="' + p.title + '" class="promo-deal-img" onerror="this.style.display=\'none\'">' : '')
-      + '<div class="promo-deal-header" style="color:' + p.color + '">' + p.title + '</div>'
-      + '<div class="promo-deal-desc">' + p.description + '</div>'
-      + '<div class="promo-deal-note">' + p.note + '</div>'
-      + '<button class="btn-promo" onclick="openPromoModal(\'' + p.id + '\')">Commander cette promo</button>'
-      + '</div>';
-  });
-  html += '</div>';
-  grid.innerHTML = html;
-}
-
-function openPromoModal(promoId) {
-  if (typeof getOrderingStatus !== 'undefined') {
-    var st = getOrderingStatus();
-    if (st === 'closed') { showHoursMessage('closed'); return; }
-    if (st === 'call')   { showHoursMessage('call');   return; }
-  }
-  var promo = APK_MENU.promos.find(function(p){ return p.id === promoId; });
-  var cfg   = PROMO_CONFIG[promoId];
-  if (!promo || !cfg) return;
-  var modal = document.getElementById('promo-modal');
-  var body  = document.getElementById('promo-modal-body');
-  if (!modal || !body) return;
-
-  var pizzas = APK_MENU.items.filter(function(it){ return it.category === 'pizzas'; });
-  var discountLabel = cfg.discount === 'free' ? 'offerte' : 'à -50%';
-
-  var html = '<div style="border-bottom:1px solid rgba(255,255,255,.1);margin-bottom:16px;padding-bottom:14px">'
-    + '<h3 style="color:' + promo.color + ';font-family:var(--font-h);letter-spacing:2px;margin-bottom:6px">' + promo.title + '</h3>'
-    + '<p style="color:#fff;font-weight:700">' + promo.description + '</p>'
-    + '<small style="color:var(--gold)">★ La réduction s\'applique automatiquement sur la pizza la moins chère</small>'
-    + '</div>';
-
-  html += '<form id="promo-form">';
-
-  for (var i = 0; i < cfg.count; i++) {
-    var sep = i > 0 ? 'border-top:1px solid rgba(255,255,255,.08);margin-top:14px;padding-top:14px' : '';
-
-    html += '<div class="promo-slot-block" data-slot="' + i + '" style="' + sep + '">'
-      + '<div style="font-weight:800;font-size:.92rem;margin-bottom:10px;color:#fff">Pizza ' + (i + 1) + '</div>';
-
-    /* Pizza selector */
-    html += '<div class="option-group" style="margin-bottom:8px">'
-      + '<label class="option-label">Choisir la pizza <span class="req">*</span></label>'
-      + '<select class="option-select promo-pizza-sel" name="promo_pizza_' + i + '" data-slot="' + i + '" required>'
-      + '<option value="">— Sélectionner une pizza —</option>';
-    pizzas.forEach(function(pz) {
-      html += '<option value="' + pz.id + '" data-price="' + pz.price + '">'
-        + pz.name + ' — ' + pz.description + '</option>';
-    });
-    html += '</select></div>';
-
-    /* Taille */
-    html += '<div class="option-group" style="margin-bottom:8px">'
-      + '<label class="option-label">Taille <span class="req">*</span></label>'
-      + '<div class="radio-group size-group">';
-    cfg.sizes.forEach(function(sz, si) {
-      html += '<label class="radio-label size-label' + (si === 0 ? ' selected' : '') + '">'
-        + '<input type="radio" name="promo_size_' + i + '" value="' + sz.name + '" data-price-add="' + sz.priceAdd + '"' + (si === 0 ? ' checked' : '') + ' required>'
-        + '<span class="size-name">' + sz.name + '</span>'
-        + '<span class="size-price" id="psz-' + i + '-' + si + '">—</span>'
-        + '</label>';
-    });
-    html += '</div></div>';
-
-    /* Base */
-    html += '<div class="option-group" style="margin-bottom:8px">'
-      + '<label class="option-label">Base <span class="req">*</span></label>'
-      + '<div class="radio-group">'
-      + '<label class="radio-label"><input type="radio" name="promo_base_' + i + '" value="Base Tomate" checked required><span>Tomate</span></label>'
-      + '<label class="radio-label"><input type="radio" name="promo_base_' + i + '" value="Base Crème Fraîche"><span>Crème Fraîche</span></label>'
-      + '</div></div>';
-
-    /* Demandes spéciales */
-    html += '<div class="option-group">'
-      + '<label class="option-label">Demandes spéciales</label>'
-      + '<textarea class="form-textarea promo-slot-req" data-idx="' + i + '"'
-      + ' placeholder="ex. sans oignons, bien cuit, extra fromage…"'
-      + ' style="min-height:48px;font-size:.85rem"></textarea>'
-      + '</div>';
-
-    html += '</div>';
-  }
-
-  html += '</form>';
-  html += '<div class="modal-footer" style="flex-direction:column;gap:8px;align-items:stretch">'
-    + '<div id="promo-recap" style="font-size:.8rem;color:var(--gold);text-align:right;min-height:1.2em"></div>'
-    + '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px">'
-    + '<div class="modal-price-line">Total : <strong id="promo-total">—</strong></div>'
-    + '<button class="btn-add-confirm" id="promo-confirm-btn" onclick="confirmPromoCart(\'' + promoId + '\')" style="opacity:.4;cursor:not-allowed" disabled>Ajouter au panier</button>'
-    + '</div></div>';
-
-  body.innerHTML = html;
-  modal.classList.add('active');
-  _setupPromoListeners(promoId);
-}
-
-function _setupPromoListeners(promoId) {
-  var cfg = PROMO_CONFIG[promoId];
-
-  function recalc() {
-    var prices = [];
-    var allOk  = true;
-
-    for (var i = 0; i < cfg.count; i++) {
-      var sel     = document.querySelector('.promo-pizza-sel[data-slot="' + i + '"]');
-      var sInp    = document.querySelector('input[name="promo_size_' + i + '"]:checked');
-      var pxPrice = sel && sel.value ? parseFloat(sel.selectedOptions[0].dataset.price || 0) : NaN;
-      var sAdd    = sInp ? parseFloat(sInp.dataset.priceAdd || 0) : 0;
-
-      /* Mettre à jour les labels de prix par taille */
-      cfg.sizes.forEach(function(sz, si) {
-        var el = document.getElementById('psz-' + i + '-' + si);
-        if (!el) return;
-        el.textContent = isNaN(pxPrice) ? '—' : formatPrice(pxPrice + sz.priceAdd);
-      });
-
-      if (!sel || !sel.value) { allOk = false; }
-      else prices.push({ idx: i, price: pxPrice + sAdd });
-    }
-
-    var tEl     = document.getElementById('promo-total');
-    var recapEl = document.getElementById('promo-recap');
-    var btn     = document.getElementById('promo-confirm-btn');
-
-    if (!allOk || prices.length < cfg.count) {
-      if (tEl)     tEl.textContent   = '—';
-      if (recapEl) recapEl.textContent = '';
-      if (btn) { btn.disabled = true; btn.style.opacity = '.4'; btn.style.cursor = 'not-allowed'; }
-      return;
-    }
-
-    /* Trouver la moins chère et appliquer la réduction */
-    prices.sort(function(a, b) { return a.price - b.price; });
-    var cheapest    = prices[0];
-    var discountAmt = cfg.discount === 'free' ? cheapest.price : Math.round(cheapest.price * 50) / 100;
-    var fullTotal   = prices.reduce(function(s, p) { return s + p.price; }, 0);
-    var finalTotal  = fullTotal - discountAmt;
-    var dLabel      = cfg.discount === 'free' ? 'offerte' : 'à -50%';
-
-    if (tEl)     tEl.textContent  = formatPrice(finalTotal);
-    if (recapEl) recapEl.innerHTML = '🎁 Pizza la moins chère (' + formatPrice(cheapest.price) + ') ' + dLabel
-      + ' — Économie : <strong>-' + formatPrice(discountAmt) + '</strong>';
-    if (btn) { btn.disabled = false; btn.style.opacity = '1'; btn.style.cursor = 'pointer'; }
-  }
-
-  document.querySelectorAll('#promo-form .promo-pizza-sel, #promo-form input[type=radio]').forEach(function(el) {
-    el.addEventListener('change', recalc);
-  });
-  recalc();
-}
-
-function confirmPromoCart(promoId) {
-  var promo = APK_MENU.promos.find(function(p){ return p.id === promoId; });
-  var cfg   = PROMO_CONFIG[promoId];
-  if (!promo || !cfg) return;
-
-  /* Collecter tous les slots */
-  var slots = [];
-  for (var i = 0; i < cfg.count; i++) {
-    var sel   = document.querySelector('.promo-pizza-sel[data-slot="' + i + '"]');
-    var sInp  = document.querySelector('input[name="promo_size_' + i + '"]:checked');
-    var bInp  = document.querySelector('input[name="promo_base_' + i + '"]:checked');
-    var reqEl = document.querySelector('.promo-slot-req[data-idx="' + i + '"]');
-    var pizza = sel && sel.value ? getItemById(sel.value) : null;
-    var sAdd  = sInp ? parseFloat(sInp.dataset.priceAdd || 0) : 0;
-    slots.push({
-      idx:   i,
-      pizza: pizza,
-      price: pizza ? pizza.price + sAdd : 0,
-      size:  sInp ? sInp.value : '',
-      base:  bInp ? bInp.value : 'Base Tomate',
-      req:   reqEl ? reqEl.value.trim() : ''
-    });
-  }
-
-  /* Identifier la moins chère */
-  var sorted      = slots.slice().sort(function(a, b) { return a.price - b.price; });
-  var cheapestIdx = sorted[0].idx;
-
-  slots.forEach(function(slot) {
-    var price      = slot.price;
-    var nameSuffix = '';
-    if (slot.idx === cheapestIdx) {
-      price      = cfg.discount === 'free' ? 0 : Math.round(price * 50) / 100;
-      nameSuffix = cfg.discount === 'free' ? ' 🎁 OFFERTE' : ' 🎁 -50%';
-    }
-    var shortSize = slot.size ? slot.size.split('·')[0].trim() : '';
-    Cart.add({
-      id:              promoId + '-p' + slot.idx + '-' + Date.now(),
-      name:            promo.title + ' · ' + (slot.pizza ? slot.pizza.name : 'Pizza') + (shortSize ? ' ' + shortSize : '') + nameSuffix,
-      totalPrice:      Math.round(price * 100) / 100,
-      selectedOptions: { Taille: slot.size, Base: slot.base },
-      specialRequest:  slot.req,
-      image:           slot.pizza ? slot.pizza.image : 'https://images.unsplash.com/photo-1598023696416-0193a0bcd302?w=400'
-    });
-  });
-
-  closePromoModal();
-}
-
-function closePromoModal() {
-  var modal = document.getElementById('promo-modal');
-  if (modal) modal.classList.remove('active');
-}
-
-/* ── Onglets catégories ──────────────────────────────────── */
+/* ── Onglets catégories (statiques + nouvelles catégories admin) ── */
 function buildTabs() {
   var el = document.getElementById('menuTabs');
   if (!el) return;
-  el.innerHTML = APK_MENU.categories.map(function(c) {
+
+  var customCats = getCustomCategories(allCustomMenuItems);
+  var allCats = APK_MENU.categories.concat(
+    customCats.filter(function(cc) { return !APK_MENU.categories.find(function(c){ return c.id === cc.id; }); })
+  );
+
+  el.innerHTML = allCats.map(function(c) {
     return '<button type="button" class="menu-tab' + (c.id===currentCategory?' active':'') + '" data-cat="' + c.id + '">' + c.label + '</button>';
   }).join('');
   el.querySelectorAll('.menu-tab').forEach(function(btn) {
@@ -607,16 +362,18 @@ function initFromHash() {
   document.querySelector('.promos-section')?.insertAdjacentElement('afterend', bar);
 })();
 
-initFromHash();
-buildPromos();
-buildTabs();
-buildFilters();
-renderMenu();
-Cart.load();
+var allCustomMenuItems = [];
 
-document.addEventListener('click', function(e) {
-  if (e.target.id === 'promo-modal') closePromoModal();
-});
+async function initMenuPage() {
+  initFromHash();
+  allCustomMenuItems = await loadCustomMenuItems();
+  buildPromos();
+  buildTabs();
+  buildFilters();
+  renderMenu();
+  Cart.load();
+}
+initMenuPage();
 </script>
 </body>
 </html>
