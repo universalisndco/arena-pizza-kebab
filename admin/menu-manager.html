@@ -276,13 +276,34 @@
               </div>
               <div class="mm-field" id="newCategoryField">
                 <label class="mm-label">Catégorie *</label>
-                <select class="mm-select" id="newCategory" onchange="onCategoryChange('new')">
-                  <option value="">Choisir…</option>
-                  <option value="__new__">+ Nouvelle catégorie</option>
-                </select>
-                <div class="mm-new-cat-input" id="newCatInputWrap">
-                  <input type="text" class="mm-input" id="newCatLabel" placeholder="Nom de la nouvelle catégorie">
+
+                <!-- Choix du mode catégorie -->
+                <div style="display:flex;gap:6px;margin-bottom:8px">
+                  <button type="button" id="catModeExisting" onclick="setCatMode('existing')"
+                    style="flex:1;padding:7px;border-radius:8px;border:2px solid var(--gold);background:rgba(245,166,35,.1);color:var(--gold);font-size:.75rem;font-weight:900;cursor:pointer">
+                    📋 Catégorie existante
+                  </button>
+                  <button type="button" id="catModeNew" onclick="setCatMode('new')"
+                    style="flex:1;padding:7px;border-radius:8px;border:2px solid rgba(255,255,255,.1);background:transparent;color:var(--gray);font-size:.75rem;font-weight:900;cursor:pointer">
+                    ✨ Nouvelle catégorie
+                  </button>
                 </div>
+
+                <!-- Catégorie existante -->
+                <div id="catExistingWrap">
+                  <select class="mm-select" id="newCategory" onchange="onCategoryChange('new')">
+                    <option value="">Choisir une catégorie…</option>
+                    <option value="__new__" style="display:none">__new__</option>
+                  </select>
+                </div>
+
+                <!-- Nouvelle catégorie -->
+                <div id="catNewWrap" style="display:none">
+                  <input type="text" class="mm-input" id="newCatLabel" placeholder="Ex: Wrap, Formule Midi, Desserts…">
+                  <div style="font-size:.72rem;color:var(--gray);margin-top:5px">Un nouvel onglet sera créé automatiquement dans le menu.</div>
+                </div>
+
+                <div class="mm-new-cat-input" id="newCatInputWrap" style="display:none"></div>
               </div>
             </div>
 
@@ -387,10 +408,41 @@ function switchMode(mode) {
 /* ── Catégories : remplir le select (mode "Nouvel article" uniquement —
    le mode combo n'a plus de select, sa catégorie vient toujours de
    l'offre spéciale obligatoire) ───────────────────────────────── */
+var _catMode = 'existing'; // 'existing' ou 'new'
+
+function setCatMode(mode) {
+  _catMode = mode;
+  var btnEx  = document.getElementById('catModeExisting');
+  var btnNew = document.getElementById('catModeNew');
+  var wrapEx = document.getElementById('catExistingWrap');
+  var wrapNew = document.getElementById('catNewWrap');
+
+  if (mode === 'existing') {
+    btnEx.style.borderColor  = 'var(--gold)';
+    btnEx.style.background   = 'rgba(245,166,35,.1)';
+    btnEx.style.color        = 'var(--gold)';
+    btnNew.style.borderColor = 'rgba(255,255,255,.1)';
+    btnNew.style.background  = 'transparent';
+    btnNew.style.color       = 'var(--gray)';
+    wrapEx.style.display  = 'block';
+    wrapNew.style.display = 'none';
+    document.getElementById('newCategory').value = '';
+  } else {
+    btnNew.style.borderColor = 'var(--gold)';
+    btnNew.style.background  = 'rgba(245,166,35,.1)';
+    btnNew.style.color       = 'var(--gold)';
+    btnEx.style.borderColor  = 'rgba(255,255,255,.1)';
+    btnEx.style.background   = 'transparent';
+    btnEx.style.color        = 'var(--gray)';
+    wrapEx.style.display  = 'none';
+    wrapNew.style.display = 'block';
+    document.getElementById('newCategory').value = '__new__';
+    togglePizzaSubfields(false);
+  }
+}
+
 function populateCategorySelects() {
   var customCats = getCustomCategories(allCustomItems);
-  // On exclut les catégories qui correspondent à des types d'offre spéciale :
-  // elles ne doivent être atteintes que via le sélecteur d'offre, jamais choisies à la main.
   var specialIds = Object.keys(SPECIAL_OFFER_TYPES);
   var allCats = APK_MENU.categories.concat(
     customCats.filter(function (cc) {
@@ -401,10 +453,10 @@ function populateCategorySelects() {
 
   var sel = document.getElementById('newCategory');
   var current = sel.value;
-  sel.innerHTML = '<option value="">Choisir…</option>' +
+  sel.innerHTML = '<option value="">Choisir une catégorie…</option>' +
     allCats.map(function (c) { return '<option value="' + c.id + '">' + c.label + '</option>'; }).join('') +
-    '<option value="__new__">+ Nouvelle catégorie</option>';
-  if (current) sel.value = current;
+    '<option value="__new__" style="display:none">__new__</option>';
+  if (current && current !== '__new__') sel.value = current;
 }
 
 function onCategoryChange(mode) {
@@ -536,14 +588,19 @@ async function createNewItem() {
     categoryLabel = t.label;
     isNewCategory = true;
   } else {
-    var categorySelect = document.getElementById('newCategory').value;
-    if (!categorySelect) { showToast('Veuillez choisir une catégorie', 'error'); return; }
-    isNewCategory = categorySelect === '__new__';
-    if (isNewCategory) {
+    var isNewCategory, categoryId, categoryLabel;
+
+    if (_catMode === 'new') {
+      // Mode nouvelle catégorie
       categoryLabel = document.getElementById('newCatLabel').value.trim();
       if (!categoryLabel) { showToast('Veuillez nommer la nouvelle catégorie', 'error'); return; }
       categoryId = categoryLabel.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      isNewCategory = true;
     } else {
+      // Mode catégorie existante
+      var categorySelect = document.getElementById('newCategory').value;
+      if (!categorySelect || categorySelect === '__new__') { showToast('Veuillez choisir une catégorie', 'error'); return; }
+      isNewCategory = false;
       categoryId = categorySelect;
       var found = APK_MENU.categories.find(function(c){ return c.id === categoryId; });
       categoryLabel = found ? found.label : categoryId;
@@ -592,10 +649,12 @@ function resetNewForm() {
   document.getElementById('newCategoryField').style.opacity = '1';
   document.getElementById('newCategoryField').style.pointerEvents = 'auto';
   document.getElementById('newCatLabel').value = '';
-  document.getElementById('newCatInputWrap').classList.remove('show');
+  document.getElementById('newCatInputWrap').style.display = 'none';
   document.getElementById('newSpecialHint').innerHTML = '';
   document.getElementById('newImage').value = '';
   newSpecialType = null;
+  _catMode = 'existing';
+  setCatMode('existing');
   buildSpecialGrid('newSpecialGrid', 'new');
   togglePizzaSubfields(false);
 }
