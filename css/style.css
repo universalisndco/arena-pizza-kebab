@@ -117,10 +117,12 @@ ul { list-style: none; }
   letter-spacing: 2px;
 }
 .nav-logo-img {
-  width: 42px; height: 42px;
-  object-fit: cover;
+  width: 58px; height: 58px;
+  object-fit: contain;
   border-radius: 50%;
   border: 2px solid var(--red);
+  background: #fff;
+  padding: 2px;
 }
 .nav-logo-badge {
   background: var(--red);
