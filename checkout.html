@@ -393,6 +393,9 @@ function generateTicketText(o) {
         if (e[1]) t += '    → ' + e[0] + ': ' + e[1] + LN;
       });
     }
+    if (item.specialRequest) {
+      t += '    ★ NOTE : ' + item.specialRequest + LN;
+    }
   });
 
   t += sep('-') + LN;
