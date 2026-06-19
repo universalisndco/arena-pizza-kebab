@@ -98,14 +98,17 @@ async function deleteCustomMenuItem(id) {
 // fois) tant qu'il existe au moins une offre active.
 // ============================================================
 async function initSpecialOffersPopup() {
-  try {
-    var items  = await loadCustomMenuItems(true); // toujours frais à l'arrivée sur la page
-    var offers = getActiveSpecialOffers(items);
-    if (!offers.length) return;
-    setTimeout(function () { showOffersPopup(offers); }, 700);
-  } catch (e) {
-    console.warn('initSpecialOffersPopup error:', e);
-  }
+  // 🔒 FONCTIONNALITÉ FREEZÉE — En attente de paiement du supplément
+  // Décommenter quand le client aura payé :
+  // try {
+  //   var items  = await loadCustomMenuItems(true);
+  //   var offers = getActiveSpecialOffers(items);
+  //   if (!offers.length) return;
+  //   setTimeout(function () { showOffersPopup(offers); }, 700);
+  // } catch (e) {
+  //   console.warn('initSpecialOffersPopup error:', e);
+  // }
+  return;
 }
 
 function showOffersPopup(offers) {
