@@ -225,9 +225,10 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
               Nouvel article
             </div>
-            <div class="mm-mode-tab" id="tabCombo" onclick="switchMode('combo')">
+            <div class="mm-mode-tab" id="tabCombo" onclick="switchMode('combo')" style="position:relative">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="9" r="3"/><circle cx="17" cy="9" r="3"/><path d="M3 21v-2a4 4 0 014-4h2"/><path d="M13 21v-2a4 4 0 014-4h2"/></svg>
               Article combiné
+              <span style="position:absolute;top:-6px;right:-6px;background:#f59e0b;color:#000;font-size:.55rem;font-weight:900;padding:2px 5px;border-radius:20px;letter-spacing:.5px">🔒 PRO</span>
             </div>
             <div class="mm-mode-tab" id="tabExisting" onclick="switchMode('existing')">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
@@ -312,41 +313,27 @@
 
           <!-- ══════════ MODE 2 : ARTICLE COMBINÉ ══════════ -->
           <div class="mm-section" id="sectionCombo">
-
-            <div class="mm-field">
-              <label class="mm-label">Sélectionner les articles à combiner</label>
-              <input type="text" class="mm-input mm-combo-search" id="comboSearch" placeholder="Rechercher un article…" oninput="renderComboList()">
-              <div class="mm-combo-list" id="comboList"></div>
-              <div class="mm-selected-summary" id="comboSummary">Aucun article sélectionné</div>
+            <!-- Champs cachés nécessaires pour éviter les erreurs JS -->
+            <div style="display:none">
+              <input id="comboSearch"><div id="comboList"></div>
+              <div id="comboSummary"></div><input id="comboName">
+              <textarea id="comboDescription"></textarea><input id="comboPrice">
+              <input id="comboImage"><div id="comboSpecialGrid"></div>
             </div>
 
-            <div class="mm-field">
-              <label class="mm-label">Nom du nouvel article *</label>
-              <input type="text" class="mm-input" id="comboName" placeholder="Ex: Menu Midi Spécial">
+            <!-- Écran verrouillé -->
+            <div style="text-align:center;padding:40px 20px">
+              <div style="font-size:3rem;margin-bottom:16px">🔒</div>
+              <div style="font-size:1.2rem;font-weight:900;color:#fff;margin-bottom:10px">Fonctionnalité Pro</div>
+              <div style="font-size:.85rem;color:var(--gray);line-height:1.7;margin-bottom:24px;max-width:320px;margin-left:auto;margin-right:auto">
+                La création d'articles combinés et d'offres spéciales (Pizza du Jour, Menu Midi, Offre Étudiante…) est disponible dans la version <strong style="color:#f59e0b">Pro</strong> du panel admin.<br><br>
+                Contactez votre développeur pour activer cette fonctionnalité.
+              </div>
+              <a href="mailto:contact@pixelstudio.fr"
+                 style="display:inline-block;padding:12px 28px;background:linear-gradient(135deg,#f59e0b,#d97706);color:#000;border-radius:10px;font-weight:900;font-size:.88rem;text-decoration:none">
+                📩 Contacter PixelStudio
+              </a>
             </div>
-
-            <div class="mm-field">
-              <label class="mm-label">Description</label>
-              <textarea class="mm-textarea" id="comboDescription" placeholder="Sera pré-rempli automatiquement, modifiable"></textarea>
-            </div>
-
-            <div class="mm-field">
-              <label class="mm-label">Nouveau prix (€) *</label>
-              <input type="number" class="mm-input" id="comboPrice" placeholder="0.00" step="0.50" min="0">
-            </div>
-
-            <div class="mm-field">
-              <label class="mm-label">URL Image (optionnel — sinon image du 1er article choisi)</label>
-              <input type="url" class="mm-input" id="comboImage" placeholder="https://images.unsplash.com/...">
-            </div>
-
-            <div class="mm-field">
-              <label class="mm-label">Type d'offre spéciale *</label>
-              <div class="mm-special-grid" id="comboSpecialGrid"></div>
-              <div style="font-size:.74rem;color:var(--gray);margin-top:6px">Une offre combinée appartient toujours à sa catégorie spéciale — elle apparaîtra automatiquement sous cet onglet dans le menu, et déclenche la popup "Nos offres du moment" sur le site.</div>
-            </div>
-
-            <button class="mm-submit-btn" onclick="createComboItem()">Créer l'offre combinée</button>
           </div>
 
           <!-- ══════════ MODE 3 : MENU EXISTANT ══════════ -->
