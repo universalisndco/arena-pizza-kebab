@@ -207,3 +207,74 @@ function initDemoData() {
   localStorage.setItem('apk_reservations', JSON.stringify(demoRes));
   localStorage.setItem('apk_demo_loaded', '1');
 }
+
+// ════════════════════════════════════════════════════════════
+// NOTIFICATION SONORE GLOBALE — fonctionne sur toutes les pages admin
+// Utilise BroadcastChannel pour recevoir les alertes depuis orders.html
+// même si orders.html est dans un autre onglet
+// ════════════════════════════════════════════════════════════
+(function() {
+  // Créer l'audio une seule fois
+  var _globalAudio = null;
+  var _globalSoundEnabled = false;
+
+  function initGlobalAudio() {
+    if (_globalAudio) return;
+    try {
+      _globalAudio = new Audio();
+      // Son bip encodé directement (court, léger)
+      var ctx = new (window.AudioContext || window.webkitAudioContext)();
+      ctx.resume().then(function() {
+        _globalSoundEnabled = true;
+      });
+    } catch(e) {}
+  }
+
+  function playGlobalAlarm() {
+    try {
+      var ctx = new (window.AudioContext || window.webkitAudioContext)();
+      if (ctx.state === 'suspended') ctx.resume();
+      [0, 0.3, 0.6].forEach(function(t) {
+        var osc  = ctx.createOscillator();
+        var gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.frequency.value = 880;
+        osc.type = 'sine';
+        gain.gain.setValueAtTime(0.5, ctx.currentTime + t);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + t + 0.25);
+        osc.start(ctx.currentTime + t);
+        osc.stop(ctx.currentTime + t + 0.25);
+      });
+    } catch(e) { console.warn('Global alarm sound error:', e); }
+
+    // Notification visuelle si supportée
+    if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification('🔔 Nouvelle commande APK !', {
+        body: 'Une nouvelle commande vient d\'arriver.',
+        icon: '/img/logo.png',
+        tag: 'apk-new-order'
+      });
+    }
+  }
+
+  // Écouter les messages de orders.html via BroadcastChannel
+  if ('BroadcastChannel' in window) {
+    var bc = new BroadcastChannel('apk_orders_channel');
+    bc.addEventListener('message', function(e) {
+      if (e.data && e.data.type === 'new_order') {
+        playGlobalAlarm();
+        showToast('🔔 Nouvelle commande : ' + (e.data.orderNumber || ''), 'success');
+      }
+    });
+  }
+
+  // Demander permission notifications au premier clic
+  document.addEventListener('click', function() {
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+    initGlobalAudio();
+  }, { once: true });
+
+})();
