@@ -494,7 +494,13 @@ async function launchStripeCheckout() {
 }
 
 /* ── Soumettre la commande (espèces) ─────────────────────── */
-document.getElementById('btnConfirm').addEventListener('click', submitOrder);
+document.getElementById('btnConfirm').addEventListener('click', function() {
+  if (paymentMethod === 'card') {
+    launchStripeCheckout(); // → Stripe, commande confirmée SEULEMENT après paiement réel
+  } else {
+    submitOrder();          // → Espèces, confirmation immédiate
+  }
+});
 
 async function submitOrder() {
   /* Vérification des horaires */
