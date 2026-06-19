@@ -228,16 +228,23 @@ db.collection('orders')
 // NOUVELLE COMMANDE → ALARME + IMPRESSION AUTO
 // ═══════════════════════════════════════════════════════
 function onNewOrder(order) {
-  // 1. Alarme sonore
+  // 1. Alarme sonore (si orders.html est l'onglet actif)
   playAlarm();
 
-  // 2. Bannière visuelle
+  // 2. Broadcaster à TOUTES les pages admin ouvertes (autres onglets)
+  if ('BroadcastChannel' in window) {
+    var bc = new BroadcastChannel('apk_orders_channel');
+    bc.postMessage({ type: 'new_order', orderNumber: order.orderNumber });
+    bc.close();
+  }
+
+  // 3. Bannière visuelle
   var banner = document.getElementById('newOrderBanner');
   banner.textContent = '🔔 Nouvelle commande — ' + order.orderNumber + ' !';
   banner.style.display = 'block';
   setTimeout(function() { banner.style.display = 'none'; }, 5000);
 
-  // 3. Impression automatique si pas encore imprimée
+  // 4. Impression automatique si pas encore imprimée
   if (!order.printed) {
     autoPrint(order);
   }
