@@ -160,7 +160,15 @@ ul { list-style: none; }
 .nav-links a.active { color: #fff; }
 .nav-links a.active::after { transform: scaleX(1); }
 
-.nav-actions { display: flex; align-items: center; gap: 16px; }
+.nav-actions { display: flex; align-items: center; gap: 12px; }
+.nav-call-btn {
+  display: flex; align-items: center; gap: 7px;
+  background: #22c55e; color: #fff; text-decoration: none;
+  padding: 9px 16px; border-radius: 10px; font-weight: 800; font-size: .85rem;
+  transition: all .2s; white-space: nowrap;
+}
+.nav-call-btn:hover { background: #16a34a; transform: translateY(-1px); }
+.nav-call-btn svg { width: 16px; height: 16px; stroke: #fff; fill: none; flex-shrink: 0; }
 .nav-cart-btn {
   position: relative;
   width: 44px; height: 44px;
