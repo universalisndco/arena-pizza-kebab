@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bonne journée — Admin APK</title>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script src="../js/firebase-config.js"></script>
+  <script src="../js/data.js"></script>
+  <link rel="stylesheet" href="css/admin.css">
+  <style>
+    body { margin:0; background:var(--dark1,#0e0e12); font-family:var(--font-b,sans-serif); }
+
+    .welcome-page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 20px;
+      background: radial-gradient(ellipse at top, rgba(212,43,43,.12) 0%, transparent 60%);
+    }
+
+    .welcome-logo {
+      width: 100px; height: 100px;
+      border-radius: 50%;
+      border: 3px solid var(--red, #D42B2B);
+      background: #fff;
+      padding: 4px;
+      object-fit: contain;
+      margin-bottom: 20px;
+      box-shadow: 0 0 40px rgba(212,43,43,.3);
+    }
+
+    .welcome-title {
+      font-size: 1.1rem;
+      font-weight: 900;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--gray, #9a9aa5);
+      margin-bottom: 6px;
+      text-align: center;
+    }
+
+    .welcome-name {
+      font-size: 2.2rem;
+      font-weight: 900;
+      color: #fff;
+      text-align: center;
+      margin-bottom: 8px;
+      letter-spacing: 1px;
+    }
+
+    .welcome-time {
+      font-size: 3rem;
+      font-weight: 900;
+      color: var(--gold, #F5A623);
+      text-align: center;
+      margin-bottom: 12px;
+      letter-spacing: 3px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .welcome-date {
+      font-size: .9rem;
+      color: var(--gray, #9a9aa5);
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    .welcome-status {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 20px; border-radius: 20px;
+      font-size: .82rem; font-weight: 800;
+      margin-bottom: 40px;
+    }
+    .welcome-status.open   { background:rgba(34,197,94,.15); color:#22c55e; border:1px solid rgba(34,197,94,.3); }
+    .welcome-status.closed { background:rgba(239,68,68,.12); color:#ef4444; border:1px solid rgba(239,68,68,.25); }
+    .welcome-status.call   { background:rgba(245,166,35,.12); color:var(--gold); border:1px solid rgba(245,166,35,.25); }
+
+    .welcome-btns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      width: 100%;
+      max-width: 560px;
+      margin-bottom: 32px;
+    }
+
+    .welcome-btn {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 12px; padding: 32px 20px;
+      border-radius: 20px; border: 2px solid;
+      cursor: pointer; font-family: var(--font-b, sans-serif);
+      font-weight: 900; font-size: .95rem;
+      text-align: center; transition: all .2s;
+      text-decoration: none;
+    }
+    .welcome-btn:hover { transform: translateY(-3px); }
+
+    .welcome-btn-main {
+      background: linear-gradient(135deg, rgba(34,197,94,.2), rgba(34,197,94,.05));
+      border-color: #22c55e;
+      color: #fff;
+    }
+    .welcome-btn-main:hover { background: linear-gradient(135deg, rgba(34,197,94,.35), rgba(34,197,94,.1)); box-shadow: 0 12px 40px rgba(34,197,94,.25); }
+
+    .welcome-btn-light {
+      background: rgba(255,255,255,.04);
+      border-color: rgba(255,255,255,.12);
+      color: var(--gray, #9a9aa5);
+    }
+    .welcome-btn-light:hover { border-color: rgba(255,255,255,.25); color: #fff; background: rgba(255,255,255,.08); }
+
+    .welcome-btn-icon { font-size: 2.6rem; line-height: 1; }
+    .welcome-btn-sub  { font-size: .72rem; font-weight: 400; opacity: .7; line-height: 1.5; }
+
+    .welcome-logout {
+      font-size: .78rem; color: var(--gray, #9a9aa5);
+      background: none; border: none; cursor: pointer;
+      text-decoration: underline; margin-top: 8px;
+    }
+    .welcome-logout:hover { color: #fff; }
+
+    .welcome-loading {
+      position: fixed; inset: 0;
+      background: var(--dark1, #0e0e12);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      z-index: 999; transition: opacity .4s;
+    }
+    .welcome-loading-spinner {
+      width: 40px; height: 40px; border: 3px solid rgba(255,255,255,.1);
+      border-top-color: var(--red,#D42B2B); border-radius: 50%;
+      animation: spin .8s linear infinite; margin-bottom: 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes fadeInUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+    .welcome-page > * { animation: fadeInUp .4s ease-out both; }
+    .welcome-page > *:nth-child(2) { animation-delay: .05s; }
+    .welcome-page > *:nth-child(3) { animation-delay: .10s; }
+    .welcome-page > *:nth-child(4) { animation-delay: .15s; }
+    .welcome-page > *:nth-child(5) { animation-delay: .20s; }
+    .welcome-page > *:nth-child(6) { animation-delay: .25s; }
+    .welcome-page > *:nth-child(7) { animation-delay: .30s; }
+  </style>
+</head>
+<body>
+
+<!-- Spinner chargement -->
+<div class="welcome-loading" id="loadingScreen">
+  <div class="welcome-loading-spinner"></div>
+  <div style="color:var(--gray);font-size:.85rem">Chargement…</div>
+</div>
+
+<div class="welcome-page">
+  <img src="../img/logo.png" alt="APK" class="welcome-logo">
+  <div class="welcome-title">Arena Pizza Kebab — Admin</div>
+  <div class="welcome-name">Bonjour 👋</div>
+  <div class="welcome-time" id="clock">--:--</div>
+  <div class="welcome-date" id="dateLabel">—</div>
+  <div class="welcome-status" id="statusBadge">…</div>
+
+  <div class="welcome-btns">
+    <button class="welcome-btn welcome-btn-main" onclick="startDay()">
+      <span class="welcome-btn-icon">🟢</span>
+      <span>Démarrer<br>la journée</span>
+      <span class="welcome-btn-sub">Active les commandes<br>+ Son activé</span>
+    </button>
+    <button class="welcome-btn welcome-btn-light" onclick="justPassing()">
+      <span class="welcome-btn-icon">⚡</span>
+      <span>Juste de<br>passage</span>
+      <span class="welcome-btn-sub">Consulter sans changer<br>le statut</span>
+    </button>
+  </div>
+
+  <button class="welcome-logout" onclick="logout()">Se déconnecter</button>
+</div>
+
+<script src="js/admin.js"></script>
+<script>
+checkAuth();
+
+// ── Horloge en direct ────────────────────────────────────
+function updateClock() {
+  var now  = new Date();
+  var time = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+  var date = now.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+  date = date.charAt(0).toUpperCase() + date.slice(1);
+  document.getElementById('clock').textContent     = time;
+  document.getElementById('dateLabel').textContent = date;
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ── Statut actuel ────────────────────────────────────────
+async function loadStatus() {
+  await loadOrderingOverride(true);
+  var s = getOrderingStatus();
+  var badge = document.getElementById('statusBadge');
+  var labels = {
+    open:   { text: '🟢 Restaurant ouvert — Commandes actives',  cls: 'open'   },
+    call:   { text: '📞 Zone appel uniquement',                   cls: 'call'   },
+    closed: { text: '🔴 Restaurant fermé — Commandes désactivées', cls: 'closed' }
+  };
+  var info = labels[s] || labels.closed;
+  badge.textContent = info.text;
+  badge.className   = 'welcome-status ' + info.cls;
+
+  // Cacher l'écran de chargement
+  document.getElementById('loadingScreen').style.opacity = '0';
+  setTimeout(function() { document.getElementById('loadingScreen').style.display = 'none'; }, 400);
+}
+
+// ── Débloquer le son (user gesture) ─────────────────────
+function unlockAudio() {
+  try {
+    var ctx = new (window.AudioContext || window.webkitAudioContext)();
+    ctx.resume();
+    // Jouer un son silencieux pour débloquer
+    var osc = ctx.createOscillator();
+    var g   = ctx.createGain();
+    g.gain.value = 0;
+    osc.connect(g); g.connect(ctx.destination);
+    osc.start(); osc.stop(ctx.currentTime + 0.01);
+    sessionStorage.setItem('apk_audio_unlocked', '1');
+    console.log('🔊 Audio débloqué');
+  } catch(e) { console.warn('Audio unlock:', e); }
+}
+
+// ── Démarrer la journée ──────────────────────────────────
+async function startDay() {
+  unlockAudio();
+  try {
+    await setOrderingOverride('forceOpen');
+  } catch(e) { console.warn('Override error:', e); }
+  window.location.href = 'orders.html';
+}
+
+// ── Juste de passage ─────────────────────────────────────
+function justPassing() {
+  unlockAudio();
+  window.location.href = 'orders.html';
+}
+
+// Init
+loadStatus();
+</script>
+</body>
+</html>
