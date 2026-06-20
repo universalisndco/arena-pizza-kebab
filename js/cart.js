@@ -175,6 +175,22 @@ function openItemModal(itemId) {
       });
       html += `</div>`;
 
+    } else if (opt.type === 'option_radio') {
+      // Radio accompagnement avec prix affiché
+      html += `<div class="radio-group accomp-group">`;
+      opt.choices.forEach((c, ci) => {
+        const name  = c.name;
+        const price = c.price || 0;
+        const pLabel = price > 0
+          ? `<em style="color:var(--gold);font-size:.78rem;margin-left:auto">+${formatPrice(price)}</em>`
+          : `<em style="color:#9ca3af;font-size:.78rem;margin-left:auto">Inclus</em>`;
+        html += `<label class="radio-label" style="justify-content:flex-start;gap:10px;padding:10px 14px">
+          <input type="radio" name="opt_${idx}" value="${name}" data-price="${price}" ${ci===0?'checked':''}>
+          <span style="flex:1">${name}</span>${pLabel}
+        </label>`;
+      });
+      html += `</div>`;
+
     } else if (opt.type === 'multi') {
       opt.choices.forEach((c, ci) => {
         const name  = typeof c === 'string' ? c : c.name;
@@ -288,6 +304,13 @@ function confirmAddToCart(itemId) {
           sizeName = r.value;
           selectedOptions[opt.label] = r.value;
           extraPrice += parseFloat(r.dataset.priceAdd || 0);
+        }
+
+      } else if (opt.type === 'option_radio') {
+        const r = form.querySelector(`[name="opt_${idx}"]:checked`);
+        if (r) {
+          selectedOptions[opt.label] = r.value;
+          extraPrice += parseFloat(r.dataset.price || 0);
         }
 
       } else if (opt.type === 'multi') {
