@@ -58,7 +58,7 @@ var FALLBACK_PASSWORD = 'apk2024';
 
 // Si déjà connecté → rediriger directement
 if (localStorage.getItem('apk_admin_auth') === '1') {
-  window.location.replace('index.html');
+  window.location.replace('welcome.html');
 }
 
 // ── Éléments UI ────────────────────────────────────────────
@@ -93,7 +93,7 @@ function loginSuccess() {
     sessionStorage.setItem('apk_audio_unlocked', '1');
   } catch(e) {}
   btnLogin.textContent = '✓ Connecté !';
-  window.location.replace('index.html');
+  window.location.replace('welcome.html');
 }
 
 // ── Méthode 1 : Firebase Auth ────────────────────────────────
