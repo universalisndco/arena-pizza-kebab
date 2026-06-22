@@ -410,7 +410,7 @@ function buildEscPosTicket(o) {
   t += BOLD_OFF;
   t += CUT;
 
-  return [{ type: 'raw', format: 'plain', data: t, options: { language: 'ESCPOS', dotDensity: 'double' } }];
+  return [{ type: 'raw', format: 'command', data: t }];
 }
 
 // ═══════════════════════════════════════════════════════
