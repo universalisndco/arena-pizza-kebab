@@ -10,7 +10,7 @@ const APK_MENU = {
     { id:"krousty",       label:"Krousty APK" },
     { id:"panini",        label:"Panini" },
     { id:"fried-chicken", label:"Fried Chicken" },
-    { id:"sandwichs",     label:"Sandwichs" },
+    { id:"sandwichs",     label:"Kebab/Sandwichs" },
     { id:"burgers",       label:"Burgers" },
     { id:"assiettes",     label:"Assiettes" },
     { id:"salade",        label:"Salades" },
