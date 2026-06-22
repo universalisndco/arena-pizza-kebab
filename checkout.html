@@ -600,7 +600,7 @@ async function submitOrder() {
 
 /* ── Sélection mode paiement ─────────────────────────────── */
 var paymentMethod = 'card';
-var MIN_CARD_AMOUNT = 17.00;
+var MIN_CARD_AMOUNT = 0.01; // Temporaire test - remettre 17.00 après
 
 function checkCardAvailability() {
   var total = Cart.getTotal();
