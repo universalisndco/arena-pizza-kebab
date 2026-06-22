@@ -253,7 +253,7 @@ db.collection('orders')
 // NOUVELLE COMMANDE → ALARME + IMPRESSION AUTO
 // ═══════════════════════════════════════════════════════
 function onNewOrder(order) {
-  // Son + bannière pour TOUTES les commandes
+  // Son pour TOUTES les commandes (carte ET espèces)
   playAlarm();
 
   if ('BroadcastChannel' in window) {
@@ -264,10 +264,10 @@ function onNewOrder(order) {
 
   var banner = document.getElementById('newOrderBanner');
   if (order.payment === 'card') {
-    // Carte → attendre confirmation Stripe, PAS d'impression ici
+    // Carte → son oui, impression NON (on attend le webhook Stripe)
     banner.textContent = '⏳ Paiement carte en cours — ' + order.orderNumber;
   } else {
-    // Espèces → impression immédiate
+    // Espèces → son + impression immédiate
     banner.textContent = '🔔 Nouvelle commande — ' + order.orderNumber + ' !';
     if (!order.printed) autoPrint(order);
   }
