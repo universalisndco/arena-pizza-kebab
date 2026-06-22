@@ -221,13 +221,15 @@ db.collection('orders')
         }
 
         if (change.type === 'modified') {
-          // Commande carte → paiement confirmé par Stripe (pending_payment → pending)
-          if (o.status === 'pending' && !o.printed) {
-            // Vérifier que c'était bien pending_payment avant
-            var prev = change.doc.data();
-            if (o.payment === 'card') {
-              onNewOrder(o); // Son + impression maintenant que paiement est validé
-            }
+          // Paiement carte confirmé par Stripe (webhook: pending_payment → pending)
+          if (o.status === 'pending' && o.payment === 'card' && !o.printed) {
+            console.log('[PAIEMENT CONFIRMÉ] Impression du ticket pour', o.orderNumber);
+            playAlarm();
+            var banner = document.getElementById('newOrderBanner');
+            banner.textContent = '✅ Paiement confirmé — ' + o.orderNumber + ' !';
+            banner.style.display = 'block';
+            setTimeout(function() { banner.style.display = 'none'; }, 5000);
+            autoPrint(o);
           }
         }
       });
@@ -292,6 +294,16 @@ function connectQZ() {
 }
 
 function autoPrint(order) {
+  // ══════════════════════════════════════════════════════
+  // RÈGLE ABSOLUE : Ne JAMAIS imprimer si le paiement
+  // carte n'est pas encore confirmé par Stripe.
+  // Le webhook met à jour status → 'pending' après paiement.
+  // ══════════════════════════════════════════════════════
+  if (order.status === 'pending_payment') {
+    console.log('[TICKET BLOQUÉ] Paiement carte pas encore confirmé — ticket refusé pour', order.orderNumber);
+    return;
+  }
+
   if (typeof qz === 'undefined' || !printerName) {
     console.warn('Imprimante non disponible — impression manuelle nécessaire');
     return;
@@ -300,7 +312,6 @@ function autoPrint(order) {
   var data = buildEscPosTicket(order);
   qz.print(cfg, data)
     .then(function() {
-      // Marquer comme imprimée dans Firebase
       db.collection('orders').doc(order._id).update({ printed: true });
     })
     .catch(function(e) { console.error('Erreur impression:', e); });
