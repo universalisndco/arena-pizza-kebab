@@ -315,20 +315,31 @@
 <script src="js/main.js"></script>
 <script>
 // ─── Promos Banner
+// Mode livraison global (défini par la popup d'entrée)
+var _orderMode = sessionStorage.getItem('apk_order_mode') || null;
+
 function buildPromos() {
   const track = document.getElementById('promosTrack');
   if (!track) return;
-  const items = [...APK_MENU.promos, ...APK_MENU.promos]; // duplicate for loop
+  const promos = getFilteredPromos();
+  const items = [...promos, ...promos];
   track.innerHTML = items.map(p =>
     `<div class="promo-item"><div class="dot"></div>${p.title} — ${p.description} · ${p.note}</div>`
   ).join('');
+}
+
+function getFilteredPromos() {
+  // Livraison → Promo 1 + 2 | Sur place → Promo 3 + 4 | Pas de choix → toutes
+  if (_orderMode === 'delivery') return APK_MENU.promos.slice(0, 2);
+  if (_orderMode === 'pickup')   return APK_MENU.promos.slice(2, 4);
+  return APK_MENU.promos;
 }
 
 // ─── Promo Cards
 function buildPromoCards() {
   const el = document.getElementById('promoCards');
   if (!el) return;
-  el.innerHTML = APK_MENU.promos.map(p => `
+  el.innerHTML = getFilteredPromos().map(p => `
     <div class="promo-card">
       <div class="promo-card-title">${p.title}</div>
       <div class="promo-card-desc">${p.description}</div>
@@ -337,7 +348,72 @@ function buildPromoCards() {
   `).join('');
 }
 
-// ─── Categories Grid
+// ─── Popup choix mode commande ──────────────────────────────
+function showOrderModePopup() {
+  if (sessionStorage.getItem('apk_order_mode')) return; // déjà choisi
+
+  var overlay = document.createElement('div');
+  overlay.id = 'orderModeOverlay';
+  overlay.innerHTML = `
+    <style>
+    #orderModeOverlay {
+      position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:10001;
+      display:flex;align-items:center;justify-content:center;padding:20px;
+      animation:omFadeIn .3s ease-out;
+    }
+    @keyframes omFadeIn{from{opacity:0}to{opacity:1}}
+    .om-modal {
+      background:var(--dark2,#15151a);border:1px solid rgba(255,255,255,.08);
+      border-radius:24px;padding:36px 28px;max-width:420px;width:100%;text-align:center;
+    }
+    .om-logo { width:72px;height:72px;border-radius:50%;border:2px solid var(--red,#D42B2B);background:#fff;padding:3px;object-fit:contain;margin:0 auto 16px;display:block; }
+    .om-title { font-size:1.5rem;font-weight:900;color:#fff;margin-bottom:6px; }
+    .om-sub   { font-size:.88rem;color:#9a9aa5;margin-bottom:28px; }
+    .om-btns  { display:grid;grid-template-columns:1fr 1fr;gap:12px; }
+    .om-btn {
+      padding:20px 12px;border-radius:16px;border:2px solid;
+      cursor:pointer;font-weight:900;font-size:.9rem;
+      display:flex;flex-direction:column;align-items:center;gap:8px;
+      transition:all .2s;background:transparent;font-family:inherit;
+    }
+    .om-btn-delivery { border-color:var(--red,#D42B2B);color:#fff; }
+    .om-btn-delivery:hover { background:rgba(212,43,43,.15);transform:translateY(-2px); }
+    .om-btn-pickup   { border-color:rgba(255,255,255,.15);color:#fff; }
+    .om-btn-pickup:hover   { background:rgba(255,255,255,.06);transform:translateY(-2px); }
+    .om-btn-icon { font-size:2rem; }
+    .om-btn-sub  { font-size:.72rem;font-weight:400;opacity:.65;line-height:1.4; }
+    </style>
+    <div class="om-modal">
+      <img src="img/logo.png" alt="APK" class="om-logo">
+      <div class="om-title">Bienvenue !</div>
+      <div class="om-sub">Comment souhaitez-vous commander ?</div>
+      <div class="om-btns">
+        <button class="om-btn om-btn-delivery" onclick="setOrderMode('delivery')">
+          <span class="om-btn-icon">🚚</span>
+          <span>Livraison</span>
+          <span class="om-btn-sub">À domicile</span>
+        </button>
+        <button class="om-btn om-btn-pickup" onclick="setOrderMode('pickup')">
+          <span class="om-btn-icon">🏪</span>
+          <span>Sur place /<br>À emporter</span>
+          <span class="om-btn-sub">Retrait au restaurant</span>
+        </button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+}
+
+function setOrderMode(mode) {
+  _orderMode = mode;
+  sessionStorage.setItem('apk_order_mode', mode);
+  var el = document.getElementById('orderModeOverlay');
+  if (el) el.remove();
+  // Mettre à jour les promos selon le choix
+  buildPromos();
+  buildPromoCards();
+}
+
 const CAT_IMAGES = {
   pizzas:         'https://images.unsplash.com/photo-1598023696416-0193a0bcd302?w=200&q=80',
   tacos:          'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=200&q=80',
@@ -472,8 +548,19 @@ async function initHomePage() {
   buildReviews();
   Cart.load();
   initSpecialOffersPopup();
+  // Popup mode commande (une seule fois par session)
+  setTimeout(showOrderModePopup, 600);
 }
 initHomePage();
 </script>
+<!-- ── Bouton WhatsApp flottant ── -->
+<a href="https://wa.me/33784652358" target="_blank" rel="noopener" aria-label="WhatsApp"
+   style="position:fixed;bottom:24px;left:20px;z-index:999;width:54px;height:54px;border-radius:50%;background:#25d366;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(37,211,102,.45);transition:all .2s;text-decoration:none"
+   onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="#fff">
+    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+  </svg>
+</a>
+
 </body>
 </html>
