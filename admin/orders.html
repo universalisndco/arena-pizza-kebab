@@ -316,6 +316,7 @@ function buildEscPosTicket(o) {
              now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
 
   var t = INIT;
+  t += BOLD_ON; // ← TOUT le ticket en gras par défaut
   t += CENTER;
 
   // ── EN-TÊTE ──────────────────────────────────
@@ -406,6 +407,7 @@ function buildEscPosTicket(o) {
   t += center('Bon appetit ! :)');
   t += SEP;
   t += LF + LF + LF + LF;
+  t += BOLD_OFF;
   t += CUT;
 
   return [{ type: 'raw', format: 'plain', data: t, options: { language: 'ESCPOS', dotDensity: 'double' } }];
