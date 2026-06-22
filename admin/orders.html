@@ -200,17 +200,40 @@ db.collection('orders')
       newOrders.push(Object.assign({ _id: doc.id }, doc.data()));
     });
 
-    // Détecter les nouvelles commandes
     if (!isFirstLoad) {
-      newOrders.forEach(function(o) {
-        if (!knownIds.has(o._id)) {
-          onNewOrder(o);
+      // ── Détecter les changements via docChanges ──────────────
+      snap.docChanges().forEach(function(change) {
+        var o = Object.assign({ _id: change.doc.id }, change.doc.data());
+
+        if (change.type === 'added' && !knownIds.has(o._id)) {
+          // Nouvelle commande ESPÈCES → son + impression immédiate
+          // Nouvelle commande CARTE → son seulement (ticket après confirmation Stripe)
+          if (o.status !== 'pending_payment') {
+            onNewOrder(o);
+          } else {
+            // Commande carte en attente de paiement → son mais PAS d'impression
+            playAlarm();
+            var banner = document.getElementById('newOrderBanner');
+            banner.textContent = '⏳ Paiement en cours — ' + o.orderNumber;
+            banner.style.display = 'block';
+            setTimeout(function() { banner.style.display = 'none'; }, 4000);
+          }
+        }
+
+        if (change.type === 'modified') {
+          // Commande carte → paiement confirmé par Stripe (pending_payment → pending)
+          if (o.status === 'pending' && !o.printed) {
+            // Vérifier que c'était bien pending_payment avant
+            var prev = change.doc.data();
+            if (o.payment === 'card') {
+              onNewOrder(o); // Son + impression maintenant que paiement est validé
+            }
+          }
         }
       });
     }
 
     newOrders.forEach(function(o) { knownIds.add(o._id); });
-    // Trier par date décroissante côté client
     allOrders = newOrders.sort(function(a, b) {
       var ta = a.createdAt ? (a.createdAt.seconds ? a.createdAt.seconds : new Date(a.createdAt).getTime()/1000) : 0;
       var tb = b.createdAt ? (b.createdAt.seconds ? b.createdAt.seconds : new Date(b.createdAt).getTime()/1000) : 0;
