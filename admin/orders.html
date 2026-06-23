@@ -221,12 +221,13 @@ db.collection('orders')
         }
 
         if (change.type === 'modified') {
-          // Carte : webhook Stripe confirme → status 'pending_payment' → 'pending'
-          if (o.payment === 'card' && o.status === 'pending' && !o.printed) {
-            console.log('[✅ PAIEMENT CONFIRMÉ] Impression ticket:', o.orderNumber);
+          // SEUL le webhook Stripe met paid:true → c'est le signal d'impression
+          // confirmation.html met status:'pending' mais PAS paid:true → ignoré
+          if (o.payment === 'card' && o.paid === true && !o.printed) {
+            console.log('[✅ WEBHOOK STRIPE CONFIRMÉ] Impression ticket:', o.orderNumber);
             playAlarm();
             var banner2 = document.getElementById('newOrderBanner');
-            banner2.textContent = '✅ Paiement confirmé — ' + o.orderNumber + ' ! Impression en cours…';
+            banner2.textContent = '✅ Paiement confirmé — ' + o.orderNumber + ' !';
             banner2.style.display = 'block';
             setTimeout(function() { banner2.style.display = 'none'; }, 6000);
             autoPrint(o);
@@ -295,17 +296,18 @@ function connectQZ() {
 
 function autoPrint(order) {
   // ══════════════════════════════════════════════════════
-  // RÈGLE ABSOLUE : Ne JAMAIS imprimer si le paiement
-  // carte n'est pas encore confirmé par Stripe.
-  // Le webhook met à jour status → 'pending' après paiement.
+  // RÈGLE ABSOLUE : Pour les paiements carte,
+  // n'imprimer QUE si paid===true (mis UNIQUEMENT par le webhook Stripe).
+  // confirmation.html met status:'pending' mais PAS paid:true.
+  // Le webhook est la SEULE source de vérité autorisée.
   // ══════════════════════════════════════════════════════
-  if (order.status === 'pending_payment') {
-    console.log('[TICKET BLOQUÉ] Paiement carte pas encore confirmé — ticket refusé pour', order.orderNumber);
+  if (order.payment === 'card' && order.paid !== true) {
+    console.log('[TICKET BLOQUÉ] paid:true absent — webhook pas encore arrivé pour', order.orderNumber);
     return;
   }
 
   if (typeof qz === 'undefined' || !printerName) {
-    console.warn('Imprimante non disponible — impression manuelle nécessaire');
+    console.warn('Imprimante non disponible');
     return;
   }
   var cfg = qz.configs.create(printerName);
