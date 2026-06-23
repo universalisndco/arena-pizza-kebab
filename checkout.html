@@ -553,7 +553,8 @@ async function submitOrder() {
       notes:  document.getElementById('deliveryNotes').value.trim()
     } : null,
     time:    (timeMode === 'later') ? document.getElementById('scheduledTime').value : 'ASAP',
-    payment: paymentMethod,
+    payment: 'cash',   // submitOrder = toujours espèces
+    status:  'pending',
     items:   Cart.items,
     total:   Cart.getTotal(),
     notes:   document.getElementById('orderNotes').value.trim(),
