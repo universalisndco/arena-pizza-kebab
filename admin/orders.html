@@ -327,7 +327,7 @@ function buildEscPosTicket(o) {
   var STRIKE_OFF = ESC + 'G\x00';      // Double frappe OFF
   var BIG_ON     = ESC + '!\x30';      // Double hauteur + largeur
   var BIG_OFF    = ESC + '!\x00';      // Taille normale
-  var DARK       = BOLD_ON + STRIKE_ON; // MAXIMUM noirceur
+  var DARK       = STRIKE_ON; // MAXIMUM noirceur
   var DARK_OFF   = BOLD_OFF + STRIKE_OFF;
   var SEP        = '================================================\n';
   var SEP2       = '------------------------------------------------\n';
@@ -355,9 +355,9 @@ function buildEscPosTicket(o) {
 
   // ── EN-TÊTE ──────────────────────────────────
   t += SEP;
-  t += BOLD_ON + BIG_ON;
+  t += BIG_ON;
   t += center('ARENA PIZZA KEBAB', 48);
-  t += BOLD_OFF + BIG_OFF;
+  t += BIG_OFF + DARK;
   t += center('[ APK ]');
   t += center('88 Rue Lesage — 51100 REIMS');
   t += center('09 83 39 82 20 | 07 84 65 23 58');
@@ -366,17 +366,17 @@ function buildEscPosTicket(o) {
 
   // ── N° COMMANDE ───────────────────────────────
   t += LEFT;
-  t += pad('COMMANDE N°', BOLD_ON + o.orderNumber + BOLD_OFF) + LF;
+  t += pad('COMMANDE N°', o.orderNumber) + LF;
   t += pad('DATE', date) + LF;
   t += LF;
 
   // ── CLIENT ────────────────────────────────────
   t += SEP2;
-  t += CENTER + BOLD_ON + '          CLIENT\n' + BOLD_OFF + LEFT;
+  t += CENTER + '          CLIENT\n' + LEFT;
   t += SEP2;
-  t += ' Nom  : ' + BOLD_ON + ((o.firstName||'') + ' ' + (o.lastName||'')) + BOLD_OFF + LF;
+  t += ' Nom  : ' + ((o.firstName||'') + ' ' + (o.lastName||'')) + LF;
   t += ' Tel  : ' + (o.phone || '—') + LF;
-  t += ' Mode : ' + BOLD_ON + (o.mode === 'delivery' ? 'LIVRAISON' : 'A EMPORTER') + BOLD_OFF + LF;
+  t += ' Mode : ' + (o.mode === 'delivery' ? 'LIVRAISON' : 'A EMPORTER') + LF;
   if (o.mode === 'delivery' && o.address) {
     if (o.address.street) t += ' Adrs : ' + o.address.street + LF;
     if (o.address.city)   t += '         ' + (o.address.zip||'') + ' ' + o.address.city + LF;
@@ -387,16 +387,16 @@ function buildEscPosTicket(o) {
 
   // ── ARTICLES ──────────────────────────────────
   t += SEP;
-  t += CENTER + BOLD_ON + '       DETAIL COMMANDE\n' + BOLD_OFF + LEFT;
+  t += CENTER + '       DETAIL COMMANDE\n' + LEFT;
   t += SEP;
 
   (o.items || []).forEach(function(item) {
     var qty   = parseInt(item.qty) || 1;
     var price = ((parseFloat(item.totalPrice) || 0) * qty).toFixed(2) + ' E';
     // NOM EN GRAS + GRAND
-    t += BOLD_ON + BIG_ON;
+    t += BIG_ON;
     t += pad(' ' + qty + 'x ' + item.name, price, 48) + LF;
-    t += BOLD_OFF + BIG_OFF;
+    t += BIG_OFF + DARK;
     // Options choisies (base, taille, viande...)
     if (item.selectedOptions) {
       Object.entries(item.selectedOptions).forEach(function(e) {
@@ -430,9 +430,9 @@ function buildEscPosTicket(o) {
     t += pad(' LIVRAISON', parseFloat(o.deliveryFee).toFixed(2) + ' E') + LF;
   }
   t += SEP;
-  t += BOLD_ON + BIG_ON;
+  t += BIG_ON;
   t += pad(' TOTAL TTC', (parseFloat(o.total)||0).toFixed(2) + ' E') + LF;
-  t += BOLD_OFF + BIG_OFF;
+  t += BIG_OFF + DARK;
   t += SEP;
   t += LF;
   t += pad(' PAIEMENT', o.payment === 'card' ? 'CARTE BANCAIRE' : 'ESPECES') + LF;
@@ -441,7 +441,7 @@ function buildEscPosTicket(o) {
   // ── PIED DE PAGE ──────────────────────────────
   t += CENTER;
   t += SEP;
-  t += BOLD_ON + center('Merci pour votre commande !') + BOLD_OFF;
+  t += center('Merci pour votre commande !');
   t += center('Bon appetit ! :)');
   t += SEP;
   t += LF + LF + LF + LF;
