@@ -208,16 +208,9 @@ db.collection('orders')
         if (change.type === 'added' && !knownIds.has(o._id)) {
           // Nouvelle commande ESPÈCES → son + impression immédiate
           // Nouvelle commande CARTE → son seulement (ticket après confirmation Stripe)
-          if (o.status !== 'pending_payment') {
-            onNewOrder(o);
-          } else {
-            // Commande carte en attente de paiement → son mais PAS d'impression
-            playAlarm();
-            var banner = document.getElementById('newOrderBanner');
-            banner.textContent = '⏳ Paiement en cours — ' + o.orderNumber;
-            banner.style.display = 'block';
-            setTimeout(function() { banner.style.display = 'none'; }, 4000);
-          }
+          // Toujours appeler onNewOrder — c'est lui qui décide d'imprimer ou pas
+          // basé sur payment et paid:true (mis UNIQUEMENT par le webhook)
+          onNewOrder(o);
         }
 
         if (change.type === 'modified') {
@@ -264,16 +257,17 @@ function onNewOrder(order) {
   }
 
   var banner = document.getElementById('newOrderBanner');
-  if (order.payment === 'card') {
-    // Carte → son oui, impression NON (on attend le webhook Stripe)
-    banner.textContent = '⏳ Paiement carte en cours — ' + order.orderNumber;
-  } else {
-    // Espèces → son + impression immédiate
-    banner.textContent = '🔔 Nouvelle commande — ' + order.orderNumber + ' !';
-    if (!order.printed) autoPrint(order);
-  }
   banner.style.display = 'block';
   setTimeout(function() { banner.style.display = 'none'; }, 5000);
+
+  // ESPÈCES → impression immédiate
+  // CARTE   → PAS d'impression ici, on attend le webhook (paid:true)
+  if (order.payment !== 'card') {
+    banner.textContent = '🔔 Nouvelle commande — ' + order.orderNumber + ' !';
+    if (!order.printed) autoPrint(order);
+  } else {
+    banner.textContent = '⏳ Paiement carte en cours — ' + order.orderNumber;
+  }
 }
 
 // ═══════════════════════════════════════════════════════
