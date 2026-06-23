@@ -323,8 +323,12 @@ function buildEscPosTicket(o) {
   var LEFT       = ESC + 'a\x00';      // Aligner gauche
   var BOLD_ON    = ESC + 'E\x01';      // Gras ON
   var BOLD_OFF   = ESC + 'E\x00';      // Gras OFF
+  var STRIKE_ON  = ESC + 'G\x01';      // Double frappe ON (encre encore + noire)
+  var STRIKE_OFF = ESC + 'G\x00';      // Double frappe OFF
   var BIG_ON     = ESC + '!\x30';      // Double hauteur + largeur
   var BIG_OFF    = ESC + '!\x00';      // Taille normale
+  var DARK       = BOLD_ON + STRIKE_ON; // MAXIMUM noirceur
+  var DARK_OFF   = BOLD_OFF + STRIKE_OFF;
   var SEP        = '================================================\n';
   var SEP2       = '------------------------------------------------\n';
   var CUT        = GS + 'V\x42\x00';  // Couper le papier
@@ -346,7 +350,7 @@ function buildEscPosTicket(o) {
              now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
 
   var t = INIT;
-  t += BOLD_ON; // ← TOUT le ticket en gras par défaut
+  t += DARK; // ← TOUT le ticket en gras + double frappe (MAX noirceur)
   t += CENTER;
 
   // ── EN-TÊTE ──────────────────────────────────
@@ -401,7 +405,7 @@ function buildEscPosTicket(o) {
     }
     // ⚠️ Demande spéciale (sans oignons, bien cuit...) EN GRAS
     if (item.specialRequest && item.specialRequest.trim()) {
-      t += BOLD_ON + '    !! ' + item.specialRequest.trim() + ' !!' + BOLD_OFF + LF;
+      t += DARK + '    >>> ' + item.specialRequest.trim().toUpperCase() + ' <<<' + DARK_OFF + LF;
     }
   });
 
@@ -410,9 +414,13 @@ function buildEscPosTicket(o) {
   // Note client
   if (o.notes) {
     t += LF;
-    t += BOLD_ON + ' !! NOTE CLIENT !!\n' + BOLD_OFF;
-    t += ' ' + o.notes + LF;
     t += SEP2;
+    t += DARK + BIG_ON;
+    t += center('!!! NOTE CLIENT !!!');
+    t += BIG_OFF + DARK_OFF;
+    t += DARK + ' >>> ' + o.notes + ' <<<\n' + DARK_OFF;
+    t += SEP2;
+    t += LF;
   }
 
   // ── TOTAL ─────────────────────────────────────
@@ -437,7 +445,7 @@ function buildEscPosTicket(o) {
   t += center('Bon appetit ! :)');
   t += SEP;
   t += LF + LF + LF + LF;
-  t += BOLD_OFF;
+  t += DARK_OFF;
   t += CUT;
 
   return [{ type: 'raw', format: 'command', data: t }];
