@@ -559,7 +559,6 @@ async function submitOrder() {
     items:   Cart.items,
     total:   Cart.getTotal(),
     notes:   document.getElementById('orderNotes').value.trim(),
-    status:  'pending',
     timestamp: new Date().toISOString()
   };
 
