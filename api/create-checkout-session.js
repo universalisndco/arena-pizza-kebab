@@ -8,34 +8,43 @@ module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
-    const { orderData, orderNumber, customerName, mode } = req.body;
+    const body = req.body;
+    const orderData = body.orderData || {};
+    const items = orderData.items || body.items || [];
+    const orderNumber = body.orderNumber || orderData.orderNumber || 'APK-000';
 
-    if (!orderData || !orderData.items || !orderData.items.length) {
+    if (!items.length) {
       return res.status(400).json({ error: 'Panier vide' });
     }
 
     // Construire les line_items Stripe
-    const lineItems = orderData.items.map(function(item) {
-      var name = item.name;
-      if (item.selectedOptions) {
-        var opts = Object.entries(item.selectedOptions)
-          .filter(function(e) { return e[1]; })
-          .map(function(e) { return e[1]; });
-        if (opts.length) name += ' (' + opts.join(', ') + ')';
-      }
+    const lineItems = items.map(function(item) {
+      var name = item.name || 'Article';
+      var price = Math.max(1, Math.round((parseFloat(item.totalPrice) || 0) * 100));
+      var qty   = Math.max(1, parseInt(item.qty) || 1);
       return {
         price_data: {
           currency: 'eur',
           product_data: { name: name },
-          unit_amount: Math.round((parseFloat(item.totalPrice) || 0) * 100)
+          unit_amount: price
         },
-        quantity: parseInt(item.qty) || 1
+        quantity: qty
       };
     });
 
-    // Stocker les données de commande dans les metadata Stripe
-    // Le webhook les utilisera pour créer la commande dans Firebase
-    const orderDataStr = JSON.stringify(orderData);
+    // Stocker les donnees commande dans metadata (max 500 chars par valeur)
+    var orderStr = '';
+    try { orderStr = JSON.stringify(orderData); } catch(e) { orderStr = '{}'; }
+
+    var meta = {
+      orderNumber:  orderNumber,
+      orderData1:   orderStr.substring(0, 499),
+      orderData2:   orderStr.length > 499  ? orderStr.substring(499,  998)  : '',
+      orderData3:   orderStr.length > 998  ? orderStr.substring(998,  1497) : '',
+      orderData4:   orderStr.length > 1497 ? orderStr.substring(1497, 1996) : '',
+      orderData5:   orderStr.length > 1996 ? orderStr.substring(1996, 2495) : '',
+      orderData6:   orderStr.length > 2495 ? orderStr.substring(2495, 2994) : ''
+    };
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -43,23 +52,13 @@ module.exports = async function handler(req, res) {
       mode: 'payment',
       success_url: 'https://www.arenapizza-reims.fr/confirmation.html?session_id={CHECKOUT_SESSION_ID}',
       cancel_url:  'https://www.arenapizza-reims.fr/checkout.html',
-      metadata: {
-        orderNumber:   orderNumber || '',
-        customerName:  customerName || '',
-        deliveryMode:  mode || 'pickup',
-        // Stocker les données complètes (max 500 chars par champ)
-        orderData1:    orderDataStr.substring(0, 499),
-        orderData2:    orderDataStr.length > 499 ? orderDataStr.substring(499, 998) : '',
-        orderData3:    orderDataStr.length > 998 ? orderDataStr.substring(998, 1497) : '',
-        orderData4:    orderDataStr.length > 1497 ? orderDataStr.substring(1497, 1996) : '',
-        orderDataLen:  String(orderDataStr.length)
-      }
+      metadata: meta
     });
 
     return res.status(200).json({ url: session.url, sessionId: session.id });
 
   } catch (err) {
-    console.error('Stripe error:', err);
+    console.error('Stripe error:', err.message);
     return res.status(500).json({ error: err.message });
   }
 };
