@@ -201,29 +201,21 @@ db.collection('orders')
     });
 
     if (!isFirstLoad) {
-      // ── Détecter les changements via docChanges ──────────────
       snap.docChanges().forEach(function(change) {
         var o = Object.assign({ _id: change.doc.id }, change.doc.data());
 
         if (change.type === 'added' && !knownIds.has(o._id)) {
-          // Nouvelle commande ESPÈCES → son + impression immédiate
-          // Nouvelle commande CARTE → son seulement (ticket après confirmation Stripe)
-          // Nouvelle commande → onNewOrder décide selon le statut
+          // Nouvelle commande détectée
+          // onNewOrder = son + bannière UNIQUEMENT (JAMAIS d'impression)
           onNewOrder(o);
+          // onStatusUpdate = SEUL déclencheur d'impression
+          onStatusUpdate(o);
         }
 
         if (change.type === 'modified') {
-          // SEUL le webhook Stripe met paid:true → c'est le signal d'impression
-          // confirmation.html met status:'pending' mais PAS paid:true → ignoré
-          if (o.status === 'PAYED_CARD' && !o.printed) {
-            console.log('[✅ WEBHOOK STRIPE CONFIRMÉ] Impression ticket:', o.orderNumber);
-            playAlarm();
-            var banner2 = document.getElementById('newOrderBanner');
-            banner2.textContent = '✅ Paiement confirmé — ' + o.orderNumber + ' !';
-            banner2.style.display = 'block';
-            setTimeout(function() { banner2.style.display = 'none'; }, 6000);
-            autoPrint(o);
-          }
+          // Changement de statut (ex: webhook Stripe → PAYED_CARD)
+          // onStatusUpdate = SEUL déclencheur d'impression
+          onStatusUpdate(o);
         }
       });
     }
@@ -245,35 +237,19 @@ db.collection('orders')
 // ═══════════════════════════════════════════════════════
 // NOUVELLE COMMANDE → ALARME + IMPRESSION AUTO
 // ═══════════════════════════════════════════════════════
+// ─── onNewOrder : SON + BANNIÈRE UNIQUEMENT — JAMAIS d'impression ─────────
 function onNewOrder(order) {
-  // ══════════════════════════════════════════════════════
-  // RÈGLE D'OR : impression UNIQUEMENT sur ces 2 statuts :
-  //   PAYED_CASH → espèces confirmées → impression immédiate
-  //   PAYED_CARD → carte confirmée par webhook Stripe → impression
-  // ══════════════════════════════════════════════════════
+  playAlarm();
+  broadcastAlarm(order.orderNumber);
+
   var banner = document.getElementById('newOrderBanner');
-
-  if (order.status === 'PAYED_CASH') {
-    playAlarm();
-    broadcastAlarm(order.orderNumber);
-    banner.textContent = '🔔 Commande espèces — ' + order.orderNumber;
-    banner.style.display = 'block';
-    setTimeout(function() { banner.style.display = 'none'; }, 5000);
-    if (!order.printed) autoPrint(order);
-
-  } else if (order.status === 'PAYED_CARD') {
-    playAlarm();
-    broadcastAlarm(order.orderNumber);
-    banner.textContent = '✅ Carte confirmée — ' + order.orderNumber;
-    banner.style.display = 'block';
-    setTimeout(function() { banner.style.display = 'none'; }, 5000);
-    if (!order.printed) autoPrint(order);
-
-  } else if (order.status === 'PENDING') {
-    banner.textContent = '⏳ Carte en attente — ' + order.orderNumber;
-    banner.style.display = 'block';
-    setTimeout(function() { banner.style.display = 'none'; }, 4000);
+  if (order.status === 'PENDING') {
+    banner.textContent = '⏳ Carte en attente de paiement — ' + order.orderNumber;
+  } else {
+    banner.textContent = '🔔 Nouvelle commande — ' + order.orderNumber;
   }
+  banner.style.display = 'block';
+  setTimeout(function() { banner.style.display = 'none'; }, 5000);
 }
 
 function broadcastAlarm(orderNumber) {
@@ -282,6 +258,24 @@ function broadcastAlarm(orderNumber) {
     bc.postMessage({ type: 'new_order', orderNumber: orderNumber });
     bc.close();
   }
+}
+
+// ─── onStatusUpdate : SEUL déclencheur d'impression ───────────────────────
+// Appelé sur added ET modified
+// Imprime SI ET SEULEMENT SI status === PAYED_CASH ou PAYED_CARD
+function onStatusUpdate(order) {
+  if (order.printed) return; // déjà imprimé → ignorer
+
+  if (order.status === 'PAYED_CASH' || order.status === 'PAYED_CARD') {
+    var banner = document.getElementById('newOrderBanner');
+    if (order.status === 'PAYED_CARD') {
+      banner.textContent = '✅ Paiement carte confirmé — ' + order.orderNumber;
+      banner.style.display = 'block';
+      setTimeout(function() { banner.style.display = 'none'; }, 6000);
+    }
+    autoPrint(order);
+  }
+  // PENDING ou autre → on ne fait rien
 }
 
 
