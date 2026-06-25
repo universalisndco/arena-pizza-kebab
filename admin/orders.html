@@ -289,30 +289,37 @@ function connectQZ() {
 }
 
 function autoPrint(order) {
-  // ══════════════════════════════════════════════════════
-  // RÈGLE ABSOLUE : Pour les paiements carte,
-  // n'imprimer QUE si paid===true (mis UNIQUEMENT par le webhook Stripe).
-  // confirmation.html met status:'pending' mais PAS paid:true.
-  // Le webhook est la SEULE source de vérité autorisée.
-  // ══════════════════════════════════════════════════════
-  // RÈGLE ABSOLUE : carte = impression UNIQUEMENT si printReady:true
-  // printReady est mis à true UNIQUEMENT par le webhook Stripe
-  // Jamais par confirmation.html, jamais par le navigateur
-  if (order.payment === 'card' && order.printReady !== true) {
-    console.log('[TICKET BLOQUÉ] printReady absent — webhook pas encore arrivé pour', order.orderNumber);
-    return;
-  }
-
   if (typeof qz === 'undefined' || !printerName) {
     console.warn('Imprimante non disponible');
     return;
   }
-  var cfg = qz.configs.create(printerName);
+
+  if (order.payment === 'card') {
+    // CARTE : re-vérifier DIRECTEMENT dans Firebase au moment d'imprimer
+    // Impossible de tricher — on lit la vraie valeur en base
+    db.collection('orders').doc(order._id).get().then(function(doc) {
+      if (!doc.exists) return;
+      var fresh = doc.data();
+      if (fresh.printReady !== true) {
+        console.log('[TICKET BLOQUÉ] Firebase: printReady pas encore true pour', order.orderNumber);
+        return;
+      }
+      console.log('[✅ IMPRESSION] Firebase confirme printReady:true pour', order.orderNumber);
+      _executePrint(order);
+    }).catch(function(e) {
+      console.error('Erreur Firebase avant impression:', e);
+    });
+  } else {
+    // ESPÈCES : impression directe
+    _executePrint(order);
+  }
+}
+
+function _executePrint(order) {
+  var cfg  = qz.configs.create(printerName);
   var data = buildEscPosTicket(order);
   qz.print(cfg, data)
-    .then(function() {
-      db.collection('orders').doc(order._id).update({ printed: true });
-    })
+    .then(function() { db.collection('orders').doc(order._id).update({ printed: true }); })
     .catch(function(e) { console.error('Erreur impression:', e); });
 }
 
