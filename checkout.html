@@ -462,7 +462,6 @@ async function launchStripeCheckout() {
     mode:         orderMode,
     payment: 'CARD',
     status:  'PENDING',
-    payment: 'CARD',
     items:        Cart.items,
     total:        Cart.getTotal(),
     notes:        (document.getElementById('notes') ? document.getElementById('notes').value.trim() : ''),
@@ -582,13 +581,6 @@ async function submitOrder() {
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
       }));
 
-      /* 2. Créer le job d'impression */
-      await db.collection('printJobs').add({
-        orderNumber: orderData.orderNumber,
-        status:      'pending',
-        ticketText:  generateTicketText(orderData),
-        createdAt:   firebase.firestore.FieldValue.serverTimestamp()
-      });
 
     } catch (e) {
       console.warn('Firebase non disponible, commande sauvée en local :', e.message);
