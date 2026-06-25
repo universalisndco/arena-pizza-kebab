@@ -622,13 +622,8 @@ function checkCardAvailability() {
     var missing = (MIN_CARD_AMOUNT - total).toFixed(2).replace('.', ',');
     document.getElementById('missingAmount').textContent = missing + '€';
 
-    // Si carte était sélectionnée mais devient indisponible → basculer sur "Sur place"
-    if (paymentMethod === 'card') {
-      paymentMethod = 'cash';
-      document.querySelectorAll('.pay-btn').forEach(function(b){ b.classList.remove('active'); });
-      document.querySelector('[data-pay="cash"]').classList.add('active');
-      document.getElementById('cashZone').style.display = 'flex';
-    }
+    // On affiche juste un message — on ne change PAS le mode de paiement automatiquement
+    // L'utilisateur garde le contrôle de son choix
   }
 
   return available;
