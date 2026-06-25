@@ -52,12 +52,12 @@
 
   // Mettre à jour le statut dans Firebase
   if (pending && pending._id) {
+    // Le statut est géré UNIQUEMENT par le webhook Stripe
+    // confirmation.html n'écrit rien dans Firebase pour ne pas interférer
     try {
       await db.collection('orders').doc(pending._id).update({
-        status: 'pending',
-        payment: 'card',
         stripeSessionId: sessionId || '',
-        paidAt: new Date().toISOString()
+        confirmedAt: new Date().toISOString()
       });
     } catch(e) { console.warn('Firebase update error:', e); }
   }
