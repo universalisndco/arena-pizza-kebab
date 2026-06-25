@@ -462,6 +462,7 @@ async function launchStripeCheckout() {
     mode:         orderMode,
     payment:      'card',
     status:       'pending_payment',
+    printReady:   false,  // mis à true UNIQUEMENT par le webhook Stripe
     items:        Cart.items,
     total:        Cart.getTotal(),
     notes:        (document.getElementById('notes') ? document.getElementById('notes').value.trim() : ''),
