@@ -452,7 +452,7 @@ async function launchStripeCheckout() {
   localStorage.setItem('apk_counter', JSON.stringify(stored));
   var orderNumber = 'APK-' + String(stored.count).padStart(3, '0');
 
-  // Sauvegarder la commande dans Firebase AVANT le paiement
+  // Construire les données de commande
   var orderData = {
     orderNumber:  orderNumber,
     firstName:    firstName,
@@ -460,18 +460,15 @@ async function launchStripeCheckout() {
     phone:        phone,
     email:        (document.getElementById('email') ? document.getElementById('email').value.trim() : ''),
     mode:         orderMode,
-    payment: 'CARD',
-    status:  'PENDING',
+    payment:      'CARD',
     items:        Cart.items,
     total:        Cart.getTotal(),
     notes:        (document.getElementById('notes') ? document.getElementById('notes').value.trim() : ''),
     createdAt:    new Date().toISOString()
   };
 
-  try {
-    var docRef = await db.collection('orders').add(orderData);
-    localStorage.setItem('apk_pending_order', JSON.stringify(Object.assign({ _id: docRef.id }, orderData)));
-  } catch(e) { console.warn('Firebase pre-save error:', e); }
+  // PAS de sauvegarde dans orders avant le paiement
+  // La commande sera créée par le webhook UNIQUEMENT si paiement validé
 
   // Appeler la serverless function Stripe
   try {
@@ -479,7 +476,7 @@ async function launchStripeCheckout() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        items: Cart.items,
+        orderData: orderData,        // toutes les données de commande
         orderNumber: orderNumber,
         customerName: firstName + ' ' + lastName,
         mode: orderMode
