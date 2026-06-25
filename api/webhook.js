@@ -99,6 +99,7 @@ module.exports = async function handler(req, res) {
         status:          'pending',
         payment:         'card',
         paid:            true,
+        printReady:      true,
         stripeSessionId: session.id,
         paidAt:          new Date().toISOString()
       });
