@@ -501,10 +501,10 @@ async function launchStripeCheckout() {
 /* ── Soumettre la commande (espèces) ─────────────────────── */
 document.getElementById('btnConfirm').addEventListener('click', function() {
   if (paymentMethod === 'card') {
-    alert('🔒 Veuillez cliquer sur le bouton "Payer par carte" pour payer par carte bancaire.');
-    return;
+    launchStripeCheckout(); // Carte → Stripe direct, pas besoin de 2 clics
+  } else {
+    submitOrder(); // Espèces → PAYED_CASH → impression immédiate
   }
-  submitOrder(); // ESPÈCES → status: PAYED_CASH → impression immédiate
 });
 
 async function submitOrder() {
