@@ -96,10 +96,7 @@ module.exports = async function handler(req, res) {
 
     if (orderNumber) {
       await updateFirebaseOrder(orderNumber, {
-        status:          'pending',
-        payment:         'card',
-        paid:            true,
-        printReady:      true,
+        status:          'PAYED_CARD',
         stripeSessionId: session.id,
         paidAt:          new Date().toISOString()
       });
