@@ -2,6 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
+  <meta name="app-version" content="v20">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Commandes — Admin APK</title>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
@@ -130,6 +131,18 @@
 <script src="js/admin.js"></script>
 <script>
 checkAuth();
+// Auto-reload si version obsolète (force le rechargement du cache)
+(function() {
+  var CURRENT_VERSION = 'v20';
+  var storedVersion = localStorage.getItem('apk_orders_version');
+  if (storedVersion !== CURRENT_VERSION) {
+    localStorage.setItem('apk_orders_version', CURRENT_VERSION);
+    if (storedVersion !== null) {
+      console.log('Nouvelle version détectée, rechargement...');
+      window.location.reload(true);
+    }
+  }
+})();
 
 // ═══════════════════════════════════════════════════════
 // ÉTAT
