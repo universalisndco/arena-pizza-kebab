@@ -460,9 +460,9 @@ async function launchStripeCheckout() {
     phone:        phone,
     email:        (document.getElementById('email') ? document.getElementById('email').value.trim() : ''),
     mode:         orderMode,
-    payment:      'card',
-    status:       'pending_payment',
-    printReady:   false,  // mis à true UNIQUEMENT par le webhook Stripe
+    payment: 'CARD',
+    status:  'PENDING',
+    payment: 'CARD',
     items:        Cart.items,
     total:        Cart.getTotal(),
     notes:        (document.getElementById('notes') ? document.getElementById('notes').value.trim() : ''),
@@ -501,11 +501,10 @@ async function launchStripeCheckout() {
 /* ── Soumettre la commande (espèces) ─────────────────────── */
 document.getElementById('btnConfirm').addEventListener('click', function() {
   if (paymentMethod === 'card') {
-    // Sécurité : le client doit obligatoirement passer par le bouton Stripe
-    alert('🔒 Pour payer par carte bancaire, veuillez cliquer sur le bouton "Payer par carte" ci-dessus.');
+    alert('🔒 Veuillez cliquer sur le bouton "Payer par carte" pour payer par carte bancaire.');
     return;
   }
-  submitOrder(); // → Espèces uniquement
+  submitOrder(); // ESPÈCES → status: PAYED_CASH → impression immédiate
 });
 
 async function submitOrder() {
@@ -555,8 +554,8 @@ async function submitOrder() {
       notes:  document.getElementById('deliveryNotes').value.trim()
     } : null,
     time:    (timeMode === 'later') ? document.getElementById('scheduledTime').value : 'ASAP',
-    payment: 'cash',   // submitOrder = toujours espèces
-    status:  'pending',
+    payment: 'CASH',
+    status:  'PAYED_CASH',
     items:   Cart.items,
     total:   Cart.getTotal(),
     notes:   document.getElementById('orderNotes').value.trim(),
