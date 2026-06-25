@@ -262,10 +262,12 @@ function onNewOrder(order) {
 
   // ESPÈCES → impression immédiate
   // CARTE   → PAS d'impression ici, on attend le webhook (paid:true)
-  if (order.payment !== 'card') {
+  if (order.payment === 'cash') {
+    // ESPÈCES UNIQUEMENT → impression immédiate
     banner.textContent = '🔔 Nouvelle commande — ' + order.orderNumber + ' !';
     if (!order.printed) autoPrint(order);
   } else {
+    // CARTE (ou inconnu) → pas d'impression, attendre le webhook
     banner.textContent = '⏳ Paiement carte en cours — ' + order.orderNumber;
   }
 }
@@ -294,24 +296,27 @@ function autoPrint(order) {
     return;
   }
 
-  if (order.payment === 'card') {
-    // CARTE : re-vérifier DIRECTEMENT dans Firebase au moment d'imprimer
-    // Impossible de tricher — on lit la vraie valeur en base
+  if (order.payment === 'cash') {
+    // ESPÈCES CONFIRMÉES → impression directe
+    _executePrint(order);
+
+  } else if (order.payment === 'card') {
+    // CARTE → vérifier printReady:true dans Firebase (mis par le webhook)
     db.collection('orders').doc(order._id).get().then(function(doc) {
       if (!doc.exists) return;
       var fresh = doc.data();
       if (fresh.printReady !== true) {
-        console.log('[TICKET BLOQUÉ] Firebase: printReady pas encore true pour', order.orderNumber);
+        console.log('[BLOQUÉ] printReady pas true pour', order.orderNumber);
         return;
       }
-      console.log('[✅ IMPRESSION] Firebase confirme printReady:true pour', order.orderNumber);
       _executePrint(order);
     }).catch(function(e) {
-      console.error('Erreur Firebase avant impression:', e);
+      console.error('Erreur Firebase:', e);
     });
+
   } else {
-    // ESPÈCES : impression directe
-    _executePrint(order);
+    // Payment inconnu ou absent → jamais imprimer
+    console.log('[BLOQUÉ] Payment inconnu:', order.payment, 'pour', order.orderNumber);
   }
 }
 
