@@ -66,74 +66,46 @@
 
 <!-- ═══════════════════════════════════════════ HERO -->
 <section class="hero">
-  <div class="hero-bg"></div>
-  <div class="hero-overlay"></div>
+  <!-- Kebab plein écran -->
+  <div style="position:absolute;inset:0;z-index:0">
+    <img src="img/kebab-hero.jpg" alt="Kebab Arena Pizza Kebab"
+      style="width:100%;height:100%;object-fit:cover;object-position:center">
+    <!-- Overlay sombre pour lisibilité -->
+    <div style="position:absolute;inset:0;background:linear-gradient(to bottom, rgba(6,9,15,.55) 0%, rgba(6,9,15,.72) 60%, rgba(6,9,15,.92) 100%)"></div>
+  </div>
 
-  <!-- Layout: kebab gauche | logo centré | kebab droite -->
-  <div style="position:absolute;inset:0;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;overflow:hidden;z-index:1">
-    <!-- Kebab gauche avec dégradé -->
-    <div style="position:relative;height:100%;overflow:hidden">
-      <img src="img/kebab-hero.jpg" alt="Kebab APK"
-        style="width:100%;height:100%;object-fit:cover;object-position:center">
-      <div style="position:absolute;inset:0;background:linear-gradient(to right, rgba(6,9,15,.3) 0%, rgba(6,9,15,.95) 100%)"></div>
-    </div>
+  <!-- Contenu centré -->
+  <div class="container" style="position:relative;z-index:4;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:calc(100vh - 140px)">
 
-    <!-- Logo APK centré -->
-    <div style="position:relative;z-index:3;display:flex;align-items:center;justify-content:center;padding:0 20px;flex-shrink:0">
-      <img src="img/logo-apk-real.png" alt="Arena Pizza Kebab"
-        style="width:220px;height:220px;object-fit:contain;filter:drop-shadow(0 8px 32px rgba(0,0,0,.8));border-radius:50%">
-    </div>
+    <!-- Logo APK subtil -->
+    <img src="img/logo-apk-real.png" alt="APK"
+      style="width:130px;height:130px;object-fit:contain;border-radius:50%;opacity:.88;margin-bottom:20px;filter:drop-shadow(0 4px 24px rgba(0,0,0,.7))">
 
-    <!-- Kebab droite avec dégradé miroir -->
-    <div style="position:relative;height:100%;overflow:hidden">
-      <img src="img/kebab-hero.jpg" alt="Kebab APK"
-        style="width:100%;height:100%;object-fit:cover;object-position:center;transform:scaleX(-1)">
-      <div style="position:absolute;inset:0;background:linear-gradient(to left, rgba(6,9,15,.3) 0%, rgba(6,9,15,.95) 100%)"></div>
+    <!-- Titre -->
+    <p style="color:var(--red);font-weight:900;font-size:.75rem;letter-spacing:3px;text-transform:uppercase;margin-bottom:12px">
+      REIMS · 88 RUE LESAGE · OUVERT 7J/7
+    </p>
+    <h1 class="hero-title" style="margin-bottom:16px">
+      ARENA<br><span class="line-red">PIZZA</span><br>KEBAB
+    </h1>
+    <p class="hero-subtitle" style="margin:0 auto 36px">
+      Pizzas artisanales, kebabs savoureux et bien plus encore.<br>
+      Livraison rapide ou à emporter — la vraie gourmandise vous attend.
+    </p>
+    <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap">
+      <a href="menu.html" class="btn btn-primary">🛒 Commander maintenant</a>
+      <a href="tel:0983398220" class="btn btn-outline">📞 Appeler</a>
     </div>
   </div>
 
-  <!-- Contenu hero centré par-dessus -->
-  <div class="container" style="position:relative;z-index:4;text-align:center">
-    <div class="hero-content">
-      <p style="color:var(--red);font-weight:900;font-size:.8rem;letter-spacing:3px;text-transform:uppercase;margin-bottom:16px">
-        REIMS · 88 RUE LESAGE · OUVERT 7J/7
-      </p>
-      <h1 class="hero-title">
-        ARENA<br>
-        <span class="line-red">PIZZA</span><br>
-        KEBAB
-      </h1>
-      <p class="hero-subtitle" style="margin:0 auto 40px">
-        Pizzas artisanales, kebabs savoureux et bien plus encore.<br>
-        Livraison rapide ou à emporter — la vraie gourmandise vous attend.
-      </p>
-      <div class="hero-actions" style="justify-content:center">
-        <a href="menu.html" class="btn btn-primary">🛒 Commander maintenant</a>
-        <a href="tel:0983398220" class="btn btn-outline">📞 Appeler</a>
-      </div>
-    </div>
-  </div>
-
-  <!-- Stats -->
-  <div class="hero-stats" style="position:relative;z-index:4;width:100%">
+  <!-- Stats en bas -->
+  <div style="position:relative;z-index:4;width:100%;padding-bottom:32px">
     <div class="container">
       <div style="display:flex;justify-content:center;gap:48px;flex-wrap:wrap">
-        <div class="hero-stat">
-          <div class="hero-stat-num">7J/7</div>
-          <div class="hero-stat-label">Ouvert tous les jours</div>
-        </div>
-        <div class="hero-stat">
-          <div class="hero-stat-num">15€</div>
-          <div class="hero-stat-label">Min. livraison</div>
-        </div>
-        <div class="hero-stat">
-          <div class="hero-stat-num">30MIN</div>
-          <div class="hero-stat-label">Livraison estimée</div>
-        </div>
-        <div class="hero-stat">
-          <div class="hero-stat-num">4.8</div>
-          <div class="hero-stat-label">Note Google</div>
-        </div>
+        <div class="hero-stat"><div class="hero-stat-num">7J/7</div><div class="hero-stat-label">Ouvert tous les jours</div></div>
+        <div class="hero-stat"><div class="hero-stat-num">15€</div><div class="hero-stat-label">Min. livraison</div></div>
+        <div class="hero-stat"><div class="hero-stat-num">30MIN</div><div class="hero-stat-label">Livraison estimée</div></div>
+        <div class="hero-stat"><div class="hero-stat-num">4.8</div><div class="hero-stat-label">Note Google</div></div>
       </div>
     </div>
   </div>
