@@ -522,6 +522,15 @@ function buildGallery() {
     </div>`;
   }).join('');
 }
+const REVIEWS = [
+  { name: 'Karim B.',    rating: 5, text: 'Excellent kebab, la viande est bien garnie et les sauces au top. Livraison rapide, je recommande !', date: 'Il y a 2 semaines' },
+  { name: 'Sophia M.',   rating: 5, text: 'La pizza Méga est vraiment généreuse. Pâte croustillante, bien garnie. Meilleure pizza de Reims selon moi !', date: 'Il y a 1 mois' },
+  { name: 'Romain D.',   rating: 5, text: 'Commande rapide, arrivée chaude. Le Krousty APK est à tomber. Fidèle depuis des mois !', date: 'Il y a 3 semaines' },
+  { name: 'Nadia T.',    rating: 4, text: 'Très bon rapport qualité-prix. Les tacos sont bien remplis. Je reviendrai !', date: 'Il y a 2 mois' },
+  { name: 'Alexandre V.',rating: 5, text: 'Service impeccable et nourriture délicieuse. Le personnel est super sympa. À recommander sans hésiter.', date: 'Il y a 1 semaine' },
+  { name: 'Fatoumata K.',rating: 5, text: 'Les meilleures pizzas de la ville ! Pâte faite maison, ingrédients frais. On est fans !', date: 'Il y a 3 semaines' },
+];
+
 function buildReviews() {
   const el = document.getElementById('reviewsGrid');
   if (!el) return;
