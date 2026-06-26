@@ -59,10 +59,6 @@
   <a href="cart.html" style="color:var(--gold)">Mon Panier</a>
 </div>
 
-<!-- ═══════════════════════════════════════════ PROMO BANNER (sous navbar) -->
-<div class="promos-section">
-  <div class="promos-track" id="promosTrack"></div>
-</div>
 
 <!-- ═══════════════════════════════════════════ HERO -->
 <section class="hero">
@@ -454,7 +450,6 @@ function setOrderMode(mode) {
   var el = document.getElementById('orderModeOverlay');
   if (el) el.remove();
   // Mettre à jour les promos selon le choix
-  buildPromos();
   buildPromoCards();
 }
 
@@ -549,7 +544,6 @@ function buildReviews() {
 async function initHomePage() {
   await loadOrderingOverride();
   await loadSiteLogo();
-  buildPromos();
   buildPromoCards();
   buildCategories();
   buildPizzaDeals();
