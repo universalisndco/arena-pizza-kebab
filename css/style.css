@@ -1320,3 +1320,57 @@ ul { list-style: none; }
   transition: border-color .2s;
 }
 .form-textarea:focus { outline: none; border-color: var(--gold); }
+
+/* ─── Mobile responsive pour nouvelles sections ──────────────── */
+@media (max-width: 768px) {
+  /* Hero stats */
+  .hero-stat-num { font-size: 2rem !important; }
+  .hero-stat { gap: 2px; }
+
+  /* Section spécialités (grid 1fr 1fr → 1 colonne) */
+  [style*="grid-template-columns:1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+  [style*="grid-template-columns: 1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Section badges (grid 1fr 1fr 1fr → 2 colonnes) */
+  [style*="grid-template-columns:1fr 1fr 1fr"] {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  /* Hero stats flex */
+  [style*="gap:48px"] {
+    gap: 24px !important;
+  }
+
+  /* Logo APK hero */
+  [style*="width:130px;height:130px"] {
+    width: 90px !important;
+    height: 90px !important;
+  }
+
+  /* Titre hero */
+  .hero-title {
+    font-size: clamp(3.5rem, 15vw, 6rem) !important;
+  }
+
+  /* Image section spécialités */
+  [style*="height:420px;object-fit:cover;border-radius:20px"] {
+    height: 260px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Badges 1 colonne sur très petit écran */
+  [style*="grid-template-columns:1fr 1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Stats 2 par ligne */
+  [style*="gap:48px"] {
+    gap: 20px !important;
+    justify-content: center !important;
+  }
+}
