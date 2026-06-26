@@ -510,58 +510,23 @@ function buildGallery() {
   const el = document.getElementById('galleryGrid');
   if (!el) return;
   const imgs = [
-    { src: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=800&q=85', style: 'grid-column:1/3;grid-row:1/2', alt:'Pizza' },
-    { src: 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=600&q=85', style: 'grid-column:3/4;grid-row:1/2', alt:'Tacos' },
-    { src: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=600&q=85', style: 'grid-column:4/5;grid-row:1/2', alt:'Pizza' },
-    { src: 'https://images.unsplash.com/photo-1598023696416-0193a0bcd302?w=600&q=85', style: 'grid-column:1/2;grid-row:2/3', alt:'Pizza' },
-    { src: 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=600&q=85', style: 'grid-column:2/3;grid-row:2/3', alt:'Riz' },
-    { src: 'https://images.unsplash.com/photo-1551782450-a2132b4ba21d?w=800&q=85', style: 'grid-column:3/5;grid-row:2/3', alt:'Roll' },
+    { src: 'img/pizza-four.jpg',     style: 'grid-column:1/3;grid-row:1/2', alt:'Pizza au four bois' },
+    { src: 'img/kebab-hero.jpg',     style: 'grid-column:3/4;grid-row:1/2', alt:'Kebab maison' },
+    { src: 'img/restaurant-ext.jpg', style: 'grid-column:4/5;grid-row:1/2', alt:'Arena Pizza Kebab' },
+    { src: 'img/pizza-real.jpg',     style: 'grid-column:1/2;grid-row:2/3', alt:'Pizza Arena' },
+    { src: 'img/pizza-box.jpg',      style: 'grid-column:2/3;grid-row:2/3', alt:'Pizza APK' },
+    { src: 'img/restaurant-int.jpg', style: 'grid-column:3/5;grid-row:2/3', alt:'Salle Arena Pizza Kebab' },
   ];
-  el.innerHTML = imgs.map(img => `
-    <img src="${img.src}" alt="${img.alt}" style="${img.style};width:100%;height:100%;object-fit:cover" loading="lazy">
-  `).join('');
+  el.style.cssText = 'display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(2,280px);gap:10px';
+  el.innerHTML = imgs.map(function(img) {
+    return `<div style="${img.style};overflow:hidden;border-radius:14px;cursor:pointer;position:relative">
+      <img src="${img.src}" alt="${img.alt}"
+        style="width:100%;height:100%;object-fit:cover;transition:transform .4s ease"
+        onmouseover="this.style.transform='scale(1.06)'"
+        onmouseout="this.style.transform='scale(1)'">
+    </div>`;
+  }).join('');
 }
-
-// ─── Reviews
-// ─── Reviews (avis réels clients — source : Google Maps & apk-eat.fr)
-const REVIEWS = [
-  {
-    name: 'Client Google',
-    date: '2024',
-    rating: 5,
-    text: 'Super expérience. J\'y vais souvent surtout pour leur kebab avec leur pain fait maison. Je recommande fort. Merci !'
-  },
-  {
-    name: 'Client Google',
-    date: '2024',
-    rating: 5,
-    text: '1ère visite ce soir pour nous, les gérants sont souriants et accueillants. On a très bien mangé (kebab et sandwich poulet). Le pain maison fait toute sa différence ! À bientôt.'
-  },
-  {
-    name: 'Client Google',
-    date: '2024',
-    rating: 4,
-    text: 'J\'ai pris deux fois du Kebab. Aujourd\'hui, ce fut le tour de leur fameuse pizza. Je recommande, la qualité est vraiment au rendez-vous pour le prix.'
-  },
-  {
-    name: 'Client Google',
-    date: '2024',
-    rating: 5,
-    text: 'Les wings et tenders sont délicieux, parmi les meilleurs que j\'ai goûtés à Reims. Le service est rapide et l\'accueil chaleureux. Une adresse à retenir !'
-  },
-  {
-    name: 'Client Google',
-    date: '2025',
-    rating: 5,
-    text: 'Pizzas généreuses et bien garnies, pâte croustillante. Livraison rapide et soignée. J\'ai commandé la Pizza Kebab Senior, elle était parfaite. Je reviendrai !'
-  },
-  {
-    name: 'Client Google',
-    date: '2025',
-    rating: 5,
-    text: 'Ouvert tard le soir, pratique pour les petites faims nocturnes. Personnel sympa, portions généreuses. Le meilleur fast-food du quartier sans hésiter.'
-  }
-];
 function buildReviews() {
   const el = document.getElementById('reviewsGrid');
   if (!el) return;
