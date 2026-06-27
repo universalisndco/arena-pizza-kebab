@@ -197,7 +197,7 @@
                 <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="rgba(99,179,237,.6)" stroke-width="1.5" style="margin:0 auto 12px;display:block"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
                 <div style="font-weight:800;font-size:.92rem;color:#fff;margin-bottom:6px">Paiement sécurisé par carte</div>
                 <div style="font-size:.78rem;margin-bottom:14px">Visa, Mastercard, CB — Crypté SSL</div>
-                <button id="btnStripeCheckout" type="button" onclick="launchStripeCheckout()"
+                <button id="btnStripeCheckout" type="button" onclick="launchSumUpCheckout()"
                   style="background:linear-gradient(135deg,#635bff,#4f46e5);color:#fff;border:none;padding:13px 28px;border-radius:10px;font-weight:900;font-size:.92rem;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:center;gap:8px">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
                   Payer par carte
@@ -429,7 +429,7 @@ function generateTicketText(o) {
 }
 
 /* ── Stripe Checkout ────────────────────────────────────── */
-async function launchStripeCheckout() {
+async function launchSumUpCheckout() {
   var status = getOrderingStatus();
   if (status === 'closed') { alert('⏰ Nous sommes fermés.'); return; }
   if (status === 'call')   { alert('📞 Appelez-nous : ' + APK_MENU.info.phone1); return; }
@@ -472,14 +472,14 @@ async function launchStripeCheckout() {
 
   // Appeler la serverless function Stripe
   try {
-    var resp = await fetch('/api/create-checkout-session', {
+    var resp = await fetch('/api/create-sumup-checkout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        orderData: orderData,        // toutes les données de commande
-        orderNumber: orderNumber,
+        orderData:    orderData,
+        orderNumber:  orderNumber,
         customerName: firstName + ' ' + lastName,
-        mode: orderMode
+        mode:         orderMode
       })
     });
     var data = await resp.json();
@@ -497,7 +497,7 @@ async function launchStripeCheckout() {
 /* ── Soumettre la commande (espèces) ─────────────────────── */
 document.getElementById('btnConfirm').addEventListener('click', function() {
   if (paymentMethod === 'card') {
-    launchStripeCheckout(); // Carte → Stripe direct, pas besoin de 2 clics
+    launchSumUpCheckout(); // Carte → Stripe direct, pas besoin de 2 clics
   } else {
     submitOrder(); // Espèces → PAYED_CASH → impression immédiate
   }
