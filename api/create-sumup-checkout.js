@@ -7,8 +7,8 @@ module.exports = async function handler(req, res) {
 
   try {
     const { orderData, orderNumber, customerName } = req.body;
-    const items  = (orderData && orderData.items) || [];
-    const total  = orderData ? parseFloat(orderData.total) : 0;
+    const items = (orderData && orderData.items) || [];
+    const total = orderData ? parseFloat(orderData.total) : 0;
 
     if (!items.length || total <= 0) {
       return res.status(400).json({ error: 'Panier vide ou montant invalide' });
@@ -21,12 +21,7 @@ module.exports = async function handler(req, res) {
       return res.status(500).json({ error: 'Configuration SumUp manquante' });
     }
 
-    // Stocker orderData en base64 dans la description (max 100 chars)
-    // On encode l'essentiel pour le webhook
-    const orderStr = JSON.stringify(orderData);
-    const orderB64 = Buffer.from(orderStr).toString('base64');
-
-    // Créer le checkout SumUp
+    // Creer le checkout SumUp
     const resp = await fetch('https://api.sumup.com/v0.1/checkouts', {
       method: 'POST',
       headers: {
@@ -39,27 +34,31 @@ module.exports = async function handler(req, res) {
         currency:           'EUR',
         merchant_code:      MERCHANT,
         description:        'Commande ' + orderNumber + ' - Arena Pizza Kebab',
-        return_url:         'https://www.arenapizza-reims.fr/confirmation.html?order=' + orderNumber + '&data=' + encodeURIComponent(orderB64),
-        redirect_url:       'https://www.arenapizza-reims.fr/confirmation.html?order=' + orderNumber,
+        return_url:         'https://www.arenapizza-reims.fr/confirmation.html?order=' + orderNumber,
+        redirect_url:       'https://www.arenapizza-reims.fr/confirmation.html?order=' + orderNumber
       })
     });
 
+    const data = await resp.json();
+    console.log('SumUp response:', JSON.stringify(data).substring(0, 300));
+
     if (!resp.ok) {
-      const err = await resp.text();
-      console.error('SumUp error:', err);
-      return res.status(500).json({ error: 'Erreur SumUp: ' + err });
+      return res.status(500).json({ error: 'Erreur SumUp: ' + JSON.stringify(data) });
     }
 
-    const data = await resp.json();
-    console.log('SumUp checkout cree:', data.id, 'pour commande:', orderNumber);
+    // L URL correcte SumUp : pay.sumup.com/b2c/CHECKOUT_ID
+    // OU utiliser hosted_checkout_url si presente dans la reponse
+    var payUrl;
+    if (data.hosted_checkout_url) {
+      payUrl = data.hosted_checkout_url;
+    } else if (data.id) {
+      payUrl = 'https://pay.sumup.com/b2c/' + data.id;
+    } else {
+      return res.status(500).json({ error: 'SumUp: pas d URL de paiement dans la reponse', data: data });
+    }
 
-    // Construire l URL de paiement SumUp
-    const payUrl = 'https://pay.sumup.com/b2c/XXXXXXXX?id=' + data.id;
-
-    return res.status(200).json({
-      checkoutId: data.id,
-      url: 'https://pay.sumup.com/b2c/' + MERCHANT + '?id=' + data.id
-    });
+    console.log('SumUp checkout cree:', data.id, '→', payUrl);
+    return res.status(200).json({ checkoutId: data.id, url: payUrl });
 
   } catch (err) {
     console.error('Erreur create-sumup-checkout:', err.message);
