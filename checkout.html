@@ -515,11 +515,70 @@ async function launchSumUpCheckout() {
   }
 }
 
-// INIT — script en bas du body, DOM déjà prêt
-Cart.load();
-renderSummary();
-checkCardAvailability();
-setMode('delivery');
+
+function checkCardAvailability() {
+  var total    = Cart.getTotal();
+  var cardBtn  = document.getElementById('btnStripeCheckout');
+  var cardZone = document.getElementById('cardAvailable');
+  var unavail  = document.getElementById('cardUnavailable');
+  var ok = total >= (window.MIN_CARD_AMOUNT || 0.01);
+  if (cardBtn)  cardBtn.disabled  = !ok;
+  if (cardZone) cardZone.style.display = ok ? 'block' : 'none';
+  if (unavail)  unavail.style.display  = ok ? 'none'  : 'block';
+}
+
+function formatPrice(p) {
+  return parseFloat(p || 0).toFixed(2).replace('.', ',') + '€';
+}
+
+
+async function submitOrder() {
+  var firstName = document.getElementById('firstName').value.trim();
+  var lastName  = document.getElementById('lastName').value.trim();
+  var phone     = document.getElementById('phone').value.trim();
+  if (!firstName || !lastName) { alert('Veuillez renseigner votre prénom et nom.'); return; }
+  if (!phone) { alert('Le numéro de téléphone est obligatoire.'); return; }
+  if (!Cart.items || !Cart.items.length) { alert('Votre panier est vide.'); return; }
+
+  var today  = new Date().toDateString();
+  var stored = JSON.parse(localStorage.getItem('apk_counter') || '{}');
+  var count  = (stored.date === today) ? (stored.count || 0) + 1 : 1;
+  localStorage.setItem('apk_counter', JSON.stringify({ date: today, count: count }));
+  var orderNumber = 'APK-' + String(count).padStart(3, '0');
+
+  var orderData = {
+    orderNumber: orderNumber,
+    firstName:   firstName,
+    lastName:    lastName,
+    phone:       phone,
+    mode:        orderMode,
+    payment:     'CASH',
+    status:      'PAYED_CASH',
+    items:       Cart.items,
+    total:       Cart.getTotal(),
+    createdAt:   new Date().toISOString()
+  };
+
+  var btn = document.getElementById('btnConfirm');
+  if (btn) { btn.disabled = true; btn.textContent = 'Enregistrement...'; }
+
+  try {
+    await db.collection('orders').add(Object.assign({}, orderData, {
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    }));
+    Cart.clear();
+    window.location.href = 'confirmation.html?method=cash';
+  } catch(e) {
+    console.warn('Firebase non disponible:', e.message);
+    Cart.clear();
+    window.location.href = 'confirmation.html?method=cash';
+  }
+}
+
+// INIT — sécurisé avec try/catch
+try { Cart.load(); } catch(e) { console.error('Cart.load:', e); }
+try { renderSummary(); } catch(e) { console.error('renderSummary:', e); }
+try { setMode('delivery'); } catch(e) { console.error('setMode:', e); }
 </script>
 </body>
 </html>
