@@ -274,15 +274,6 @@
 <script src="js/main.js"></script>
 
 <script>
-// INITIALISATION CHECKOUT
-document.addEventListener('DOMContentLoaded', function() {
-  Cart.load();
-  renderSummary();
-  checkCardAvailability();
-  setMode('delivery');
-});
-</script>
-<script>
 /* ── État ─────────────────────────────────────────────────── */
 var orderMode = 'delivery';
 var timeMode  = 'asap';
@@ -524,4 +515,8 @@ async function launchSumUpCheckout() {
   }
 }
 
-
+// INIT — script en bas du body, DOM déjà prêt
+Cart.load();
+renderSummary();
+checkCardAvailability();
+setMode('delivery');
