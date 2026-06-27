@@ -98,45 +98,11 @@ function loginSuccess() {
 
 // ── Méthode 1 : Firebase Auth ────────────────────────────────
 function tryFirebaseLogin(email, password) {
-  // Timeout de sécurité : si Firebase ne répond pas en 8s → fallback
-  var timeoutId = setTimeout(function() {
-    showInfo('Firebase lent, tentative locale…');
-    tryLocalLogin(email, password);
-  }, 8000);
-
-  // Vérifier que firebase et auth existent
-  if (typeof firebase === 'undefined' || typeof firebase.auth === 'undefined') {
-    clearTimeout(timeoutId);
-    showInfo('Firebase non chargé, connexion locale…');
-    tryLocalLogin(email, password);
-    return;
-  }
-
-  firebase.auth().signInWithEmailAndPassword(email, password)
-    .then(function(userCredential) {
-      clearTimeout(timeoutId);
-      loginSuccess();
-    })
-    .catch(function(error) {
-      clearTimeout(timeoutId);
-      setLoading(false);
-      console.log('Firebase Auth error:', error.code, error.message);
-
-      // Si l'erreur Firebase est "mauvais mot de passe" → afficher l'erreur
-      if (error.code === 'auth/wrong-password' ||
-          error.code === 'auth/user-not-found' ||
-          error.code === 'auth/invalid-credential' ||
-          error.code === 'auth/invalid-email') {
-        showError('Email ou mot de passe incorrect.');
-      } else {
-        // Autre erreur (réseau, config) → tenter le fallback local
-        showInfo('Connexion Firebase échouée (' + error.code + '), tentative locale…');
-        tryLocalLogin(email, password);
-      }
-    });
+  // Login local direct — pas de Firebase Auth
+  tryLocalLogin(email, password);
 }
 
-// ── Méthode 2 : Fallback local ───────────────────────────────
+
 function tryLocalLogin(email, password) {
   setLoading(false);
   if (email === FALLBACK_EMAIL && password === FALLBACK_PASSWORD) {
