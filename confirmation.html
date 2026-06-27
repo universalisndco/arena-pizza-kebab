@@ -41,46 +41,82 @@
 <script src="js/cart.js"></script>
 <script>
 (async function() {
-  var params  = new URLSearchParams(window.location.search);
-  var sessionId   = params.get('session_id');
-  var orderNum    = params.get('order');
-  var card = document.getElementById('confirmCard');
+  var params   = new URLSearchParams(window.location.search);
+  var orderNum = params.get('order');
+  var source   = params.get('source'); // 'sumup' si paiement SumUp
+  var card     = document.getElementById('confirmCard');
 
-  // Récupérer la commande en attente depuis localStorage
+  // ── Flux SumUp : verifier le paiement et creer la commande ──
+  if (source === 'sumup' && orderNum) {
+    try {
+      // Recuperer les donnees de commande depuis localStorage
+      var pendingData = null;
+      try { pendingData = JSON.parse(localStorage.getItem('apk_pending_order') || 'null'); } catch(e) {}
+
+      // Appeler notre endpoint de verification
+      var verifyResp = await fetch('/api/verify-sumup-payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          checkoutReference: orderNum,
+          orderData: pendingData
+        })
+      });
+      var result = await verifyResp.json();
+
+      if (result.paid) {
+        // Paiement confirme → afficher confirmation
+        Cart.clear();
+        localStorage.removeItem('apk_pending_order');
+        if (card) {
+          card.innerHTML = `
+            <div style="text-align:center;padding:40px 20px">
+              <div style="font-size:4rem;margin-bottom:16px">✅</div>
+              <h1 style="font-family:var(--font-h);font-size:2.5rem;color:#fff;margin-bottom:8px">
+                COMMANDE CONFIRMEE !
+              </h1>
+              <p style="color:rgba(255,255,255,.7);margin-bottom:24px">
+                Votre paiement a ete accepte.<br>
+                Commande <strong>${orderNum}</strong> en preparation !
+              </p>
+              <a href="index.html" class="btn btn-primary">Retour a l'accueil</a>
+            </div>
+          `;
+        }
+      } else {
+        // Paiement pas confirme
+        if (card) {
+          card.innerHTML = `
+            <div style="text-align:center;padding:40px 20px">
+              <div style="font-size:3rem;margin-bottom:16px">⏳</div>
+              <h2 style="color:#fff">Paiement en cours de verification...</h2>
+              <p style="color:rgba(255,255,255,.7)">Statut : ${result.status || 'inconnu'}</p>
+              <a href="checkout.html" class="btn btn-outline" style="margin-top:20px">Retour au panier</a>
+            </div>
+          `;
+        }
+      }
+    } catch(e) {
+      console.error('Erreur verification SumUp:', e);
+    }
+    return;
+  }
+
+  // ── Flux Cash : juste afficher la confirmation ──────────────
   var pending = null;
   try { pending = JSON.parse(localStorage.getItem('apk_pending_order') || 'null'); } catch(e) {}
 
-  // Mettre à jour le statut dans Firebase
   if (pending && pending._id) {
-    // Le statut est géré UNIQUEMENT par le webhook Stripe
-    // confirmation.html n'écrit rien dans Firebase pour ne pas interférer
     try {
       await db.collection('orders').doc(pending._id).update({
-        stripeSessionId: sessionId || '',
+        stripeSessionId: params.get('session_id') || '',
         confirmedAt: new Date().toISOString()
       });
     } catch(e) { console.warn('Firebase update error:', e); }
   }
 
-  // Vider le panier
   Cart.clear();
   localStorage.removeItem('apk_pending_order');
-
-  // Afficher la confirmation
-  var num = orderNum || (pending && pending.orderNumber) || '—';
-  card.innerHTML =
-    '<div class="confirm-icon">' +
-      '<svg viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>' +
-    '</div>' +
-    '<div class="confirm-title">Commande confirmée !</div>' +
-    '<div class="confirm-subtitle">Votre paiement a bien été reçu.<br>Nous préparons votre commande dès maintenant.</div>' +
-    '<div class="confirm-order">' +
-      '<div class="confirm-order-label">Votre numéro de commande</div>' +
-      '<div class="confirm-order-num">' + num + '</div>' +
-    '</div>' +
-    '<div style="font-size:.82rem;color:var(--gray);margin-bottom:24px">Gardez ce numéro, il vous sera demandé à la livraison ou au retrait.</div>' +
-    '<a href="index.html" class="confirm-btn">Retour à l\'accueil</a>';
-})();
 </script>
 </body>
 </html>
