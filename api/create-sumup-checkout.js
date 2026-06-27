@@ -14,15 +14,19 @@ module.exports = async function handler(req, res) {
       return res.status(400).json({ error: 'Panier vide' });
     }
 
-    const API_KEY  = process.env.SUMUP_API_KEY;
-    const MERCHANT = process.env.SUMUP_MERCHANT;
+    const API_KEY   = process.env.SUMUP_API_KEY;
+    const MERCHANT  = process.env.SUMUP_MERCHANT;
 
-    // Creer le checkout SumUp
+    if (!API_KEY || !MERCHANT) {
+      return res.status(500).json({ error: 'Configuration SumUp manquante' });
+    }
+
+    // Creer le checkout SumUp avec montant fixe
     const resp = await fetch('https://api.sumup.com/v0.1/checkouts', {
       method: 'POST',
       headers: {
         'Authorization': 'Bearer ' + API_KEY,
-        'Content-Type': 'application/json'
+        'Content-Type':  'application/json'
       },
       body: JSON.stringify({
         checkout_reference: orderNumber,
@@ -35,26 +39,16 @@ module.exports = async function handler(req, res) {
     });
 
     const data = await resp.json();
-    console.log('SumUp full response:', JSON.stringify(data));
+    console.log('SumUp checkout:', data.id, '- status:', data.status);
 
-    if (!resp.ok) {
+    if (!resp.ok || !data.id) {
       return res.status(500).json({ error: 'Erreur SumUp', details: data });
     }
 
-    // SumUp retourne hosted_checkout_url dans la reponse
-    // Sinon on essaie les formats connus
-    var payUrl = data.hosted_checkout_url
-      || ('https://checkout.sumup.com/pay/' + data.id);
-
-    console.log('URL paiement:', payUrl);
-    return res.status(200).json({
-      checkoutId: data.id,
-      url: payUrl,
-      fullData: data
-    });
+    return res.status(200).json({ checkoutId: data.id });
 
   } catch (err) {
-    console.error('Erreur:', err.message);
+    console.error('Erreur create-sumup-checkout:', err.message);
     return res.status(500).json({ error: err.message });
   }
 };
