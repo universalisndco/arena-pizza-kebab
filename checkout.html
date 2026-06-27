@@ -432,83 +432,54 @@ function generateTicketText(o) {
 /* ── Stripe Checkout ────────────────────────────────────── */
 async function launchSumUpCheckout() {
   var status = getOrderingStatus();
-  if (status === 'closed') { alert('⏰ Nous sommes fermés.'); return; }
-  if (status === 'call')   { alert('📞 Appelez-nous : ' + APK_MENU.info.phone1); return; }
+  if (status === 'closed') { alert('Nous sommes fermes.'); return; }
+  if (status === 'call')   { alert('Appelez-nous : ' + APK_MENU.info.phone1); return; }
 
   var firstName = document.getElementById('firstName').value.trim();
   var lastName  = document.getElementById('lastName').value.trim();
   var phone     = document.getElementById('phone').value.trim();
-  if (!firstName || !lastName) { alert('Veuillez renseigner votre prénom et nom.'); return; }
-  if (!phone)                  { alert('Le numéro de téléphone est obligatoire.'); return; }
-  if (!Cart.items || Cart.items.length === 0) { alert('Votre panier est vide.'); return; }
+  if (!firstName || !lastName) { alert('Veuillez renseigner votre prenom et nom.'); return; }
+  if (!phone)                  { alert('Le numero de telephone est obligatoire.'); return; }
+  if (!Cart.items || !Cart.items.length) { alert('Votre panier est vide.'); return; }
 
   var btn = document.getElementById('btnStripeCheckout');
-  if (btn) { btn.disabled = true; btn.textContent = 'Redirection…'; }
+  if (btn) { btn.disabled = true; btn.textContent = 'Redirection...'; }
 
-  // Générer le numéro de commande
-  var today = new Date().toDateString();
-  var stored = JSON.parse(localStorage.getItem('apk_counter') || '{}');
-  if (stored.date !== today) stored = { date: today, count: 0 };
-  stored.count += 1;
-  localStorage.setItem('apk_counter', JSON.stringify(stored));
-  var orderNumber = 'APK-' + String(stored.count).padStart(3, '0');
+  // Numero de commande
+  var today   = new Date().toDateString();
+  var stored  = JSON.parse(localStorage.getItem('apk_counter') || '{}');
+  var count   = (stored.date === today) ? (stored.count || 0) + 1 : 1;
+  localStorage.setItem('apk_counter', JSON.stringify({ date: today, count: count }));
+  var orderNumber = 'APK-' + String(count).padStart(3, '0');
 
-  // Construire les données de commande
+  // Données de commande
   var orderData = {
-    orderNumber:  orderNumber,
-    firstName:    firstName,
-    lastName:     lastName,
-    phone:        phone,
-    email:        (document.getElementById('email') ? document.getElementById('email').value.trim() : ''),
-    mode:         orderMode,
-    payment:      'CARD',
-    items:        Cart.items,
-    total:        Cart.getTotal(),
-    notes:        (document.getElementById('notes') ? document.getElementById('notes').value.trim() : ''),
-    createdAt:    new Date().toISOString()
+    orderNumber: orderNumber,
+    firstName:   firstName,
+    lastName:    lastName,
+    phone:       phone,
+    mode:        orderMode,
+    payment:     'CARD',
+    items:       Cart.items,
+    total:       Cart.getTotal(),
+    createdAt:   new Date().toISOString()
   };
 
-  // PAS de sauvegarde dans orders avant le paiement
-  // La commande sera créée par le webhook UNIQUEMENT si paiement validé
+  // Sauvegarder pour la page de confirmation
+  localStorage.setItem('apk_pending_order', JSON.stringify(orderData));
 
-  // Appeler la serverless function Stripe
-  try {
-    var resp = await fetch('/api/create-sumup-checkout', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        orderData:    orderData,
-        orderNumber:  orderNumber,
-        customerName: firstName + ' ' + lastName,
-        mode:         orderMode
-      })
-    });
-    var data = await resp.json();
-    if (!resp.ok) throw new Error(data.error || 'Erreur SumUp');
+  // Lien SumUp avec montant pré-rempli + description
+  var total       = Cart.getTotal().toFixed(2);
+  var description = encodeURIComponent('Commande ' + orderNumber + ' - Arena Pizza Kebab');
+  var sumupUrl    = 'https://pay.sumup.com/b2c/QNWW041I'
+                  + '?amount=' + total
+                  + '&currency=EUR'
+                  + '&description=' + description
+                  + '&return-url=' + encodeURIComponent('https://www.arenapizza-reims.fr/confirmation.html?order=' + orderNumber + '&source=sumup');
 
-    // Sauvegarder commande pour la page de confirmation
-    localStorage.setItem('apk_pending_order', JSON.stringify(orderData));
-
-    // Rediriger vers la page de paiement SumUp
-    if (data.url) {
-      window.location.href = data.url;
-    } else {
-      throw new Error('Pas de lien de paiement SumUp');
-    }
-  } catch(e) {
-    alert('Erreur paiement : ' + e.message);
-    if (btn) { btn.disabled = false; btn.textContent = 'Payer par carte'; }
-  }
+  window.location.href = sumupUrl;
 }
 
-/* ── Soumettre la commande (espèces) ─────────────────────── */
-document.getElementById('btnConfirm').addEventListener('click', function() {
-  if (paymentMethod === 'card') {
-    launchSumUpCheckout(); // Carte → Stripe direct, pas besoin de 2 clics
-  } else {
-    submitOrder(); // Espèces → PAYED_CASH → impression immédiate
-  }
-});
 
 async function submitOrder() {
   /* Vérification des horaires */
