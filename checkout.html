@@ -181,6 +181,7 @@
           </div>
 
           <!-- Zone Stripe (vierge — à intégrer) OU message minimum non atteint -->
+          <div id="sumup-card" style="margin-bottom:12px"></div>
           <div id="stripeZone" style="background:var(--dark4);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:20px">
 
             <!-- Affiché si total >= 17€ -->
@@ -443,16 +444,15 @@ async function launchSumUpCheckout() {
   if (!Cart.items || !Cart.items.length) { alert('Votre panier est vide.'); return; }
 
   var btn = document.getElementById('btnStripeCheckout');
-  if (btn) { btn.disabled = true; btn.textContent = 'Redirection...'; }
+  if (btn) { btn.disabled = true; btn.textContent = 'Chargement...'; }
 
   // Numero de commande
-  var today   = new Date().toDateString();
-  var stored  = JSON.parse(localStorage.getItem('apk_counter') || '{}');
-  var count   = (stored.date === today) ? (stored.count || 0) + 1 : 1;
+  var today  = new Date().toDateString();
+  var stored = JSON.parse(localStorage.getItem('apk_counter') || '{}');
+  var count  = (stored.date === today) ? (stored.count || 0) + 1 : 1;
   localStorage.setItem('apk_counter', JSON.stringify({ date: today, count: count }));
   var orderNumber = 'APK-' + String(count).padStart(3, '0');
 
-  // Données de commande
   var orderData = {
     orderNumber: orderNumber,
     firstName:   firstName,
@@ -464,160 +464,55 @@ async function launchSumUpCheckout() {
     total:       Cart.getTotal(),
     createdAt:   new Date().toISOString()
   };
-
-  // Sauvegarder pour la page de confirmation
   localStorage.setItem('apk_pending_order', JSON.stringify(orderData));
 
-  // Lien SumUp avec montant pré-rempli + description
-  var total       = Cart.getTotal().toFixed(2);
-  var description = encodeURIComponent('Commande ' + orderNumber + ' - Arena Pizza Kebab');
-  var sumupUrl    = 'https://pay.sumup.com/b2c/QNWW041I'
-                  + '?amount=' + total
-                  + '&currency=EUR'
-                  + '&description=' + description
-                  + '&return-url=' + encodeURIComponent('https://www.arenapizza-reims.fr/confirmation.html?order=' + orderNumber + '&source=sumup');
+  try {
+    // Créer le checkout SumUp via notre serverless
+    var resp = await fetch('/api/create-sumup-checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderData: orderData, orderNumber: orderNumber })
+    });
+    var data = await resp.json();
+    if (!resp.ok || !data.checkoutId) throw new Error(data.error || 'Erreur SumUp');
 
-  window.location.href = sumupUrl;
-}
+    // Afficher le widget SumUp embarqué
+    var cardDiv = document.getElementById('sumup-card');
+    if (btn) btn.style.display = 'none';
 
+    cardDiv.innerHTML = '';
+    cardDiv.style.cssText = 'padding:16px 0';
 
-async function submitOrder() {
-  /* Vérification des horaires */
-  var hoursStatus = getOrderingStatus();
-  if (hoursStatus === 'closed') {
-    alert('⏰ Désolé, nous sommes fermés.\nHoraires de commande : 11h00–13h15 et 18h00–22h15.');
-    return;
-  }
-  if (hoursStatus === 'call') {
-    alert('📞 Les commandes en ligne se terminent.\nVeuillez appeler le ' + APK_MENU.info.phone1 + ' pour commander.');
-    return;
-  }
-
-  /* Validation */
-  var firstName = document.getElementById('firstName').value.trim();
-  var lastName  = document.getElementById('lastName').value.trim();
-  var phone     = document.getElementById('phone').value.trim();
-  if (!firstName || !lastName) { alert('Veuillez renseigner votre prénom et nom.'); return; }
-  if (!phone)                  { alert('Le numéro de téléphone est obligatoire.'); return; }
-  if (!Cart.items || Cart.items.length === 0) { alert('Votre panier est vide.'); return; }
-  if (orderMode === 'delivery') {
-    if (!document.getElementById('address').value.trim()) { alert('Veuillez renseigner votre adresse.'); return; }
-    if (!document.getElementById('city').value.trim())    { alert('Veuillez renseigner votre ville.'); return; }
-  }
-
-  /* Construire la commande */
-  // Numéro journalier : APK-001, APK-002... repart à 001 chaque jour
-  var orderNum = (function() {
-    var today   = new Date().toDateString();
-    var stored  = JSON.parse(localStorage.getItem('apk_counter') || '{}');
-    var count   = (stored.date === today) ? (stored.count || 0) + 1 : 1;
-    localStorage.setItem('apk_counter', JSON.stringify({ date: today, count: count }));
-    return 'APK-' + String(count).padStart(3, '0');
-  })();
-  var orderData = {
-    orderNumber: orderNum,
-    firstName: firstName,
-    lastName:  lastName,
-    phone:     phone,
-    email:     document.getElementById('email').value.trim(),
-    mode:      orderMode,
-    address:   (orderMode === 'delivery') ? {
-      street: document.getElementById('address').value.trim(),
-      city:   document.getElementById('city').value.trim(),
-      zip:    document.getElementById('zip').value.trim(),
-      notes:  document.getElementById('deliveryNotes').value.trim()
-    } : null,
-    time:    (timeMode === 'later') ? document.getElementById('scheduledTime').value : 'ASAP',
-    payment: 'CASH',
-    status:  'PAYED_CASH',
-    items:   Cart.items,
-    total:   Cart.getTotal(),
-    notes:   document.getElementById('orderNotes').value.trim(),
-    timestamp: new Date().toISOString()
-  };
-
-  /* UI loading */
-  var btn = document.getElementById('btnConfirm');
-  btn.disabled    = true;
-  btn.textContent = 'Enregistrement…';
-
-  /* Sauvegarder dans localStorage (toujours, comme fallback) */
-  localStorage.setItem('apk_last_order', JSON.stringify(orderData));
-  var orders = JSON.parse(localStorage.getItem('apk_orders') || '[]');
-  orders.unshift(Object.assign({}, orderData));
-  localStorage.setItem('apk_orders', JSON.stringify(orders));
-
-  /* Sauvegarder dans Firebase si disponible */
-  if (typeof db !== 'undefined') {
-    try {
-      /* 1. Enregistrer la commande */
-      await db.collection('orders').add(Object.assign({}, orderData, {
-        paymentStatus: 'cash',
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-      }));
-
-
-    } catch (e) {
-      console.warn('Firebase non disponible, commande sauvée en local :', e.message);
+    // Charger le SDK SumUp si pas encore chargé
+    if (!window.SumUpCard) {
+      await new Promise(function(resolve, reject) {
+        var s = document.createElement('script');
+        s.src = 'https://gateway.sumup.com/gateway/ecom/card/v2/sdk.js';
+        s.onload = resolve;
+        s.onerror = reject;
+        document.head.appendChild(s);
+      });
     }
-  }
 
-  Cart.clear();
-  window.location.href = 'confirmation.html?method=cash';
+    SumUpCard.mount({
+      id:         'sumup-card',
+      checkoutId: data.checkoutId,
+      onResponse: function(type, body) {
+        console.log('SumUp:', type, body);
+        if (type === 'success') {
+          window.location.href = '/confirmation.html?order=' + orderNumber + '&source=sumup';
+        } else if (type === 'error') {
+          alert('Paiement refuse. Veuillez reessayer.');
+          if (btn) { btn.disabled = false; btn.style.display = ''; btn.textContent = 'Payer par carte'; }
+          cardDiv.innerHTML = '';
+        }
+      }
+    });
+
+  } catch(e) {
+    alert('Erreur paiement : ' + e.message);
+    if (btn) { btn.disabled = false; btn.style.display = ''; btn.textContent = 'Payer par carte'; }
+  }
 }
 
-/* ── Sélection mode paiement ─────────────────────────────── */
-var paymentMethod = 'card';
-var MIN_CARD_AMOUNT = 0.01; // Temporaire test - remettre 17.00 après
 
-function checkCardAvailability() {
-  var total = Cart.getTotal();
-  var cardBtn = document.getElementById('payBtnCard');
-  var available = total >= MIN_CARD_AMOUNT;
-
-  if (cardBtn) {
-    cardBtn.disabled = !available;
-    cardBtn.style.opacity = available ? '1' : '.45';
-    cardBtn.style.cursor = available ? 'pointer' : 'not-allowed';
-  }
-
-  document.getElementById('cardAvailable').style.display   = available ? 'block' : 'none';
-  document.getElementById('cardUnavailable').style.display = available ? 'none'  : 'block';
-
-  if (!available) {
-    var missing = (MIN_CARD_AMOUNT - total).toFixed(2).replace('.', ',');
-    document.getElementById('missingAmount').textContent = missing + '€';
-
-    // On affiche juste un message — on ne change PAS le mode de paiement automatiquement
-    // L'utilisateur garde le contrôle de son choix
-  }
-
-  return available;
-}
-
-document.querySelectorAll('.pay-btn').forEach(function(btn) {
-  btn.addEventListener('click', function() {
-    if (this.dataset.pay === 'card' && Cart.getTotal() < MIN_CARD_AMOUNT) {
-      return; // bloqué — message déjà visible
-    }
-    paymentMethod = this.dataset.pay;
-    document.querySelectorAll('.pay-btn').forEach(function(b){ b.classList.remove('active'); });
-    this.classList.add('active');
-    document.getElementById('stripeZone').style.display = (paymentMethod === 'card')   ? 'block' : 'none';
-    document.getElementById('cashZone').style.display   = (paymentMethod === 'cash')   ? 'flex'  : 'none';
-  });
-});
-
-/* Init */
-async function initCheckoutPage() {
-  await loadOrderingOverride();
-  await loadSiteLogo();
-  Cart.load();
-  renderSummary();
-  setMode('delivery');
-  checkCardAvailability();
-}
-initCheckoutPage();
-</script>
-</body>
-</html>
