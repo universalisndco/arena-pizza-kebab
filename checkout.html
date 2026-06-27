@@ -272,6 +272,16 @@
 <script src="js/data.js"></script>
 <script src="js/cart.js"></script>
 <script src="js/main.js"></script>
+
+<script>
+// INITIALISATION CHECKOUT
+document.addEventListener('DOMContentLoaded', function() {
+  Cart.load();
+  renderSummary();
+  checkCardAvailability();
+  setMode('delivery');
+});
+</script>
 <script>
 /* ── État ─────────────────────────────────────────────────── */
 var orderMode = 'delivery';
