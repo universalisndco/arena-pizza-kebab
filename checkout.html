@@ -198,7 +198,7 @@
                 <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="rgba(99,179,237,.6)" stroke-width="1.5" style="margin:0 auto 12px;display:block"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
                 <div style="font-weight:800;font-size:.92rem;color:#fff;margin-bottom:6px">Paiement sécurisé par carte</div>
                 <div style="font-size:.78rem;margin-bottom:14px">Visa, Mastercard, CB — Crypté SSL</div>
-                <button id="btnStripeCheckout" type="button" onclick="launchSumUpCheckout()"
+                <button id="btnStripeCheckout" type="button" onclick="launchStripeCheckout()"
                   style="background:linear-gradient(135deg,#635bff,#4f46e5);color:#fff;border:none;padding:13px 28px;border-radius:10px;font-weight:900;font-size:.92rem;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:center;gap:8px">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
                   Payer par carte
@@ -431,22 +431,21 @@ function generateTicketText(o) {
 }
 
 /* ── Stripe Checkout ────────────────────────────────────── */
-async function launchSumUpCheckout() {
-  var status = getOrderingStatus();
-  if (status === 'closed') { alert('Nous sommes fermes.'); return; }
-  if (status === 'call')   { alert('Appelez-nous : ' + APK_MENU.info.phone1); return; }
+async function launchStripeCheckout() {
+  var hoursStatus = getOrderingStatus ? getOrderingStatus() : 'open';
+  if (hoursStatus === 'closed') { alert('Nous sommes fermés.'); return; }
 
   var firstName = document.getElementById('firstName').value.trim();
   var lastName  = document.getElementById('lastName').value.trim();
   var phone     = document.getElementById('phone').value.trim();
-  if (!firstName || !lastName) { alert('Veuillez renseigner votre prenom et nom.'); return; }
-  if (!phone)                  { alert('Le numero de telephone est obligatoire.'); return; }
+  if (!firstName || !lastName) { alert('Veuillez renseigner votre prénom et nom.'); return; }
+  if (!phone)                  { alert('Le numéro de téléphone est obligatoire.'); return; }
   if (!Cart.items || !Cart.items.length) { alert('Votre panier est vide.'); return; }
 
   var btn = document.getElementById('btnStripeCheckout');
-  if (btn) { btn.disabled = true; btn.textContent = 'Chargement...'; }
+  if (btn) { btn.disabled = true; btn.textContent = 'Redirection...'; }
 
-  // Numero de commande
+  // Numéro de commande
   var today  = new Date().toDateString();
   var stored = JSON.parse(localStorage.getItem('apk_counter') || '{}');
   var count  = (stored.date === today) ? (stored.count || 0) + 1 : 1;
@@ -464,54 +463,31 @@ async function launchSumUpCheckout() {
     total:       Cart.getTotal(),
     createdAt:   new Date().toISOString()
   };
+
+  // Sauvegarder pour confirmation
   localStorage.setItem('apk_pending_order', JSON.stringify(orderData));
 
   try {
-    // Créer le checkout SumUp via notre serverless
-    var resp = await fetch('/api/create-sumup-checkout', {
+    var resp = await fetch('/api/create-checkout-session', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ orderData: orderData, orderNumber: orderNumber })
+      body: JSON.stringify({
+        orderData:    orderData,
+        orderNumber:  orderNumber,
+        customerName: firstName + ' ' + lastName,
+        mode:         orderMode
+      })
     });
     var data = await resp.json();
-    if (!resp.ok || !data.checkoutId) throw new Error(data.error || 'Erreur SumUp');
-
-    // Afficher le widget SumUp embarqué
-    var cardDiv = document.getElementById('sumup-card');
-    if (btn) btn.style.display = 'none';
-
-    cardDiv.innerHTML = '';
-    cardDiv.style.cssText = 'padding:16px 0';
-
-    // Charger le SDK SumUp si pas encore chargé
-    if (!window.SumUpCard) {
-      await new Promise(function(resolve, reject) {
-        var s = document.createElement('script');
-        s.src = 'https://gateway.sumup.com/gateway/ecom/card/v2/sdk.js';
-        s.onload = resolve;
-        s.onerror = reject;
-        document.head.appendChild(s);
-      });
+    if (!resp.ok) throw new Error(data.error || 'Erreur Stripe');
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      throw new Error('Pas de lien Stripe');
     }
-
-    SumUpCard.mount({
-      id:         'sumup-card',
-      checkoutId: data.checkoutId,
-      onResponse: function(type, body) {
-        console.log('SumUp:', type, body);
-        if (type === 'success') {
-          window.location.href = '/confirmation.html?order=' + orderNumber + '&source=sumup';
-        } else if (type === 'error') {
-          alert('Paiement refuse. Veuillez reessayer.');
-          if (btn) { btn.disabled = false; btn.style.display = ''; btn.textContent = 'Payer par carte'; }
-          cardDiv.innerHTML = '';
-        }
-      }
-    });
-
   } catch(e) {
     alert('Erreur paiement : ' + e.message);
-    if (btn) { btn.disabled = false; btn.style.display = ''; btn.textContent = 'Payer par carte'; }
+    if (btn) { btn.disabled = false; btn.textContent = 'Payer par carte'; }
   }
 }
 
@@ -585,7 +561,7 @@ var btnConfirm = document.getElementById('btnConfirm');
 if (btnConfirm) {
   btnConfirm.addEventListener('click', function() {
     if (paymentMethod === 'card') {
-      launchSumUpCheckout();
+      launchStripeCheckout();
     } else {
       submitOrder();
     }
