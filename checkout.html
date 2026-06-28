@@ -580,6 +580,18 @@ try { Cart.load(); } catch(e) { console.error('Cart.load:', e); }
 try { renderSummary(); } catch(e) { console.error('renderSummary:', e); }
 try { setMode('delivery'); } catch(e) { console.error('setMode:', e); }
 
+// ── Bouton Confirmer la commande ─────────────────────────
+var btnConfirm = document.getElementById('btnConfirm');
+if (btnConfirm) {
+  btnConfirm.addEventListener('click', function() {
+    if (paymentMethod === 'card') {
+      launchSumUpCheckout();
+    } else {
+      submitOrder();
+    }
+  });
+}
+
 // ── Boutons mode paiement ─────────────────────────────────
 var paymentMethod = 'card';
 document.querySelectorAll('.pay-btn').forEach(function(btn) {
