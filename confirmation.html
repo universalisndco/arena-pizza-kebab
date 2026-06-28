@@ -4,119 +4,101 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Commande confirmée — Arena Pizza Kebab</title>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-  <script src="js/firebase-config.js"></script>
   <link rel="stylesheet" href="css/style.css">
   <style>
-    .confirm-page { min-height:100vh; display:flex; align-items:center; justify-content:center; padding:40px 20px; }
-    .confirm-card { background:var(--dark2); border:1px solid rgba(255,255,255,.08); border-radius:24px; padding:48px 36px; max-width:480px; width:100%; text-align:center; }
-    .confirm-icon { width:80px; height:80px; border-radius:50%; background:rgba(34,197,94,.15); border:2px solid #22c55e; display:flex; align-items:center; justify-content:center; margin:0 auto 24px; }
-    .confirm-icon svg { width:40px; height:40px; }
-    .confirm-title { font-family:var(--font-h); font-size:2rem; margin-bottom:8px; color:#fff; }
-    .confirm-subtitle { color:var(--gray); font-size:.9rem; margin-bottom:28px; line-height:1.6; }
-    .confirm-order { background:var(--dark3); border-radius:12px; padding:16px 20px; margin-bottom:28px; }
-    .confirm-order-num { font-size:1.6rem; font-weight:900; color:var(--gold); }
-    .confirm-order-label { font-size:.75rem; color:var(--gray); text-transform:uppercase; letter-spacing:1px; margin-bottom:4px; }
-    .confirm-btn { display:inline-block; padding:14px 32px; background:var(--red); color:#fff; border-radius:12px; font-weight:900; text-decoration:none; font-size:.9rem; }
+    body { background: var(--dark); display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+    .confirm-box {
+      background: var(--dark2);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 20px;
+      padding: 48px 40px;
+      max-width: 480px;
+      width: 90%;
+      text-align: center;
+    }
+    .confirm-icon { font-size: 4rem; margin-bottom: 16px; }
+    .confirm-title { font-family: var(--font-h); font-size: 2.2rem; color: #fff; margin-bottom: 12px; }
+    .confirm-sub { color: rgba(255,255,255,.6); font-size: 1rem; line-height: 1.6; margin-bottom: 32px; }
+    .confirm-order { background: var(--dark3); border-radius: 12px; padding: 14px 20px; margin-bottom: 28px; font-weight: 700; color: var(--gold); font-size: 1.1rem; }
+    .btn-home { display: inline-block; background: var(--red); color: #fff; padding: 14px 32px; border-radius: 50px; font-weight: 900; text-decoration: none; font-size: 1rem; }
   </style>
 </head>
 <body>
-<nav class="navbar" id="navbar">
-  <div class="nav-container">
-    <a href="index.html" class="nav-logo">
-      <img src="img/logo.png" alt="APK" class="nav-logo-img">
-      <span class="nav-logo-name">ARENA <span class="red">PIZZA</span> KEBAB</span>
-    </a>
-  </div>
-</nav>
 
-<div class="confirm-page">
-  <div class="confirm-card" id="confirmCard">
-    <div style="text-align:center;color:var(--gray);padding:40px">Vérification du paiement…</div>
-  </div>
+<div class="confirm-box" id="confirmCard">
+  <div class="confirm-icon">⏳</div>
+  <div class="confirm-title">Traitement...</div>
 </div>
 
-<script src="js/data.js"></script>
 <script src="js/cart.js"></script>
 <script>
-(async function() {
+(function() {
   var params   = new URLSearchParams(window.location.search);
-  var orderNum = params.get('order');
-  var source   = params.get('source'); // 'sumup' si paiement SumUp
+  var method   = params.get('method');   // 'cash'
+  var sessionId = params.get('session_id'); // Stripe
   var card     = document.getElementById('confirmCard');
 
-  // ── Flux SumUp : verifier le paiement et creer la commande ──
-  if (source === 'sumup' && orderNum) {
-    try {
-      // Recuperer les donnees de commande depuis localStorage
-      var pendingData = null;
-      try { pendingData = JSON.parse(localStorage.getItem('apk_pending_order') || 'null'); } catch(e) {}
+  // ══════════════════════════════════════════════════════
+  // FLUX CASH — pas de vérification, confirmation directe
+  // ══════════════════════════════════════════════════════
+  if (method === 'cash') {
+    var pending = null;
+    try { pending = JSON.parse(localStorage.getItem('apk_pending_order') || 'null'); } catch(e) {}
+    var orderNum = pending ? pending.orderNumber : 'APK-???';
 
-      // Appeler notre endpoint de verification
-      var verifyResp = await fetch('/api/verify-sumup-payment', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          checkoutReference: orderNum,
-          orderData: pendingData
-        })
-      });
-      var result = await verifyResp.json();
+    cart.innerHTML = card.innerHTML = `
+      <div class="confirm-icon">✅</div>
+      <div class="confirm-title">COMMANDE CONFIRMÉE !</div>
+      <div class="confirm-order">Commande ${orderNum}</div>
+      <div class="confirm-sub">
+        Votre commande a bien été reçue.<br>
+        <strong>Le restaurant va vous appeler dans quelques minutes</strong><br>
+        pour confirmer et organiser votre commande.
+      </div>
+      <a href="index.html" class="btn-home">🏠 Retour à l'accueil</a>
+    `;
 
-      if (result.paid) {
-        // Paiement confirme → afficher confirmation
-        Cart.clear();
-        localStorage.removeItem('apk_pending_order');
-        if (card) {
-          card.innerHTML = `
-            <div style="text-align:center;padding:40px 20px">
-              <div style="font-size:4rem;margin-bottom:16px">✅</div>
-              <h1 style="font-family:var(--font-h);font-size:2.5rem;color:#fff;margin-bottom:8px">
-                COMMANDE CONFIRMEE !
-              </h1>
-              <p style="color:rgba(255,255,255,.7);margin-bottom:24px">
-                Votre paiement a ete accepte.<br>
-                Commande <strong>${orderNum}</strong> en preparation !
-              </p>
-              <a href="index.html" class="btn btn-primary">Retour a l'accueil</a>
-            </div>
-          `;
-        }
-      } else {
-        // Paiement pas confirme
-        if (card) {
-          card.innerHTML = `
-            <div style="text-align:center;padding:40px 20px">
-              <div style="font-size:3rem;margin-bottom:16px">⏳</div>
-              <h2 style="color:#fff">Paiement en cours de verification...</h2>
-              <p style="color:rgba(255,255,255,.7)">Statut : ${result.status || 'inconnu'}</p>
-              <a href="checkout.html" class="btn btn-outline" style="margin-top:20px">Retour au panier</a>
-            </div>
-          `;
-        }
-      }
-    } catch(e) {
-      console.error('Erreur verification SumUp:', e);
-    }
+    // Vider le panier
+    try { Cart.clear(); } catch(e) {}
+    localStorage.removeItem('apk_pending_order');
     return;
   }
 
-  // ── Flux Cash : juste afficher la confirmation ──────────────
-  var pending = null;
-  try { pending = JSON.parse(localStorage.getItem('apk_pending_order') || 'null'); } catch(e) {}
+  // ══════════════════════════════════════════════════════
+  // FLUX CARTE (Stripe) — afficher confirmation
+  // La commande est déjà créée par le webhook Stripe
+  // ══════════════════════════════════════════════════════
+  if (sessionId) {
+    var pending2 = null;
+    try { pending2 = JSON.parse(localStorage.getItem('apk_pending_order') || 'null'); } catch(e) {}
+    var orderNum2 = pending2 ? pending2.orderNumber : 'APK-???';
 
-  if (pending && pending._id) {
-    try {
-      await db.collection('orders').doc(pending._id).update({
-        stripeSessionId: params.get('session_id') || '',
-        confirmedAt: new Date().toISOString()
-      });
-    } catch(e) { console.warn('Firebase update error:', e); }
+    card.innerHTML = `
+      <div class="confirm-icon">✅</div>
+      <div class="confirm-title">PAIEMENT CONFIRMÉ !</div>
+      <div class="confirm-order">Commande ${orderNum2}</div>
+      <div class="confirm-sub">
+        Votre paiement a été accepté.<br>
+        <strong>Le restaurant va vous appeler dans quelques minutes</strong><br>
+        pour confirmer et organiser votre commande.
+      </div>
+      <a href="index.html" class="btn-home">🏠 Retour à l'accueil</a>
+    `;
+
+    try { Cart.clear(); } catch(e) {}
+    localStorage.removeItem('apk_pending_order');
+    return;
   }
 
-  Cart.clear();
-  localStorage.removeItem('apk_pending_order');
+  // Fallback
+  card.innerHTML = `
+    <div class="confirm-icon">✅</div>
+    <div class="confirm-title">COMMANDE REÇUE !</div>
+    <div class="confirm-sub">Le restaurant va vous appeler dans quelques minutes.</div>
+    <a href="index.html" class="btn-home">🏠 Retour à l'accueil</a>
+  `;
+  try { Cart.clear(); } catch(e) {}
+})();
 </script>
 </body>
 </html>
