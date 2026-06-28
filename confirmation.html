@@ -46,7 +46,7 @@
     try { pending = JSON.parse(localStorage.getItem('apk_pending_order') || 'null'); } catch(e) {}
     var orderNum = pending ? pending.orderNumber : 'APK-???';
 
-    cart.innerHTML = card.innerHTML = `
+    card.innerHTML = `
       <div class="confirm-icon">✅</div>
       <div class="confirm-title">COMMANDE CONFIRMÉE !</div>
       <div class="confirm-order">Commande ${orderNum}</div>
