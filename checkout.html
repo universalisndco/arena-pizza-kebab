@@ -579,6 +579,28 @@ async function submitOrder() {
 try { Cart.load(); } catch(e) { console.error('Cart.load:', e); }
 try { renderSummary(); } catch(e) { console.error('renderSummary:', e); }
 try { setMode('delivery'); } catch(e) { console.error('setMode:', e); }
+
+// ── Boutons mode paiement ─────────────────────────────────
+var paymentMethod = 'card';
+document.querySelectorAll('.pay-btn').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    paymentMethod = this.dataset.pay;
+    // Mettre à jour le style des boutons
+    document.querySelectorAll('.pay-btn').forEach(function(b) {
+      b.classList.remove('active');
+      b.style.borderColor = 'rgba(255,255,255,.08)';
+      b.style.color = 'var(--gray)';
+    });
+    this.classList.add('active');
+    this.style.borderColor = 'var(--red)';
+    this.style.color = '#fff';
+    // Afficher/masquer les zones de paiement
+    var stripeZone = document.getElementById('stripeZone');
+    var cashZone   = document.getElementById('cashZone');
+    if (stripeZone) stripeZone.style.display = paymentMethod === 'card' ? 'block' : 'none';
+    if (cashZone)   cashZone.style.display   = paymentMethod === 'cash' ? 'flex'  : 'none';
+  });
+});
 </script>
 </body>
 </html>
