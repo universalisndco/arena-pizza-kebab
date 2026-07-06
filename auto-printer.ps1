@@ -28,9 +28,9 @@ function Build-Ticket($order) {
     $t += "${ESC}E$([char]1)"
     $t += "${ESC}G$([char]1)"
     $t += "${ESC}a$([char]1)"
-    $t += "${ESC}!$([char]0x30)"
+    $t += "${ESC}!$([char]0x38)"
     $t += "ARENA PIZZA KEBAB`n"
-    $t += "${ESC}!$([char]0)"
+    $t += "${ESC}!$([char]8)"
     $t += "88 Rue Lesage, Reims`n"
     $t += "Tel: 09 83 39 82 20`n"
     $t += "================================`n"
@@ -45,9 +45,9 @@ function Build-Ticket($order) {
         } catch {}
     }
 
-    $t += "${ESC}!$([char]0x30)"
+    $t += "${ESC}!$([char]0x38)"
     $t += "N. $num`n"
-    $t += "${ESC}!$([char]0)"
+    $t += "${ESC}!$([char]8)"
     $t += "Heure: $timeStr`n"
     $t += "================================`n"
 
@@ -82,10 +82,10 @@ function Build-Ticket($order) {
 
     $t += "================================`n"
     $t += "${ESC}a$([char]1)"
-    $t += "${ESC}!$([char]0x30)"
+    $t += "${ESC}!$([char]0x38)"
     $total = [math]::Round([double]$order.total, 2)
     $t += "TOTAL: ${total} EUR`n"
-    $t += "${ESC}!$([char]0)"
+    $t += "${ESC}!$([char]8)"
     $pay = if ($order.status -eq 'PAYED_CASH') { 'ESPECES' } else { 'CARTE BANCAIRE' }
     $t += "Paiement: $pay`n"
 
