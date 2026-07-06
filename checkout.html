@@ -432,6 +432,7 @@ function generateTicketText(o) {
 
 /* ── Stripe Checkout ────────────────────────────────────── */
 async function launchStripeCheckout() {
+  if (typeof loadOrderingOverride === 'function') { try { await loadOrderingOverride(true); } catch(e) {} }
   var hoursStatus = getOrderingStatus ? getOrderingStatus() : 'open';
   if (hoursStatus === 'closed') { alert('Nous sommes fermés.'); return; }
 
