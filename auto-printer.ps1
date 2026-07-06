@@ -158,42 +158,17 @@ function Print-Ticket($order, $docId) {
     $rawBytes = $encoding.GetBytes($ticket)
     $success = $false
 
-    # Methode 1 : imprimante specifique XP (copy1)
+    # Imprimante par defaut
     try {
-        $printerName = 'xp- (copy1)'
-        Write-Host "  Essai imprimante: $printerName" -ForegroundColor Cyan
-        $success = [RawPrinter]::SendRaw($printerName, $rawBytes)
-        if ($success) {
-            Write-Host "  Ticket imprime sur $printerName !" -ForegroundColor Green
+        $default = (Get-CimInstance -ClassName Win32_Printer -Filter "Default=True")
+        if ($default) {
+            $printerName = $default.Name
+            Write-Host "  Imprimante par defaut: $printerName" -ForegroundColor Cyan
+            $success = [RawPrinter]::SendRaw($printerName, $rawBytes)
+            if ($success) { Write-Host "  Ticket imprime!" -ForegroundColor Green }
         }
     } catch {
         Write-Host "  Erreur: $_" -ForegroundColor Yellow
-    }
-
-    # Methode 2 : imprimante par defaut
-    if (-not $success) {
-        try {
-            $default = (Get-CimInstance -ClassName Win32_Printer -Filter "Default=True")
-            if ($default) {
-                $printerName = $default.Name
-                Write-Host "  Essai imprimante par defaut: $printerName" -ForegroundColor Cyan
-                $success = [RawPrinter]::SendRaw($printerName, $rawBytes)
-                if ($success) { Write-Host "  Ticket imprime!" -ForegroundColor Green }
-            }
-        } catch {}
-    }
-
-    # Methode 3 : cherche imprimante thermique par nom
-    if (-not $success) {
-        try {
-            $allPrinters = Get-CimInstance -ClassName Win32_Printer
-            $xp = $allPrinters | Where-Object { $_.Name -like '*XP*' -or $_.Name -like '*xp*' -or $_.Name -like '*TM-T*' -or $_.Name -like '*thermal*' -or $_.Name -like '*POS*' } | Select-Object -First 1
-            if ($xp) {
-                Write-Host "  Essai: $($xp.Name)" -ForegroundColor Yellow
-                $success = [RawPrinter]::SendRaw($xp.Name, $rawBytes)
-                if ($success) { Write-Host "  Ticket imprime sur $($xp.Name)!" -ForegroundColor Green }
-            }
-        } catch {}
     }
 
     if ($success) {
