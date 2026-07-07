@@ -351,7 +351,7 @@ function showHoursMessage(type) {
   let msg = '';
   const phone = APK_MENU.info.phone1;
   if (type === 'closed') {
-    msg = `⏰ Nous sommes actuellement fermés.<br>Revenez entre <strong>11h00–13h15</strong> ou <strong>18h00–22h15</strong>.`;
+    msg = `⏰ Nous sommes actuellement fermés.<br>Revenez entre <strong>11h00–13h30</strong> ou <strong>18h00–22h30</strong>.`;
   } else if (type === 'call') {
     msg = `📞 Les commandes en ligne se terminent.<br>Appelez-nous directement au <strong><a href="tel:${phone}" style="color:var(--gold)">${phone}</a></strong> pour commander.`;
   }

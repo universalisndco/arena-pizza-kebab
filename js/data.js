@@ -646,7 +646,7 @@ const APK_MENU = {
     name:"Arena Pizza Kebab", shortName:"APK",
     address:"88 Rue Lesage", city:"51100 Reims",
     phone1:"09 83 39 82 20", phone2:"07 84 65 23 58",
-    hours:"7J/7 — 11h00 à 13h15 et 18h00 à 22h15",
+    hours:"7J/7 — 11h00 à 13h30 et 18h00 à 22h30",
     hoursDetail: {
       service1: { open:"11:00", close:"13:15" },
       callOnly1: { open:"13:15", close:"13:30" },
@@ -709,8 +709,10 @@ function getOrderingStatus() {
 
   var now  = new Date();
   var mins = now.getHours() * 60 + now.getMinutes();
-  if ((mins >= 660 && mins < 795) || (mins >= 1080 && mins < 1335)) return 'open';
-  if ((mins >= 795 && mins < 810) || (mins >= 1335 && mins < 1350)) return 'call';
+  // Ouvert : 11h00-13h30 et 18h00-22h30
+  if ((mins >= 660 && mins < 810) || (mins >= 1080 && mins < 1350)) return 'open';
+  // Zone "appelez-nous" : 15 min après chaque service (13h30-13h45 et 22h30-22h45)
+  if ((mins >= 810 && mins < 825) || (mins >= 1350 && mins < 1365)) return 'call';
   return 'closed';
 }
 
