@@ -556,7 +556,7 @@ function buildStats() {
     var d = o.timestamp || (o.createdAt&&o.createdAt.seconds?new Date(o.createdAt.seconds*1000).toISOString():null);
     return d && new Date(d).toDateString()===today;
   });
-  var pending = allOrders.filter(function(o){ return o.status==='pending'; }).length;
+  var pending = allOrders.filter(function(o){ return o.status==='pending'||o.status==='PAYED_CASH'||o.status==='PAYED_CARD'; }).length;
   var revenue = todayO.filter(function(o){ return o.status!=='cancelled'; })
                       .reduce(function(s,o){ return s+(parseFloat(o.total)||0); },0);
 
@@ -571,14 +571,11 @@ function buildStats() {
 }
 
 function buildOrdersTable() {
-  var today    = new Date().toDateString();
-  var filtered = allOrders.filter(function(o){
-    var d = o.timestamp||(o.createdAt&&o.createdAt.seconds?new Date(o.createdAt.seconds*1000).toISOString():null);
-    return d && new Date(d).toDateString()===today;
-  });
-  if(currentFilter==='pending')    filtered=filtered.filter(function(o){return o.status==='pending';});
-  else if(currentFilter==='active') filtered=filtered.filter(function(o){return['accepted','preparing','ready','delivering'].indexOf(o.status)>=0;});
-  else if(currentFilter==='done')   filtered=filtered.filter(function(o){return o.status==='done';});
+  var filtered;
+  if(currentFilter==='pending')    filtered=allOrders.filter(function(o){return o.status==='pending'||o.status==='PAYED_CASH'||o.status==='PAYED_CARD';});
+  else if(currentFilter==='active') filtered=allOrders.filter(function(o){return['accepted','preparing','ready','delivering'].indexOf(o.status)>=0;});
+  else if(currentFilter==='done')   filtered=allOrders.filter(function(o){return o.status==='done';});
+  else                              filtered=allOrders.slice();
 
   var el = document.getElementById('ordersTable');
   if(!el) return;
@@ -591,7 +588,7 @@ function buildOrdersTable() {
     '<div>N°</div><div>Client</div><div>Total</div><div>Mode</div><div>Statut</div><div>Heure</div></div>'+
     filtered.map(function(o){
       var key=o.orderNumber||o.firestoreId;
-      return '<div class="order-row'+(o.status==='pending'?' new':'')+'" onclick="showDetail(\''+key+'\')">'+
+      return '<div class="order-row'+(o.status==='pending'||o.status==='PAYED_CASH'||o.status==='PAYED_CARD'?' new':'')+'" onclick="showDetail(\''+key+'\')">'+
         '<div class="order-id" style="font-size:.85rem">'+(o.orderNumber||'—')+'</div>'+
         '<div><div class="order-client">'+(o.firstName||'')+' '+(o.lastName||'')+'</div>'+
         '<div class="order-client-phone">'+(o.phone||'')+'</div></div>'+
