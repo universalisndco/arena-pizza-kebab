@@ -372,7 +372,7 @@ function buildTicketText(o) {
 
   // ── TOTAL ─────────────────────────────────
   t += BIG_ON + row(' TOTAL :', (parseFloat(o.total)||0).toFixed(2)+'E') + BIG_OFF + NL;
-  t += ' PAIEMENT : Sur place' + NL;
+  t += ' PAIEMENT : ' + (o.status==='PAYED_CARD'||o.payment==='CARD'?'CARTE BANCAIRE':'ESPECES / SUR PLACE') + NL;
   t += W + NL;
 
   // ── PIED ──────────────────────────────────
@@ -447,7 +447,7 @@ function printTicket(order) {
 
   document.getElementById('pt-total').innerHTML =
     '<span>TOTAL :</span><span>'+(parseFloat(order.total)||0).toFixed(2)+'E</span>';
-  document.getElementById('pt-payment').textContent = 'PAIEMENT : Sur place';
+  document.getElementById('pt-payment').textContent = 'PAIEMENT : ' + (order.status==='PAYED_CARD'||order.payment==='CARD'?'CARTE BANCAIRE':'ESPECES / SUR PLACE');
 
   window.print();
 }

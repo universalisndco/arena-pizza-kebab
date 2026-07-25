@@ -359,7 +359,7 @@ function generateTicketText(o) {
   var date = now.toLocaleDateString('fr-FR') + '  ' +
              now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
 
-  var paiement = o.payment === 'card' ? 'CARTE BANCAIRE' : 'ESPECES / SUR PLACE';
+  var paiement = (o.payment==='CARD'||o.payment==='card'||o.status==='PAYED_CARD') ? 'CARTE BANCAIRE' : 'ESPECES / SUR PLACE';
 
   var t = '';
   t += sep('=') + LN;
