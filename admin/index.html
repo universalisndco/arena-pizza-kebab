@@ -229,6 +229,18 @@
 checkAuth();
 initDemoData();
 
+/* ── PAIEMENT — meme regle que orders.html (insensible a la casse) ── */
+function isCardPaymentDash(o) {
+  if (!o) return false;
+  var p = String(o.payment || '').toUpperCase();
+  var s = String(o.status  || '').toUpperCase();
+  if (p === 'CASH' || s === 'PAYED_CASH') return false;
+  return p === 'CARD' || s === 'PAYED_CARD';
+}
+function paymentLabelDash(o) {
+  return isCardPaymentDash(o) ? 'CARTE BANCAIRE' : 'ESPECES / SUR PLACE';
+}
+
 var currentFilter    = 'all';
 var selectedOrderNum = null;
 var allOrders        = [];
@@ -372,7 +384,7 @@ function buildTicketText(o) {
 
   // ── TOTAL ─────────────────────────────────
   t += BIG_ON + row(' TOTAL :', (parseFloat(o.total)||0).toFixed(2)+'E') + BIG_OFF + NL;
-  t += ' PAIEMENT : ' + (o.status==='PAYED_CARD'||o.payment==='CARD'?'CARTE BANCAIRE':'ESPECES / SUR PLACE') + NL;
+  t += ' PAIEMENT : ' + paymentLabelDash(o) + NL;
   t += W + NL;
 
   // ── PIED ──────────────────────────────────
@@ -447,7 +459,7 @@ function printTicket(order) {
 
   document.getElementById('pt-total').innerHTML =
     '<span>TOTAL :</span><span>'+(parseFloat(order.total)||0).toFixed(2)+'E</span>';
-  document.getElementById('pt-payment').textContent = 'PAIEMENT : ' + (order.status==='PAYED_CARD'||order.payment==='CARD'?'CARTE BANCAIRE':'ESPECES / SUR PLACE');
+  document.getElementById('pt-payment').textContent = 'PAIEMENT : ' + paymentLabelDash(order);
 
   window.print();
 }
@@ -466,9 +478,22 @@ async function autoPrint(order) {
 ════════════════════════════════════════════════════════════ */
 var initialLoad = true;
 
+/* Date d'une commande, quel que soit le format enregistre
+   (vraie date Firestore, texte ISO, ou ancien champ timestamp). */
+function orderTime(o) {
+  if (!o) return 0;
+  var c = o.createdAt;
+  if (c && c.seconds) return c.seconds * 1000;
+  if (c) { var d = new Date(c); if (!isNaN(d.getTime())) return d.getTime(); }
+  if (o.timestamp) { var t = new Date(o.timestamp); if (!isNaN(t.getTime())) return t.getTime(); }
+  return 0;
+}
+
 if (typeof db !== 'undefined') {
+  // Meme logique que orders.html : on ne trie pas cote Firestore (formats de
+  // date melanges dans la base), on trie cote navigateur pour que les deux
+  // pages affichent exactement les memes commandes dans le meme ordre.
   db.collection('orders')
-    .orderBy('createdAt', 'desc')
     .onSnapshot(function(snapshot) {
       var fbOrders = [];
       snapshot.forEach(function(doc) {
@@ -477,7 +502,9 @@ if (typeof db !== 'undefined') {
       var localOrders = getOrders();
       var fbNums      = fbOrders.map(function(o){ return o.orderNumber; });
       var localOnly   = localOrders.filter(function(o){ return fbNums.indexOf(o.orderNumber) < 0; });
-      allOrders = fbOrders.concat(localOnly);
+      allOrders = fbOrders.concat(localOnly).sort(function(a, b) {
+        return orderTime(b) - orderTime(a);
+      });
       saveOrders(allOrders);
 
       if (!initialLoad) {
