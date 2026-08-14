@@ -145,6 +145,22 @@ checkAuth();
 })();
 
 // ═══════════════════════════════════════════════════════
+// PAIEMENT — regle unique partagee (ticket + admin)
+// Insensible a la casse : 'CARD', 'card' et 'PAYED_CARD' sont tous
+// reconnus comme un paiement par carte.
+// ═══════════════════════════════════════════════════════
+function isCardPayment(o) {
+  if (!o) return false;
+  var p = String(o.payment || '').toUpperCase();
+  var s = String(o.status  || '').toUpperCase();
+  if (p === 'CASH' || s === 'PAYED_CASH') return false;
+  return p === 'CARD' || s === 'PAYED_CARD';
+}
+function paymentLabel(o) {
+  return isCardPayment(o) ? 'CARTE BANCAIRE' : 'ESPECES';
+}
+
+// ═══════════════════════════════════════════════════════
 // ÉTAT
 // ═══════════════════════════════════════════════════════
 var allOrders    = [];
@@ -205,8 +221,13 @@ function dismissAlarms() {
 // ═══════════════════════════════════════════════════════
 // FIREBASE LISTENER TEMPS RÉEL
 // ═══════════════════════════════════════════════════════
+// Pas de .orderBy() ici : les anciennes commandes carte ont un createdAt en
+// texte et les commandes especes une vraie date. Firestore trierait les deux
+// types separement et le .limit() couperait au mauvais endroit.
+// On remonte donc large et on trie cote navigateur (voir .sort ci-dessous),
+// ce qui gere correctement les deux formats.
 db.collection('orders')
-  .limit(100)
+  .limit(300)
   .onSnapshot(function(snap) {
     var newOrders = [];
     snap.forEach(function(doc) {
@@ -435,7 +456,7 @@ function buildEscPosTicket(o) {
   t += BIG_OFF + DARK;
   t += SEP;
   t += LF;
-  t += pad(' PAIEMENT', o.payment === 'card' ? 'CARTE BANCAIRE' : 'ESPECES') + LF;
+  t += pad(' PAIEMENT', paymentLabel(o)) + LF;
   t += LF;
 
   // ── PIED DE PAGE ──────────────────────────────
@@ -523,7 +544,7 @@ function openModal(id) {
       '<div><label style="color:var(--gray);font-size:.7rem;font-weight:900">CLIENT</label><div style="font-weight:800;margin-top:3px">' + (o.firstName||'') + ' ' + (o.lastName||'') + '</div></div>' +
       '<div><label style="color:var(--gray);font-size:.7rem;font-weight:900">TÉLÉPHONE</label><div style="margin-top:3px"><a href="tel:' + o.phone + '" style="color:var(--gold);font-weight:800">' + (o.phone||'—') + '</a></div></div>' +
       '<div><label style="color:var(--gray);font-size:.7rem;font-weight:900">MODE</label><div style="margin-top:3px">' + (o.mode === 'delivery' ? '🚚 Livraison' : '🏪 À emporter') + '</div></div>' +
-      '<div><label style="color:var(--gray);font-size:.7rem;font-weight:900">PAIEMENT</label><div style="margin-top:3px">' + (o.payment === 'card' ? '💳 Carte' : '💵 Espèces') + '</div></div>' +
+      '<div><label style="color:var(--gray);font-size:.7rem;font-weight:900">PAIEMENT</label><div style="margin-top:3px">' + (isCardPayment(o) ? '💳 Carte' : '💵 Espèces') + '</div></div>' +
     '</div>' +
     (o.mode === 'delivery' && o.address ? '<div style="background:var(--dark3);border-radius:10px;padding:10px 14px;margin-bottom:16px;font-size:.84rem"><strong>Adresse :</strong> ' + (o.address.street||'') + ', ' + (o.address.zip||'') + ' ' + (o.address.city||'') + (o.address.notes ? '<br><em>' + o.address.notes + '</em>' : '') + '</div>' : '') +
     (o.notes ? '<div style="background:rgba(212,43,43,.1);border:1px solid rgba(212,43,43,.3);border-radius:10px;padding:10px 14px;margin-bottom:16px;font-size:.84rem"><strong>⚠️ Note :</strong> ' + o.notes + '</div>' : '') +
