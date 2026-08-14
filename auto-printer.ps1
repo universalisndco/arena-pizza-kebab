@@ -2,6 +2,11 @@
 # Double-cliquez sur LANCER-IMPRESSION.bat pour demarrer
 # Ctrl+C pour arreter
 
+# Force TLS 1.2 (evite "Erreur connexion Firebase" sur PowerShell 5.1 / Windows anciens)
+try {
+    [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
+} catch {}
+
 $PROJECT_ID = 'arena-pizza-kebab-3f078'
 $API_KEY = 'AIzaSyCaxE-POSptcvcXAGSYq7PFKPMcMnRFouM'
 $POLL_INTERVAL = 5
@@ -59,8 +64,12 @@ function Build-Ticket($order) {
     if ($order.mode -eq 'delivery' -and $order.address) {
         $addr = $order.address
         if ($addr.street) { $t += "Adresse: $($addr.street)`n" }
-        if ($addr.city)   { $t += "Ville  : $($addr.city)`n" }
+        if ($addr.zip -or $addr.city) { $t += "Ville  : $($addr.zip) $($addr.city)`n" }
+        if ($addr.notes)  { $t += "Info   : $($addr.notes)`n" }
     }
+
+    $heure = if ($order.time -and $order.time -ne 'ASAP') { $order.time } else { 'Des que possible' }
+    $t += "Heure  : $heure`n"
 
     $t += "================================`n"
 
@@ -86,7 +95,18 @@ function Build-Ticket($order) {
     $total = [math]::Round([double]$order.total, 2)
     $t += "TOTAL: ${total} EUR`n"
     $t += "${ESC}!$([char]8)"
-    $pay = if ($order.status -eq 'PAYED_CASH') { 'ESPECES' } else { 'CARTE BANCAIRE' }
+    # Meme regle que le site et l'admin (insensible a la casse).
+    # Avant : tout ce qui n'etait pas PAYED_CASH s'imprimait "CARTE BANCAIRE",
+    # donc une commande espece passee en "Terminee" devenait "CARTE BANCAIRE".
+    $payField   = "$($order.payment)".ToUpper()
+    $statField  = "$($order.status)".ToUpper()
+    $isCard = $false
+    if ($payField -eq 'CASH' -or $statField -eq 'PAYED_CASH') {
+        $isCard = $false
+    } elseif ($payField -eq 'CARD' -or $statField -eq 'PAYED_CARD') {
+        $isCard = $true
+    }
+    $pay = if ($isCard) { 'CARTE BANCAIRE' } else { 'ESPECES' }
     $t += "Paiement: $pay`n"
 
     if ($order.notes) {
@@ -226,6 +246,8 @@ function Check-Orders {
                     $addrFields = @{
                         street = $af.street.stringValue
                         city   = $af.city.stringValue
+                        zip    = $af.zip.stringValue
+                        notes  = $af.notes.stringValue
                     }
                 }
 
@@ -238,6 +260,9 @@ function Check-Orders {
                     address      = $addrFields
                     total        = if ($fields.total.doubleValue) { $fields.total.doubleValue } elseif ($fields.total.integerValue) { $fields.total.integerValue } else { 0 }
                     status       = $status
+                    payment      = $fields.payment.stringValue
+                    time         = $fields.time.stringValue
+                    email        = $fields.email.stringValue
                     notes        = $fields.notes.stringValue
                     createdAt    = $fields.createdAt.timestampValue
                     items        = $items
