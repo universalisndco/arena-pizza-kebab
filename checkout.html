@@ -294,6 +294,42 @@ function setMode(m) {
   document.getElementById('stepPay').textContent   = base + 2;
 }
 
+/* ── Adresse de livraison ────────────────────────────────── */
+function getAddressData() {
+  if (orderMode !== 'delivery') return null;
+  return {
+    street: document.getElementById('address').value.trim(),
+    city:   document.getElementById('city').value.trim(),
+    zip:    document.getElementById('zip').value.trim(),
+    notes:  document.getElementById('deliveryNotes').value.trim()
+  };
+}
+/* Heure souhaitee : 'ASAP' ou heure programmee saisie par le client */
+function getTimeValue() {
+  if (timeMode !== 'later') return 'ASAP';
+  var v = document.getElementById('scheduledTime').value;
+  return v ? v : 'ASAP';
+}
+/* Instructions speciales saisies par le client */
+function getOrderNotes() {
+  var el = document.getElementById('orderNotes');
+  return el ? el.value.trim() : '';
+}
+/* Email (facultatif) */
+function getEmail() {
+  var el = document.getElementById('email');
+  return el ? el.value.trim() : '';
+}
+function checkAddressRequired() {
+  if (orderMode !== 'delivery') return true;
+  var a = getAddressData();
+  if (!a.street || !a.city) {
+    alert('Veuillez renseigner votre adresse et votre ville de livraison.');
+    return false;
+  }
+  return true;
+}
+
 /* ── Heure ───────────────────────────────────────────────── */
 document.getElementById('btnASAP').addEventListener('click', function() { setTime('asap'); });
 document.getElementById('btnLater').addEventListener('click', function() { setTime('later'); });
@@ -359,7 +395,12 @@ function generateTicketText(o) {
   var date = now.toLocaleDateString('fr-FR') + '  ' +
              now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
 
-  var paiement = (o.payment==='CARD'||o.payment==='card'||o.status==='PAYED_CARD') ? 'CARTE BANCAIRE' : 'ESPECES / SUR PLACE';
+  // Meme regle que l'admin et l'auto-printer (insensible a la casse)
+  var _p = String(o.payment||'').toUpperCase();
+  var _s = String(o.status ||'').toUpperCase();
+  var estCarte = (_p === 'CASH' || _s === 'PAYED_CASH') ? false
+               : (_p === 'CARD' || _s === 'PAYED_CARD');
+  var paiement = estCarte ? 'CARTE BANCAIRE' : 'ESPECES / SUR PLACE';
 
   var t = '';
   t += sep('=') + LN;
@@ -442,6 +483,7 @@ async function launchStripeCheckout() {
   if (!firstName || !lastName) { alert('Veuillez renseigner votre prénom et nom.'); return; }
   if (!phone)                  { alert('Le numéro de téléphone est obligatoire.'); return; }
   if (!Cart.items || !Cart.items.length) { alert('Votre panier est vide.'); return; }
+  if (!checkAddressRequired()) return;
 
   var btn = document.getElementById('btnStripeCheckout');
   if (btn) { btn.disabled = true; btn.textContent = 'Redirection...'; }
@@ -458,7 +500,11 @@ async function launchStripeCheckout() {
     firstName:   firstName,
     lastName:    lastName,
     phone:       phone,
+    email:       getEmail(),
     mode:        orderMode,
+    address:     getAddressData(),
+    time:        getTimeValue(),
+    notes:       getOrderNotes(),
     payment:     'CARD',
     items:       Cart.items,
     total:       Cart.getTotal(),
@@ -516,6 +562,7 @@ async function submitOrder() {
   if (!firstName || !lastName) { alert('Veuillez renseigner votre prénom et nom.'); return; }
   if (!phone) { alert('Le numéro de téléphone est obligatoire.'); return; }
   if (!Cart.items || !Cart.items.length) { alert('Votre panier est vide.'); return; }
+  if (!checkAddressRequired()) return;
 
   var today  = new Date().toDateString();
   var stored = JSON.parse(localStorage.getItem('apk_counter') || '{}');
@@ -528,7 +575,11 @@ async function submitOrder() {
     firstName:   firstName,
     lastName:    lastName,
     phone:       phone,
+    email:       getEmail(),
     mode:        orderMode,
+    address:     getAddressData(),
+    time:        getTimeValue(),
+    notes:       getOrderNotes(),
     payment:     'CASH',
     status:      'PAYED_CASH',
     items:       Cart.items,
