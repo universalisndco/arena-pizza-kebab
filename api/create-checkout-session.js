@@ -36,15 +36,32 @@ module.exports = async function handler(req, res) {
     var orderStr = '';
     try { orderStr = JSON.stringify(orderData); } catch(e) { orderStr = '{}'; }
 
-    var meta = {
-      orderNumber:  orderNumber,
-      orderData1:   orderStr.substring(0, 499),
-      orderData2:   orderStr.length > 499  ? orderStr.substring(499,  998)  : '',
-      orderData3:   orderStr.length > 998  ? orderStr.substring(998,  1497) : '',
-      orderData4:   orderStr.length > 1497 ? orderStr.substring(1497, 1996) : '',
-      orderData5:   orderStr.length > 1996 ? orderStr.substring(1996, 2495) : '',
-      orderData6:   orderStr.length > 2495 ? orderStr.substring(2495, 2994) : ''
-    };
+    // Stripe autorise 50 cles de 500 caracteres max.
+    // On decoupe sur 20 morceaux (~9980 caracteres) au lieu de 6 (~2994),
+    // sinon les grosses commandes etaient tronquees et le JSON devenait
+    // illisible cote webhook => commande creee sans client ni articles.
+    var CHUNK      = 499;
+    var MAX_CHUNKS = 20;
+
+    var meta = { orderNumber: orderNumber };
+    for (var i = 0; i < MAX_CHUNKS; i++) {
+      var part = orderStr.substring(i * CHUNK, (i + 1) * CHUNK);
+      if (!part) break;
+      meta['orderData' + (i + 1)] = part;
+    }
+
+    if (orderStr.length > CHUNK * MAX_CHUNKS) {
+      console.warn('orderData trop long (' + orderStr.length + ' chars) — tronque.');
+    }
+
+    // Filet de securite : infos client dans des cles dediees.
+    // Meme si le JSON est tronque, le ticket aura le nom, le tel et l'adresse.
+    var addr = orderData.address || {};
+    meta.cName  = ((orderData.firstName || '') + ' ' + (orderData.lastName || '')).trim().substring(0, 499);
+    meta.cPhone = String(orderData.phone || '').substring(0, 499);
+    meta.cMode  = String(orderData.mode  || '').substring(0, 499);
+    meta.cAddr  = [addr.street, addr.zip, addr.city, addr.notes]
+                    .filter(Boolean).join(' | ').substring(0, 499);
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
