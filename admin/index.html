@@ -63,6 +63,46 @@
     }
     #newOrderToast svg { width: 22px; height: 22px; flex-shrink: 0; }
 
+    /* ── Boutons période / statut ───────────── */
+    .period-btn {
+      padding: 8px 15px; border-radius: 9px; cursor: pointer;
+      background: var(--dark3); border: 1px solid rgba(255,255,255,.09);
+      color: var(--gray); font-size: .8rem; font-weight: 800;
+      font-family: var(--font-b); transition: all .18s; white-space: nowrap;
+    }
+    .period-btn:hover  { color: #fff; border-color: rgba(255,255,255,.22); }
+    .period-btn.active { background: var(--red); border-color: var(--red); color: #fff; }
+
+    .btn-reprint {
+      padding: 5px 9px; border-radius: 7px; cursor: pointer;
+      background: rgba(245,166,35,.12); border: 1px solid rgba(245,166,35,.32);
+      color: var(--gold); font-size: .7rem; font-weight: 800;
+      font-family: var(--font-b); white-space: nowrap; transition: all .18s;
+    }
+    .btn-reprint:hover { background: var(--gold); color: #000; }
+
+    /* ── Analytics ──────────────────────────── */
+    .ana-grid  { display: grid; grid-template-columns: 1fr 1fr; gap: 26px; }
+    @media (max-width: 900px) { .ana-grid { grid-template-columns: 1fr; } }
+    .ana-title {
+      font-size: .74rem; font-weight: 900; letter-spacing: .5px;
+      text-transform: uppercase; color: var(--gray2); margin-bottom: 12px;
+    }
+    .ana-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 6px 0; font-size: .84rem;
+    }
+    .ana-row .lbl { flex: 0 0 40%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .ana-row .bar { flex: 1; height: 9px; border-radius: 5px; background: rgba(255,255,255,.06); overflow: hidden; }
+    .ana-row .bar > i { display: block; height: 100%; border-radius: 5px; background: linear-gradient(90deg,var(--gold),var(--red)); }
+    .ana-row .val { flex: 0 0 92px; text-align: right; font-weight: 800; color: #fff; font-size: .8rem; }
+    .ana-empty { padding: 22px; text-align: center; color: var(--gray); font-size: .85rem; }
+    .ana-cols  { display: flex; align-items: flex-end; gap: 5px; height: 130px; padding-top: 8px; }
+    .ana-cols > div { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 5px; height: 100%; }
+    .ana-cols .col { width: 100%; border-radius: 4px 4px 0 0; background: linear-gradient(180deg,var(--gold),var(--red)); min-height: 2px; }
+    .ana-cols .cap { font-size: .62rem; color: var(--gray2); white-space: nowrap; }
+    .ana-cols .amt { font-size: .6rem; color: var(--gray); white-space: nowrap; }
+
     /* ══════════════════════════════════════════
        ZONE IMPRESSION — visible uniquement @print
     ══════════════════════════════════════════ */
@@ -198,6 +238,29 @@
     </div>
 
     <div class="page-content">
+
+      <!-- ══ STATUT DU RESTAURANT ══════════════════════════ -->
+      <div class="card" style="margin-bottom:18px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
+        <div>
+          <div style="font-weight:900;font-size:1rem">Statut du restaurant</div>
+          <div style="font-size:.8rem;color:var(--gray)" id="statusHint">Chargement…</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="period-btn" data-mode="auto"        onclick="setStatusMode('auto')">🕐 Auto</button>
+          <button class="period-btn" data-mode="forceOpen"   onclick="setStatusMode('forceOpen')">🟢 Ouvert</button>
+          <button class="period-btn" data-mode="forceClosed" onclick="setStatusMode('forceClosed')">🔴 Fermé</button>
+        </div>
+      </div>
+
+      <!-- ══ PÉRIODE ═══════════════════════════════════════ -->
+      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+        <button class="period-btn active" data-period="today">Aujourd'hui</button>
+        <button class="period-btn" data-period="7">7 jours</button>
+        <button class="period-btn" data-period="30">30 jours</button>
+        <button class="period-btn" data-period="90">3 mois</button>
+        <button class="period-btn" data-period="180">6 mois</button>
+      </div>
+
       <div class="stats-row" id="statsRow"></div>
       <div class="two-col">
         <div class="card">
@@ -219,6 +282,32 @@
           </div>
         </div>
       </div>
+
+      <!-- ══ ANALYTICS VENTES ══════════════════════════════ -->
+      <div class="card" style="margin-top:20px">
+        <div class="card-header">
+          <div class="card-title">Analytics — Ventes <span id="anaPeriodLabel" style="color:var(--gray);font-size:.78rem;font-weight:700"></span></div>
+        </div>
+        <div style="padding:18px 20px">
+          <div class="ana-grid">
+            <div class="ana-box">
+              <div class="ana-title">🍕 Top 10 des plats</div>
+              <div id="anaTop"></div>
+            </div>
+            <div class="ana-box">
+              <div class="ana-title">🚚 Livraison / À emporter</div>
+              <div id="anaMode"></div>
+              <div class="ana-title" style="margin-top:18px">💳 Moyen de paiement</div>
+              <div id="anaPay"></div>
+            </div>
+          </div>
+          <div class="ana-title" style="margin-top:22px">🕐 Heures de pointe</div>
+          <div id="anaHours"></div>
+          <div class="ana-title" style="margin-top:22px">📅 Chiffre d'affaires par jour</div>
+          <div id="anaDays"></div>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
@@ -577,25 +666,168 @@ function handleNewOrderToast() {
   document.getElementById('newOrderToast').style.display = 'none';
 }
 
-function buildStats() {
-  var today  = new Date().toDateString();
-  var todayO = allOrders.filter(function(o){
-    var d = o.timestamp || (o.createdAt&&o.createdAt.seconds?new Date(o.createdAt.seconds*1000).toISOString():null);
-    return d && new Date(d).toDateString()===today;
+/* ══════════════════════════════════════════════════════════
+   PÉRIODE
+══════════════════════════════════════════════════════════ */
+var currentPeriod = 'today';
+var PERIOD_LABEL  = { today:"aujourd'hui", '7':'7 derniers jours', '30':'30 derniers jours',
+                      '90':'3 derniers mois', '180':'6 derniers mois' };
+
+function periodStart() {
+  var d = new Date();
+  d.setHours(0,0,0,0);
+  if (currentPeriod !== 'today') d.setDate(d.getDate() - (parseInt(currentPeriod,10) - 1));
+  return d.getTime();
+}
+/* Commandes de la période, hors annulées */
+function periodOrders() {
+  var from = periodStart();
+  return allOrders.filter(function(o){
+    return o.status !== 'cancelled' && orderTime(o) >= from;
   });
+}
+
+function buildStats() {
+  var list    = periodOrders();
   var pending = allOrders.filter(function(o){ return o.status==='pending'||o.status==='PAYED_CASH'||o.status==='PAYED_CARD'; }).length;
-  var revenue = todayO.filter(function(o){ return o.status!=='cancelled'; })
-                      .reduce(function(s,o){ return s+(parseFloat(o.total)||0); },0);
+  var revenue = list.reduce(function(s,o){ return s+(parseFloat(o.total)||0); },0);
+  var moyen   = list.length ? revenue / list.length : 0;
+  var lbl     = PERIOD_LABEL[currentPeriod] || '';
 
   document.getElementById('statsRow').innerHTML =
     '<div class="stat-card red"><div class="stat-label">En attente</div><div class="stat-value" style="color:var(--red)">'+pending+'</div><div class="stat-sub">À traiter</div></div>'+
-    '<div class="stat-card gold"><div class="stat-label">Aujourd\'hui</div><div class="stat-value" style="color:var(--gold)">'+todayO.length+'</div><div class="stat-sub">Commandes</div></div>'+
-    '<div class="stat-card green"><div class="stat-label">CA du jour</div><div class="stat-value" style="color:var(--green)">'+formatPrice(revenue)+'</div><div class="stat-sub">Chiffre d\'affaires</div></div>'+
-    '<div class="stat-card blue"><div class="stat-label">Total</div><div class="stat-value" style="color:var(--blue)">'+allOrders.length+'</div><div class="stat-sub">Commandes totales</div></div>';
+    '<div class="stat-card gold"><div class="stat-label">Commandes</div><div class="stat-value" style="color:var(--gold)">'+list.length+'</div><div class="stat-sub">'+lbl+'</div></div>'+
+    '<div class="stat-card green"><div class="stat-label">Chiffre d\'affaires</div><div class="stat-value" style="color:var(--green)">'+formatPrice(revenue)+'</div><div class="stat-sub">'+lbl+'</div></div>'+
+    '<div class="stat-card blue"><div class="stat-label">Panier moyen</div><div class="stat-value" style="color:var(--blue)">'+formatPrice(moyen)+'</div><div class="stat-sub">'+lbl+'</div></div>';
 
   var b = document.getElementById('sidebarBadge');
   if(pending>0){b.style.display='flex';b.textContent=pending;}else{b.style.display='none';}
+
+  // Les analytics suivent toujours les mêmes données que les compteurs
+  try { buildAnalytics(); } catch(e) { console.warn('analytics:', e); }
 }
+
+/* ══════════════════════════════════════════════════════════
+   ANALYTICS VENTES — calculé à partir des commandes existantes
+══════════════════════════════════════════════════════════ */
+function anaRows(entries, total, fmt) {
+  if (!entries.length) return '<div class="ana-empty">Aucune donnée sur cette période.</div>';
+  var max = Math.max.apply(null, entries.map(function(e){ return e[1]; })) || 1;
+  return entries.map(function(e){
+    var pct = total ? Math.round(e[1]/total*100) : 0;
+    return '<div class="ana-row">'+
+      '<span class="lbl" title="'+e[0]+'">'+e[0]+'</span>'+
+      '<span class="bar"><i style="width:'+Math.max(2,Math.round(e[1]/max*100))+'%"></i></span>'+
+      '<span class="val">'+fmt(e[1])+' · '+pct+'%</span>'+
+    '</div>';
+  }).join('');
+}
+
+function buildAnalytics() {
+  var list = periodOrders();
+  document.getElementById('anaPeriodLabel').textContent = '— ' + (PERIOD_LABEL[currentPeriod]||'');
+
+  var nb = function(n){ return n + (n>1?' ventes':' vente'); };
+
+  /* Top plats (par quantité vendue) */
+  var plats = {};
+  list.forEach(function(o){
+    (o.items||[]).forEach(function(it){
+      var n = (it.name||'?').trim();
+      plats[n] = (plats[n]||0) + (parseInt(it.qty,10)||1);
+    });
+  });
+  var top = Object.entries(plats).sort(function(a,b){return b[1]-a[1];}).slice(0,10);
+  var totPlats = Object.values(plats).reduce(function(s,v){return s+v;},0);
+  document.getElementById('anaTop').innerHTML = anaRows(top, totPlats, nb);
+
+  /* Livraison vs à emporter */
+  var liv = list.filter(function(o){ return o.mode==='delivery'; }).length;
+  document.getElementById('anaMode').innerHTML =
+    anaRows([['🚚 Livraison',liv],['🏪 À emporter',list.length-liv]].filter(function(e){return e[1]>0;}),
+            list.length, function(n){ return n+' cmd'; });
+
+  /* Carte vs espèces */
+  var carte = list.filter(isCardPaymentDash).length;
+  document.getElementById('anaPay').innerHTML =
+    anaRows([['💳 Carte',carte],['💵 Espèces',list.length-carte]].filter(function(e){return e[1]>0;}),
+            list.length, function(n){ return n+' cmd'; });
+
+  /* Heures de pointe */
+  var heures = new Array(24).fill(0);
+  list.forEach(function(o){ var t=orderTime(o); if(t) heures[new Date(t).getHours()]++; });
+  var hMin = 10, hMax = 23;
+  var maxH = Math.max.apply(null, heures.slice(hMin,hMax+1)) || 1;
+  var hHtml = '';
+  for (var h=hMin; h<=hMax; h++) {
+    hHtml += '<div title="'+heures[h]+' commande(s) entre '+h+'h et '+(h+1)+'h">'+
+             (heures[h]?'<span class="amt">'+heures[h]+'</span>':'')+
+             '<div class="col" style="height:'+Math.round(heures[h]/maxH*100)+'%"></div>'+
+             '<span class="cap">'+h+'h</span></div>';
+  }
+  document.getElementById('anaHours').innerHTML =
+    list.length ? '<div class="ana-cols">'+hHtml+'</div>'
+                : '<div class="ana-empty">Aucune donnée sur cette période.</div>';
+
+  /* CA par jour */
+  var jours = {};
+  list.forEach(function(o){
+    var t = orderTime(o); if(!t) return;
+    var d = new Date(t); d.setHours(0,0,0,0);
+    jours[d.getTime()] = (jours[d.getTime()]||0) + (parseFloat(o.total)||0);
+  });
+  var jk = Object.keys(jours).map(Number).sort(function(a,b){return a-b;}).slice(-30);
+  var maxJ = Math.max.apply(null, jk.map(function(k){return jours[k];})) || 1;
+  var jHtml = jk.map(function(k){
+    var d = new Date(k);
+    var cap = String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0');
+    return '<div title="'+cap+' — '+formatPrice(jours[k])+'">'+
+           '<span class="amt">'+Math.round(jours[k])+'</span>'+
+           '<div class="col" style="height:'+Math.round(jours[k]/maxJ*100)+'%"></div>'+
+           '<span class="cap">'+cap+'</span></div>';
+  }).join('');
+  document.getElementById('anaDays').innerHTML =
+    jk.length ? '<div class="ana-cols">'+jHtml+'</div>'
+              : '<div class="ana-empty">Aucune donnée sur cette période.</div>';
+}
+
+/* ══════════════════════════════════════════════════════════
+   STATUT DU RESTAURANT (réutilise data.js)
+══════════════════════════════════════════════════════════ */
+function renderStatus() {
+  var mode = (typeof _orderingOverride !== 'undefined') ? _orderingOverride : 'auto';
+  document.querySelectorAll('.period-btn[data-mode]').forEach(function(b){
+    b.classList.toggle('active', b.dataset.mode === mode);
+  });
+  var live = (typeof getOrderingStatus === 'function') ? getOrderingStatus() : 'open';
+  var txt  = { open:'🟢 Ouvert', call:'📞 Appel uniquement', closed:'🔴 Fermé' }[live] || live;
+  document.getElementById('statusHint').textContent =
+    (mode === 'auto' ? 'Mode automatique — actuellement ' + txt
+                     : (mode === 'forceOpen' ? 'Forcé ouvert — les clients peuvent commander à toute heure'
+                                             : 'Forcé fermé — aucune commande possible'));
+}
+async function setStatusMode(mode) {
+  try {
+    await setOrderingOverride(mode);
+    renderStatus();
+    showToast(({auto:'🕐 Mode automatique',forceOpen:'🟢 Restaurant ouvert',forceClosed:'🔴 Restaurant fermé'})[mode]);
+  } catch(e) { showToast('Erreur : '+e.message,'error'); }
+}
+if (typeof loadOrderingOverride === 'function') {
+  loadOrderingOverride(true).then(renderStatus).catch(function(){ renderStatus(); });
+}
+setInterval(renderStatus, 60000);
+
+/* Boutons de période */
+document.querySelectorAll('.period-btn[data-period]').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    document.querySelectorAll('.period-btn[data-period]').forEach(function(b){ b.classList.remove('active'); });
+    btn.classList.add('active');
+    currentPeriod = btn.dataset.period;
+    buildStats();
+    buildAnalytics();
+  });
+});
 
 function buildOrdersTable() {
   var filtered;
@@ -611,11 +843,11 @@ function buildOrdersTable() {
     return;
   }
   el.innerHTML=
-    '<div style="display:grid;grid-template-columns:80px 1fr 100px 120px 100px 90px;gap:10px;padding:10px 20px;font-size:.7rem;font-weight:900;letter-spacing:1px;text-transform:uppercase;color:var(--gray2);border-bottom:1px solid rgba(255,255,255,.05)">'+
-    '<div>N°</div><div>Client</div><div>Total</div><div>Mode</div><div>Statut</div><div>Heure</div></div>'+
+    '<div style="display:grid;grid-template-columns:80px 1fr 100px 120px 100px 90px 80px;gap:10px;padding:10px 20px;font-size:.7rem;font-weight:900;letter-spacing:1px;text-transform:uppercase;color:var(--gray2);border-bottom:1px solid rgba(255,255,255,.05)">'+
+    '<div>N°</div><div>Client</div><div>Total</div><div>Mode</div><div>Statut</div><div>Heure</div><div></div></div>'+
     filtered.map(function(o){
       var key=o.orderNumber||o.firestoreId;
-      return '<div class="order-row'+(o.status==='pending'||o.status==='PAYED_CASH'||o.status==='PAYED_CARD'?' new':'')+'" onclick="showDetail(\''+key+'\')">'+
+      return '<div class="order-row'+(o.status==='pending'||o.status==='PAYED_CASH'||o.status==='PAYED_CARD'?' new':'')+'" style="grid-template-columns:80px 1fr 100px 120px 100px 90px 80px" onclick="showDetail(\''+key+'\')">'+
         '<div class="order-id" style="font-size:.85rem">'+(o.orderNumber||'—')+'</div>'+
         '<div><div class="order-client">'+(o.firstName||'')+' '+(o.lastName||'')+'</div>'+
         '<div class="order-client-phone">'+(o.phone||'')+'</div></div>'+
@@ -623,8 +855,17 @@ function buildOrdersTable() {
         '<div><span class="order-mode mode-'+(o.mode==='delivery'?'delivery':'pickup')+'">'+(o.mode==='delivery'?'Livraison':'À emporter')+'</span></div>'+
         '<div>'+statusBadge(o.status)+'</div>'+
         '<div class="order-time">'+timeAgo(o.timestamp||(o.createdAt&&o.createdAt.seconds?new Date(o.createdAt.seconds*1000).toISOString():null))+'</div>'+
+        '<div><button class="btn-reprint" title="Réimprimer le ticket" onclick="event.stopPropagation();reprint(\''+key+'\')">🖨 Ticket</button></div>'+
         '</div>';
     }).join('');
+}
+
+/* Réimprime un ticket sans ouvrir le détail */
+function reprint(key) {
+  var order = allOrders.find(function(o){ return (o.orderNumber===key)||(o.firestoreId===key); });
+  if (!order) { showToast('Commande introuvable', 'error'); return; }
+  selectedOrderNum = key;
+  autoPrint(order);
 }
 
 function showDetail(orderNum) {
