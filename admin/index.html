@@ -262,26 +262,6 @@
       </div>
 
       <div class="stats-row" id="statsRow"></div>
-      <div class="two-col">
-        <div class="card">
-          <div class="card-header">
-            <div class="card-title">Commandes du jour</div>
-            <div style="display:flex;gap:8px">
-              <button class="filter-btn active" data-filter="all">Toutes</button>
-              <button class="filter-btn" data-filter="pending">En attente</button>
-              <button class="filter-btn" data-filter="active">En cours</button>
-              <button class="filter-btn" data-filter="done">Terminées</button>
-            </div>
-          </div>
-          <div id="ordersTable"></div>
-        </div>
-        <div class="detail-panel" id="detailPanel">
-          <div class="detail-placeholder">
-            <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
-            <p>Cliquez sur une commande<br>pour voir les détails</p>
-          </div>
-        </div>
-      </div>
 
       <!-- ══ ANALYTICS VENTES ══════════════════════════════ -->
       <div class="card" style="margin-top:20px">
@@ -305,6 +285,27 @@
           <div id="anaHours"></div>
           <div class="ana-title" style="margin-top:22px">📅 Chiffre d'affaires par jour</div>
           <div id="anaDays"></div>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Dernières commandes <a href="orders.html" style="font-size:.72rem;color:var(--gold);text-decoration:none;font-weight:700;margin-left:8px">voir tout →</a></div>
+            <div style="display:flex;gap:8px">
+              <button class="filter-btn active" data-filter="all">Toutes</button>
+              <button class="filter-btn" data-filter="pending">En attente</button>
+              <button class="filter-btn" data-filter="active">En cours</button>
+              <button class="filter-btn" data-filter="done">Terminées</button>
+            </div>
+          </div>
+          <div id="ordersTable"></div>
+        </div>
+        <div class="detail-panel" id="detailPanel">
+          <div class="detail-placeholder">
+            <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+            <p>Cliquez sur une commande<br>pour voir les détails</p>
+          </div>
         </div>
       </div>
 
@@ -835,6 +836,10 @@ function buildOrdersTable() {
   else if(currentFilter==='active') filtered=allOrders.filter(function(o){return['accepted','preparing','ready','delivering'].indexOf(o.status)>=0;});
   else if(currentFilter==='done')   filtered=allOrders.filter(function(o){return o.status==='done';});
   else                              filtered=allOrders.slice();
+
+  // Le tableau de bord ne montre que les dernières commandes.
+  // La liste complète reste sur la page "Toutes les commandes".
+  filtered = filtered.slice(0, 20);
 
   var el = document.getElementById('ordersTable');
   if(!el) return;
